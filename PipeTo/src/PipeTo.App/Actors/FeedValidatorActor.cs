@@ -86,7 +86,8 @@ namespace PipeTo.App.Actors
                 {
                     SendMessage(string.Format("{0} is a valid RSS or ATOM feed.", feed.FeedUri), PipeToSampleStatusCode.Success);
                     
-                    //add processing work here
+                    //Begin processing the feed!
+                    Context.ActorOf(Props.Create(() => new FeedParserCoordinator(feed.FeedUri)));
                 }
             });
         }
