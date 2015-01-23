@@ -57,6 +57,7 @@
     <Compile Include="ActorNames.cs" />
     <Compile Include="Actors\ConsoleActors.cs" />
     <Compile Include="Actors\FeedValidatorActor.cs" />
+    <Compile Include="Actors\StatusMessageHelper.cs" />
     <Compile Include="Instructions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

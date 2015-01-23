@@ -1,4 +1,5 @@
 ﻿using System;
+using Akka;
 using Akka.Actor;
 
 namespace PipeTo.App.Actors
@@ -24,7 +25,8 @@ namespace PipeTo.App.Actors
         /// </summary>
         public class ConsoleWriteMsg
         {
-            public ConsoleWriteMsg(string message) : this(message, ConsoleColor.Gray)
+            public ConsoleWriteMsg(string message)
+                : this(message, StatusMessageHelper.MapConsoleColor(PipeToSampleStatusCode.Normal))
             {
             }
 
@@ -38,6 +40,40 @@ namespace PipeTo.App.Actors
             public string Message { get; private set; }
         }
 
+        /// <summary>
+        /// Used for sending failure messages, which mean we need to ask the console for additional input
+        /// </summary>
+        public class ConsoleWriteFailureMessage : ConsoleWriteMsg {
+            public ConsoleWriteFailureMessage(string message, string url) : this(message, url, StatusMessageHelper.MapConsoleColor(PipeToSampleStatusCode.Normal))
+            {
+            }
+
+            public ConsoleWriteFailureMessage(string message, string url, ConsoleColor color) : base(message, color)
+            {
+                Url = url;
+            }
+
+            public string Url { get; private set; }
+        }
+
+        /// <summary>
+        /// Used for sending "task complete!" messages, which mean we need to ask the console for additional input
+        /// </summary>
+        public class ConsoleWriteTaskCompleteMessage : ConsoleWriteMsg
+        {
+            public ConsoleWriteTaskCompleteMessage(string message, string url)
+                : this(message, url, StatusMessageHelper.MapConsoleColor(PipeToSampleStatusCode.Normal))
+            {
+            }
+
+            public ConsoleWriteTaskCompleteMessage(string message, string url, ConsoleColor color) : base(message, color)
+            {
+                Url = url;
+            }
+
+            public string Url { get; private set; }
+        }
+
         #endregion
 
         protected override void OnReceive(object message)
@@ -48,12 +84,24 @@ namespace PipeTo.App.Actors
              * mark any other types of messages as 'Unhandled' in the event that an
              * unsupported type is sent to this actor.
              */
-
+            Console.ResetColor();
             var consoleWriteMsg = message as ConsoleWriteMsg;
             if (consoleWriteMsg != null)
             {
                 Console.ForegroundColor = consoleWriteMsg.Color;
                 Console.WriteLine("{0}: {1}", Sender, consoleWriteMsg.Message);
+                Console.ResetColor();
+
+                //use Akka.NET's pattern match to filter for ConsoleWriteMsg sub-types
+                consoleWriteMsg.Match()
+                    .With<ConsoleWriteTaskCompleteMessage>(completeMessage => //successful operation - tell the ConsoleReaderActor that we're ready for more work.
+                        Context.ActorSelection(ActorNames.ConsoleReaderActor.Path).Tell(new ConsoleReaderActor.ReadFromConsoleClean()))
+                    .With<ConsoleWriteFailureMessage>(failureMessage => Context.ActorSelection(ActorNames.ConsoleReaderActor.Path)
+                        .Tell(new ConsoleReaderActor.ReadFromConsoleError(failureMessage.Url.ToString()))) //failed operation
+                    .Default(o =>
+                    { 
+                        //do nothing
+                    });
                 return;
             }
 
@@ -76,7 +124,6 @@ namespace PipeTo.App.Actors
     /// </summary>
     public class ConsoleReaderActor : UntypedActor
     {
-
         #region ConsoleReaderActor Message classes
         /// <summary>
         /// Message used to signal that we just need to read from the console
@@ -128,13 +175,8 @@ namespace PipeTo.App.Actors
                 return;
             }
 
-            //tell the ConsoleWriterActor what we just read from the console
-            #region YOU NEED TO FILL THIS IN
-            #endregion
-
-            //tell ourself to "READ FROM CONSOLE AGAIN"
-            #region YOU NEED TO FILL THIS IN
-            #endregion
+            //Tell the FeedValidatorActor that we're ready to party
+            Context.ActorSelection(ActorNames.FeedValidatorActor.Path).Tell(read);
         }
     }
 }
