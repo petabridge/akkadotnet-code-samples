@@ -133,7 +133,7 @@ namespace PipeTo.App.Actors
 
         #endregion
 
-        private Uri _feedUri;
+        private readonly Uri _feedUri;
         private DownloadStats _downloadStats;
         private readonly string _consoleWriterActorPath;
         private ActorRef _feedParserActor;

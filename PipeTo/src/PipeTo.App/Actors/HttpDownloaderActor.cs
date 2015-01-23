@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Akka.Actor;
 
@@ -83,8 +84,18 @@ namespace PipeTo.App.Actors
             {
                  SendMessage(string.Format("Beginning download of img {0} for feed {1}", image.ImageUrl, image.FeedUri));
 
+                //check for relative URLs
+                var imageUrl = image.ImageUrl;
+                if (!Uri.IsWellFormedUriString(image.ImageUrl, UriKind.Absolute))
+                {
+                    var baseAddress = new Uri(image.FeedUri);
+
+                    //Combine the base address and relative URL of image to form an absolute one.
+                    imageUrl = string.Format("{0}://{1}{2}", baseAddress.Scheme, baseAddress.Host, imageUrl);
+                }
+
                 //asynchronously download the image and pipe the results to ourself
-                _httpClient.GetAsync(image.ImageUrl).ContinueWith(httpRequest =>
+                _httpClient.GetAsync(imageUrl).ContinueWith(httpRequest =>
                 {
                     var response = httpRequest.Result;
 

@@ -112,17 +112,22 @@ namespace PipeTo.App.Actors
                 doc.LoadHtml(item.FeedItem.Content);
 
                 //find all of the IMG tags via XPATH
-                foreach (var imgNode in doc.DocumentNode.SelectNodes("//img[@src]"))
+                var nodes = doc.DocumentNode.SelectNodes("//img[@src]");
+
+                if (nodes != null)
                 {
-                    var imgUrl = imgNode.Attributes["src"].Value;
+                    foreach (var imgNode in doc.DocumentNode.SelectNodes("//img[@src]"))
+                    {
+                        var imgUrl = imgNode.Attributes["src"].Value;
 
-                    SendMessage(string.Format("Found image {0} inside {1}", imgUrl, item.FeedItem.Link));
+                        SendMessage(string.Format("Found image {0} inside {1}", imgUrl, item.FeedItem.Link));
 
-                    //Let the coordinator know that we expect download results for moreimages...
-                    Context.Parent.Tell(new FeedParserCoordinator.RemainingDownloadCount(item.FeedUri, 0, 1));
+                        //Let the coordinator know that we expect download results for moreimages...
+                        Context.Parent.Tell(new FeedParserCoordinator.RemainingDownloadCount(item.FeedUri, 0, 1));
 
-                    //And let the download actor know that it has work to do
-                    _downloadActor.Tell(new HttpDownloaderActor.DownloadImage(item.FeedUri, imgUrl));
+                        //And let the download actor know that it has work to do
+                        _downloadActor.Tell(new HttpDownloaderActor.DownloadImage(item.FeedUri, imgUrl));
+                    }
                 }
 
                 //Let the parent know that we've finished processing this HTML document
