@@ -25,7 +25,7 @@ Any samples you want to submit must:
 
 ### Questions about Samples?
 
-Please [create a Github issue](https://github.com/petabridge/akkadotnet-code-samples/issues) for any questions you might have?
+Please [create a Github issue](https://github.com/petabridge/akkadotnet-code-samples/issues) for any questions you might have.
 
 ### Code License
 
