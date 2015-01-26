@@ -41,7 +41,7 @@ You are free to modify and use these diagrams in your own derivative works as lo
 
 All original diagram files are in `.sdr` format, which means they were made with [SmartDraw](http://www.smartdraw.com/ "SmartDraw - communicate visually with great diagrams for Windows").
 
-![SmartDraw logo](../../images/smartdraw-logo.jpg)
+![SmartDraw logo](images/smartdraw-logo.jpg)
 
 You can [download a free trial of SmartDraw from their site](http://www.smartdraw.com/downloads/).
 
