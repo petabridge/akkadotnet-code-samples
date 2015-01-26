@@ -103,8 +103,8 @@ namespace PipeTo.App.Actors
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         // async call, inside an async call
-                        // awaited...
-                        // even though async and await aren't allowed inside actors?!?!?!?
+                        // and we wait on it...
+                        // BUT THIS IS STILL ASYNCHRONOUS?!?!
                         // INSERT INCEPTION HORN SOUND EFFECT HERE https://www.youtube.com/watch?v=ZKGJZt83_JE
                         var contentStream = response.Content.ReadAsStreamAsync();
                         try
