@@ -24,7 +24,7 @@ Everything in this sample, including reading from and writing to the `Console`, 
 
 Here's how the **actor hierarchy** is organized in this sample:
 
-![Akka.NET PipeTo Sample Actor Hierarchy](/diagrams/akkadotnet-PipeTo-actor-hierarchy.png)
+![Akka.NET PipeTo Sample Actor Hierarchy](diagrams/akkadotnet-PipeTo-actor-hierarchy.png)
 
 * **`/user/`** is the root actor for all user-defined actors. Any time you call `ActorSystem.ActorOf` you're going to create a child of the `/user/` actor. This is built into Akka.NET.
 * **`/user/consoleReader`** is an instance of a `ConsoleReaderActor` (source) responsible for prompting the end-user for command-line input. If the user types "exit" on the command line, this actor will also call `ActorSystem.ShutDown` - which will terminate the application. There is only ever a single instance of this actor, because there's only one instance of the command line to read from.
