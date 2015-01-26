@@ -27,8 +27,29 @@ Here's how the **actor hierarchy** is organized in this sample:
 ![Akka.NET PipeTo Sample Actor Hierarchy](diagrams/akkadotnet-PipeTo-actor-hierarchy.png)
 
 * **`/user/`** is the root actor for all user-defined actors. Any time you call `ActorSystem.ActorOf` you're going to create a child of the `/user/` actor. This is built into Akka.NET.
-* **`/user/consoleReader`** is an instance of a `ConsoleReaderActor` (source) responsible for prompting the end-user for command-line input. If the user types "exit" on the command line, this actor will also call `ActorSystem.ShutDown` - which will terminate the application. There is only ever a single instance of this actor, because there's only one instance of the command line to read from.
-* **`/user/consoleWriter/`** is an instance of a `ConsoleWriterActor` (source) responsible for receiving status updates from all other actors in this sample and writing them to the console in a serial fashion. In the event of a completed feed parse or a failed URL validation, the `ConsoleWriterActor` will tell the `ConsoleReaderActor` to prompt the user for a new RSS / ATOM feed URL. There is only ever a single instance of this actor, because there should only be one actor responsible for writing output to the console (single writer pattern.)
+* **`/user/consoleReader`** is an instance of a `ConsoleReaderActor` ([source](src/PipeTo.App/Actors/ConsoleActors.cs#L125 "ConsoleReaderActor C# Source")) responsible for prompting the end-user for command-line input. If the user types "exit" on the command line, this actor will also call `ActorSystem.ShutDown` - which will terminate the application. There is only ever a single instance of this actor, because there's only one instance of the command line to read from.
+* **`/user/consoleWriter/`** is an instance of a `ConsoleWriterActor` ([source](src/PipeTo.App/Actors/ConsoleActors.cs#L10 "ConsoleWriterActor C# source")) responsible for receiving status updates from all other actors in this sample and writing them to the console in a serial fashion. In the event of a completed feed parse or a failed URL validation, the `ConsoleWriterActor` will tell the `ConsoleReaderActor` to prompt the user for a new RSS / ATOM feed URL. There is only ever a single instance of this actor, because there should only be one actor responsible for writing output to the console (single writer pattern.)
+* **`/user/feedValidator`** is an instance of a `FeedValidatorActor` ([source](src/PipeTo.App/Actors/FeedValidatorActor.cs#L13 "FeedValidatorActor C# Source")) responsible for receiving input from the `ConsoleReaderActor` and validating whether or not the user-provided URL is:
+	* A valid absolute URI and
+	* Actually hosts a valid RSS or Atom feed at the address, determined using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ")'s asynchronous methods and `PipeTo` ([relevant source](src/PipeTo.App/Actors/FeedValidatorActor.cs#L67 "QDFeed Parser Async call result piped back to FeedValidatorActor").)
+* **`/user/feedValidator/[feedCoordinator]`** is an instance of the `FeedParserCoordinator` actor ([source](src/PipeTo.App/Actors/FeedParserCoordinator.cs#L10 "FeedParserCoordinator actor C# Source")) created by the `FeedValidatorActor` in the event that a user-supplied feed URL passes validation. A `FeedParserCoordinator` is responsible for coordinating the downloading of RSS / ATOM feed items, parsing of said items, and the downloading of all images found in the feed concurrently. There is one of these actors per RSS or Atom feed. Technically, if you sent a list of 100 different feed URLs to the `FeedValidatorActor` then it would create 100 different `FeedValidatorActor` instances to process each feed in parallel.  This actor is responsible for dispatching work to its children and determining when its children have finished processing the contents of the provided feed.
+* **`/user/feedValidator/[feedCoordinator]/[feedParser]`** hosts an instance of a `FeedParserActor` ([source](src/PipeTo.App/Actors/FeedParserActor.cs#L13 "FeedParserActor C# Source"),) who gets created during the `FeedParserCoordinator.PreStart` call. This actor is responsible for:
+	* asynchronously downloading the content of the RSS / ATOM feed using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ")'s aync methods and using `PipeTo` to deliver the downloaded feed back to itself as a new message ([relevant source](src/PipeTo.App/Actors/FeedParserActor.cs#L73 "FeedParserActor downloads RSS or ATOM feed and uses PipeTo to send result to self").)
+	* Parsing all `<img>` tags from each RSS / ATOM item in the feed using the [HTML Agility Pack](http://htmlagilitypack.codeplex.com/ "HTML Agility Pack C# Library").
+	* Sending the full URLs for each parsed image to its sibling `HTTPDownloaderActor`, which will begin downloading each image into memory.
+	* Reporting back to its parent, the `FeedParserCoordinator` the number of remaining feed items that need to be processed and the number of images that need to be processed.
+* **`/user/feedValidator/[feedCoordinator]/[httpDownloader]`** is an instance of a `HttpDownloaderActor` ([source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L14 "HttpDownloaderActor C# Source")) who gets created during the `FeedParserCoordinator.PreStart` call. This actor is responsible for:
+	* asynchronously downloading all image URLs sent to it by the `FeedParserActor` using the `HttpClient` - each download is done asynchronously using `Task` instances, `ContinueWith` for minor post-processig, and `PipeTo` to deliver the completed results back into the `HttpDownloaderActor` as messages. **The fact that this single actor can process many image downloads in parallel is the entire point of this code sample. Please see the ([relevant source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L98 "Critical region where multiple image downloads are kicked off in parallel").)**. 
+	* Reporting successful or failed download attempts back to the `FeedParserCoordinator`.
+
+### Dataflow
+
+This sample is a simple .NET 4.5 console application that does the following:
+
+1. `ConsoleReaderActor` asks the user to type the URL of a valid RSS or ATOM feed into the console, such as [http://www.aaronstannard.com/feed.xml](http://www.aaronstannard.com/feed.xml).
+2. URL is sent to the `FeedValidatorActor` who then validates the URL and asynchronously determines whether or not the destination content is valid RSS / ATOM, using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ")'s asynchronous methods. If the URL doesn't meet either of these two validation requirements, the user is prompted to start the process over by providing a different URL. Otherwise, the application moves onto step 3.
+3. The `FeedValidatorActor` creates a `FeedParserCoordinator` actor
+
 
 ### NuGet Dependencies
 
@@ -37,13 +58,5 @@ This sample depends on the following [NuGet](http://www.nuget.org/ "NuGet - pack
 * [Akka.NET](http://www.nuget.org/packages/Akka/) (core only)
 * [HTML Agility Pack](http://www.nuget.org/packages/HtmlAgilityPack/)
 * [Quick and Dirty Feed Parser](http://www.nuget.org/packages/qdfeed/)
-
-This sample is a simple .NET 4.5 console application that does the following:
-
-1. `ConsoleReaderActor` asks the user to type the URL of a valid RSS or ATOM feed into the console, such as [http://www.aaronstannard.com/feed.xml](http://www.aaronstannard.com/feed.xml).
-2. URL is sent to the `FeedValidatorActor` who then validates the URL and asynchronously determines whether or not the destination content is valid RSS / ATOM, using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ")'s asynchronous methods. If the URL doesn't meet either of these two validation requirements, the user is prompted to start the process over by providing a different URL. Otherwise, the application moves onto step 3.
-3. The `FeedValidatorActor` creates a `FeedParserCoordinator` actor
-
-## Critical Sections
 
 ## Running the Sample
