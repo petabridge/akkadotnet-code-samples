@@ -2,6 +2,8 @@
 
 The goal of this sample is to show you how you can use the `PipeTo` extension method within [Akka.NET](http://getakka.net/ "Akka.NET - Distributed actor system for C# and F#") to allow a single actor to make many asynchronous calls simultaneously using the [.NET Task Parallel Library (TPL)](https://msdn.microsoft.com/en-us/library/dd460717(v=vs.110).aspx "Task Parallel Library (TPL)").
 
+> This is actually a fairly small and simple example, but we've documented it in extensive detail. Don't confuse "detailed" with "complex."
+
 ## Sample Overview
 
 In this sample we're going to ask the user to provide us with the URL of a valid RSS or ATOM feed, and we're going to:
@@ -39,16 +41,78 @@ Here's how the **actor hierarchy** is organized in this sample:
 	* Sending the full URLs for each parsed image to its sibling `HTTPDownloaderActor`, which will begin downloading each image into memory.
 	* Reporting back to its parent, the `FeedParserCoordinator` the number of remaining feed items that need to be processed and the number of images that need to be processed.
 * **`/user/feedValidator/[feedCoordinator]/[httpDownloader]`** is an instance of a `HttpDownloaderActor` ([source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L14 "HttpDownloaderActor C# Source")) who gets created during the `FeedParserCoordinator.PreStart` call. This actor is responsible for:
-	* asynchronously downloading all image URLs sent to it by the `FeedParserActor` using the `HttpClient` - each download is done asynchronously using `Task` instances, `ContinueWith` for minor post-processig, and `PipeTo` to deliver the completed results back into the `HttpDownloaderActor` as messages. **The fact that this single actor can process many image downloads in parallel is the entire point of this code sample. Please see the ([relevant source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L98 "Critical region where multiple image downloads are kicked off in parallel").)**. 
+	* asynchronously downloading all image URLs sent to it by the `FeedParserActor` using the `HttpClient` - each download is done asynchronously using `Task` instances, `ContinueWith` for minor post-processing, and `PipeTo` to deliver the completed results back into the `HttpDownloaderActor` as messages. **The fact that this single actor can process many image downloads in parallel is the entire point of this code sample. Please see the ([relevant source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L98 "Critical region where multiple image downloads are kicked off in parallel").)**. 
 	* Reporting successful or failed download attempts back to the `FeedParserCoordinator`.
+
+Also worth pointing out is the use of statically defined names and dynamic names. 
+
+> Any time you intend to have a single instance of a specific actor per-process, you should use a static name so it can be easily referred to via `ActorSelection` throughout your application. 
+> 
+> If you intend to have many instances of an actor, particularly if they're not top-level actors, then you can use dynamic names.
+
+As a best practice, we define all names and paths for looking up actors inside a static metadata class, in this case the `ActorNames` class ([source](src/PipeTo.App/ActorNames.cs "ActorNames class C# source").)
 
 ### Dataflow
 
-This sample is a simple .NET 4.5 console application that does the following:
+The first data flow involves simply reading input from the console, via the `ConsoleReaderActor`:
 
-1. `ConsoleReaderActor` asks the user to type the URL of a valid RSS or ATOM feed into the console, such as [http://www.aaronstannard.com/feed.xml](http://www.aaronstannard.com/feed.xml).
-2. URL is sent to the `FeedValidatorActor` who then validates the URL and asynchronously determines whether or not the destination content is valid RSS / ATOM, using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ")'s asynchronous methods. If the URL doesn't meet either of these two validation requirements, the user is prompted to start the process over by providing a different URL. Otherwise, the application moves onto step 3.
-3. The `FeedValidatorActor` creates a `FeedParserCoordinator` actor
+![ConsoleReaderActor dataflow for reading from console](diagrams/1-dataflow-reading-from-the-console.png)
+
+The `ConsoleReaderActor` receives a message of type `ConsoleReaderActor.ReadFromConsoleClean` from the `Main` method, and this tells the `ConsoleReaderActor` that it's time to print the instructions for the app and request an RSS / ATOM feed Uri from the end-user.
+
+If the `ConsoleReaderActor` receives the string literal "exit" from the end-user, it will call `ActorSystem.ShutDown` and terminate the `Program.MyActorSystem` instance, which will cause `MyActorSystem.AwaitTermination` to complete and allow the `Main` function to exit and terminate the console app.
+
+However, if the `ConsoleReaderActor` receives any other string it will `Tell` that string to the `FeedValidatorActor`.
+
+![FeedValidatorActor dataflow for validating the user-supplied feed uri](diagrams/2-dataflow-validating-feed-uri.png)
+
+The `FeedValidatorActor` receives the `string` message from the `ConsoleReaderActor` and immediately checks to see if the string is a valid Uri.
+
+* **If the string *is not* a valid uri**, the `FeedValidatorActor` sends a `ConsoleWriterActor.ConsoleWriteFailureMessage` back to the `ConsoleWriterActor`.
+* **If the string is a valid uri**, the `FeedValidatorActor` will call the following code block to validate that the uri points to a live RSS or ATOM feed.
+
+```csharp
+IsValidRssOrAtomFeed(feedUri)
+	.ContinueWith(rssValidationResult => new IsValidFeed(feedUri, rssValidationResult.Result), 
+                        TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.ExecuteSynchronously)
+	.PipeTo(Self);
+```
+
+This calls a method within [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ") which returns `Task<bool>` - the `FeedValidatorActor` then continues this `Task<bool>` with a simple function that wraps the `bool` result and the original `feedUri` string into a `IsValidFeed` instance. This `IsValidFeed` object is then *piped* into `FeedValidatorActor`'s inbox via the `PipeTo` method.
+
+> If the `FeedValidatorActor` had to validate hundreds of feeds, a single instance of this actor could process hundreds of feeds concurrently because the long-running `IsValidRssOrAtomFeed` method is being run asynchronously on an I/O completion port and the result of that `Task` is placed into the `FeedValidatorActor`'s mailbox just like any other message. 
+> 
+> That's how you're supposed to use async within an actor - turn all asynchronous operations into functions that eventually produce a new message for the actor to process.
+
+* **If the feed *is not* a valid RSS or ATOM feed**, the `FeedValidatorActor` sends a `ConsoleWriterActor.ConsoleWriteFailureMessage` back to the `ConsoleWriterActor`.
+* **If the feed is a valid RSS or ATOM feed**, the `FeedValidatorActor` creates a new `FeedParserCoordinator` actor instance and passes in the `feedUri` as a constructor argument.
+
+![FeedParserCoordinator instantiation dataflow](diagrams/3-dataflow-feed-parser-coordinator-instantiation.png)
+
+When the `FeedParserCoordinator` is created, it immediately creates a `FeedParserActor` and `HttpDownloaderActor` during its `FeedParserCoordinator.PreStart` phase. Once both children are started, the `FeedParserCoordinator` sends a `FeedParserActor.BeginProcessFeed` message to the `FeedParserActor` to begin the feed download and parsing process.
+
+![FeedParserActor feed processing dataflow](diagrams/4-dataflow-feed-parser-actor-feed-processing.png)
+
+Once the `FeedParserActor` receives the `FeedParserActor.BeginProcessFeed` message, it immediately attempts to download and parse the feed using [Quick and Dirty Feed Parser](https://github.com/Aaronontheweb/qdfeed "Quick and Dirty Feed Parser - lightweight .NET library for parsing RSS 2.0 and Atom 1.0 XML in an agnostic fashion ") - and the results are *piped* to the `FeedParserActor` asynchronously as an `IFeed` message. Technically this means that `FeedParserActor` could process multiple feeds in parallel, even though we're really only using the actor to parse a single feed once.
+
+**If the feed is empty or did not parse properly**, the `FeedParserActor` notifies its parent, the `FeedParserCoordinator`, that the job is finished. The `FeedParserCoordinator` will then signal the `ConsoleReaderActor` that the app is ready for additional input and will self-terminate.
+
+**If the feed has items**, the `FeedParserActor` will notify the `FeedParserCoordinator` that there are N RSS / ATOM feed items waiting to be processed and will then begin sending each of those items back to itself as a distinct `ParseFeedItem` message.
+
+![FeedParserActor individual feed item processing dataflow](diagrams/5-dataflow-feed-parser-actor-processing-for-individual-feed-items.png)
+
+For each `ParseFeedItem` message the `FeedParserActor` receives, the actor will:
+
+* Use the [HTML Agility Pack](http://htmlagilitypack.codeplex.com/ "HTML Agility Pack C# Library") to find any `<img>` tags in the text of the feed item and extract the urls of those images.
+* Report back to the `FeedParserCoordinator` for each discovered image (to help with job tracking.)
+* Send the URL of each image to the `HttpDownloaderActor` for download.
+* Tell the `FeedParserCoordinator` that we've completed HTML parsing for one page (job tracking.)
+
+> And so now we get to the important part - seeing the `HttpDownloaderActor` asynchronously download all of the images at once.
+
+![HttpDownloaderActor asynchronous image downloading dataflow](diagrams/6-dataflow-HttpDownloaderActor-asynchronous-image-processing.png)
+
+The `HttpDownloaderActor` receives a `HttpDownloaderActor.DownloadImage` message from the `FeedParserActor`
 
 
 ### NuGet Dependencies

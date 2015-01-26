@@ -55,7 +55,7 @@ namespace PipeTo.App.Actors
                     /*
                      * WOAH! What's going on here?
                      * 
-      6               * We're calling IsValidRssOrAtomFeed(feedUri), an async method that returns Task<bool>.
+                     * We're calling IsValidRssOrAtomFeed(feedUri), an async method that returns Task<bool>.
                      * Rather than waiting on that Task and blocking the Actor or using the AWAIT keyword, which is unsupported,
                      * we're continuing the task and having it transform its results into a IsValidFeed object, which we'll then
                      * PipeTo this actor's inbox!
