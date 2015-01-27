@@ -139,7 +139,7 @@ For each `ParseFeedItem` message the `FeedParserActor` receives, the actor will:
 
 The `HttpDownloaderActor` receives a `HttpDownloaderActor.DownloadImage` message from the `FeedParserActor` and asynchronously kicks off an `HttpClient.GetAsync` task to begin downloading the image. *This is where `PipeTo` comes in for a major performance boost.* **([Source](src/PipeTo.App/Actors/HttpDownloaderActor.cs#L98 "Critical region where multiple image downloads are kicked off in parallel").)**
 
-> While the HTTP download and post-processing happens for each individual image, the `HttpDownloaderActor` is still able to receive and process additional `HttpDownloaderActor.DownloadImage` or `HttpDownloaderActor.ImageDownloadComplete` messages while those downloads run on different threads.
+> While the HTTP download and post-processing happens for each individual image, the `HttpDownloaderActor` is still able to receive and process additional `HttpDownloaderActor.DownloadImage` or `HttpDownloaderActor.ImageDownloadResult` messages while those downloads run on different threads.
 
 Once the post-processing for an HTTP download is done, regardless of success or failure the result is wrapped inside a `HttpDownloaderActor.ImageDownloadResult` object and *piped* back into the actor's mailbox as a new message. *That's how you do async within actors - turn the output of `Task<T>` objects into messages.*
 
