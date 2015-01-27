@@ -43,7 +43,32 @@ Those are a set of bitmasked options specific to the `Task` class, and in this c
 
 Sometimes your continuations can be executed on a totally different thread or scheduled to run at a different time and this can cause unpredictable behavior inside actors - because *the actors themselves might be running on a different thread* than they were when they started the asynchronous `Task`. 
 
-It's best to include these flags whenever you're doing a `ContinueWith` inside an Actor. This makes the behavior of continuations and `PipeTo` very predictable and reliable.
+> The `ContinueWith` will still run on a different thread than the actor, but it makes sure it's the *same* thread as the original `Task<T>`.
+
+It's best to include these flags whenever you're doing a `ContinueWith` inside an Actor. This makes the behavior of continuations and `PipeTo` very predictable and reliable. 
+
+**Do I need to worry about closing over (closures) my actor's internal state when using `PipeTo`?**
+
+**Yes**, you need to close over *any state whose value might change between messages* that you need to use inside your `ContinueWith` or `PipeTo` calls.
+
+So for instance, the `Sender` property of your actor will almost definitely change between messages. You'll need to [use a C# closure](http://www.codethinked.com/c-closures-explained) for this property in order to guarantee that any asynchronous methods that depend on this property get the right value.
+
+Here's an example:
+
+```csharp
+//time to kick off the feed parsing process, and send the results to ourselves
+Receive<BeginProcessFeed>(feed =>
+{
+	//instance variable for closure
+	var senderClosure = Sender; 
+    SendMessage(string.Format("Downloading {0} for RSS/ATOM processing...", feed.FeedUri));
+
+	//reply back to the sender
+    _feedFactory.CreateFeedAsync(feed.FeedUri).PipeTo(senderClosure);
+});
+```
+
+Doing a closure is as simple as stuffing the property into an instance variable (`var`) and using that instance variable in your call instead of the field or property defined on your actor.
 
 ### Architecture
 
