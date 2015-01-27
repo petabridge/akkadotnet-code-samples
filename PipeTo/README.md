@@ -25,7 +25,7 @@ The goal of this is to show you that, yes - even though actors can only process 
 This sample should illustrate the following concepts:
 
 1. That although the actors are only processing a single RSS / ATOM feed, you could easily have them process hundreds of feeds in parallel *without writing any additional actor code*. All you'd have to do is send additional feed uris to the `FeedValidatorActor`. This is what makes actors fundamentally powerful - any process you've written using actors can be automatically parallelized.
-2. That even though actors can only process one message at a time, they can still run asynchronous tasks in the background just like any other class. The trick to doing this effecitvely, however, is to make sure that the results of those asynchronous tasks are *delivered back to the actor as messages*. This is what `PipeTo` does.
+2. That even though actors can only process one message at a time, they can still run asynchronous tasks in the background just like any other class. The trick to doing this effectively, however, is to make sure that the results of those asynchronous tasks are *delivered back to the actor as messages*. This is what `PipeTo` does.
 
 ### Questions
 
