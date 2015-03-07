@@ -1,6 +1,8 @@
 ﻿using Akka.Actor;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.SqlServer.Server;
+using WebCrawler.Messages.Commands;
 using WebCrawler.Messages.State;
 using WebCrawler.Web.Hubs;
 
@@ -11,6 +13,20 @@ namespace WebCrawler.Web.Actors
     /// </summary>
     public class SignalRActor : ReceiveActor
     {
+        #region Messages
+
+        public class DebugCluster
+        {
+            public DebugCluster(string message)
+            {
+                Message = message;
+            }
+
+            public string Message { get; private set; }
+        }
+
+        #endregion
+
         private CrawlHub _hub;
 
         public SignalRActor()
@@ -25,9 +41,19 @@ namespace WebCrawler.Web.Actors
                 _hub.CrawlFailed(string.Format("COULD NOT CRAWL {0}: {1}", bad.RawStr, bad.Message));
             });
 
-            Receive<JobStatusMessage>(status =>
+            Receive<JobStatusUpdate>(status =>
             {
                 _hub.PushStatus(status);
+            });
+
+            Receive<StartJob>(start =>
+            {
+                _hub.WriteRawMessage(string.Format("Starting crawl of {0}", start.Job.Root.ToString()));
+            });
+
+            Receive<DebugCluster>(debug =>
+            {
+                _hub.WriteRawMessage(string.Format("DEBUG: {0}", debug.Message));
             });
         }
 

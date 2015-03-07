@@ -13,10 +13,10 @@
         <span class="input-group-btn">
             <button class="btn btn-default" type="button" id="btnQuery">Query</button>
         </span>
-        <input type="text" class="form-control" placeholder="Crawl domain...">
+        <input type="text" class="form-control" placeholder="Crawl domain..." id="crawlDomain">
     </div><!-- /input-group -->
     <div class="well" id="output">
-        <!-- ko foreach: logs -->
+        <!-- ko foreach: messages -->
         <p data-bind="text:message"></p>
         <!-- /ko -->
     </div>
@@ -32,7 +32,7 @@
 
             self.messages = ko.observableArray([]);
 
-            self.addLog = function(message) {
+            self.addMessage = function(message) {
                 self.messages.unshift({ message: message });
             };
         }
@@ -42,15 +42,20 @@
 
         $(function() {
             // Reference the auto-generated proxy for the hub.
-            var chat = $.connection.actorEventStream;
+            var chat = $.connection.crawlHub;
             // Create a function that the hub can call back to display messages.
-            chat.client.log = function(message) {
-                stream.addLog(message);
+            chat.client.writeStatus = function(message) {
+                stream.addMessage(message);
             };
 
 
             $.connection.hub.start().done(function() {
+                $('#btnQuery').click(function() {
+                    //call the StartCrawl method on the hub
+                    chat.server.startCrawl($('#crawlDomain').val());
 
+                    $('#crawlDomain').val('').focus();
+                });
             });
         });
     </script>

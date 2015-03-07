@@ -3,6 +3,7 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using Akka.Actor;
 using Akka.Routing;
+using WebCrawler.Messages.Actors;
 using WebCrawler.Web.Actors;
 
 namespace WebCrawler.Web
@@ -19,7 +20,7 @@ namespace WebCrawler.Web
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             ActorSystem = ActorSystem.Create("webcrawler");
-            var router = ActorSystem.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), "tasker");
+            var router = ActorSystem.ActorOf(Props.Create(() => new RemoteJobActor()).WithRouter(FromConfig.Instance), "tasker");
             SystemActors.CommandProcessor = ActorSystem.ActorOf(Props.Create(() => new CommandProcessor(router)),
                 "commands");
             SystemActors.SignalRActor = ActorSystem.ActorOf(Props.Create(() => new SignalRActor()), "signalr");

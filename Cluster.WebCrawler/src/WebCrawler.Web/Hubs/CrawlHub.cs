@@ -12,17 +12,28 @@ namespace WebCrawler.Web.Hubs
     {
         public void PushStatus(JobStatusUpdate update)
         {
-            Clients.All.writeStatus(string.Format("[{0}]({1}) - {2} ({3}) [{4} elapsed]", DateTime.UtcNow, update.Job, update.Stats, update.Status, update.Elapsed));
+            WriteMessage(string.Format("[{0}]({1}) - {2} ({3}) [{4} elapsed]", DateTime.UtcNow, update.Job, update.Stats, update.Status, update.Elapsed));
         }
 
         public void CrawlFailed(string reason)
         {
-            Clients.All.writeStatus(reason);
+           WriteMessage(reason);
         }
 
         public void StartCrawl(string message)
         {
             SystemActors.SignalRActor.Tell(message);
+        }
+
+        internal void WriteRawMessage(string msg)
+        {
+            WriteMessage(msg);
+        }
+
+        internal static void WriteMessage(string message)
+        {
+            var context = GlobalHost.ConnectionManager.GetHubContext<CrawlHub>();
+            dynamic allClients = context.Clients.All.writeStatus(message);
         }
     }
 }

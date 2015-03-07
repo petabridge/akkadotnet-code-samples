@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using Akka.Actor;
+using Akka.Routing;
 using WebCrawler.Messages.Commands;
 using WebCrawler.Messages.State;
 
@@ -51,8 +53,11 @@ namespace WebCrawler.Web.Actors
             {
                 if (Uri.IsWellFormedUriString(attempt.RawStr, UriKind.Absolute))
                 {
-                    CommandRouter.Tell(new StartJob(new CrawlJob(new Uri(attempt.RawStr, UriKind.Absolute), true),
-                        Sender));
+                    var startJob = new StartJob(new CrawlJob(new Uri(attempt.RawStr, UriKind.Absolute), true), Sender);
+                    CommandRouter.Tell(startJob);
+                    CommandRouter.Ask<Routees>(new GetRoutees()).ContinueWith(tr => new SignalRActor.DebugCluster(string.Format("{0} has {1} routees: {2}", CommandRouter,
+                        tr.Result.Members.Count(), string.Join(",", tr.Result.Members.Select(y => y.ToString()))))).PipeTo(Sender);
+                    Sender.Tell(startJob);
                 }
                 else
                 {
