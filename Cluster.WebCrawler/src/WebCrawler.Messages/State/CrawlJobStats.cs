@@ -106,5 +106,15 @@
         {
             return new CrawlJobStats(Key);
         }
+
+        public override string ToString()
+        {
+            return
+                string.Format(
+                    "Discovered: {0} (HTML: {1}, IMG: {2}) -- Downloaded {3} (HTML: {4}, IMG: {5}) -- Bytes {6} (HTML: {7}, IMG: {8})",
+                    TotalDocumentsDiscovered,
+                    HtmlDocumentsDiscovered, ImagesDiscovered, TotalDocumentsDownloaded, HtmlDocumentsDownloaded,
+                    ImagesDownloaded, TotalBytesDownloaded, HtmlBytesDownloaded, ImageBytesDownloaded);
+        }
     }
 }

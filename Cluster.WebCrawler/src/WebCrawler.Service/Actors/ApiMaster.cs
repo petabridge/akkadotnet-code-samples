@@ -125,7 +125,8 @@ namespace WebCrawler.Service.Actors
                     {
                         //need to create the job now
                         var crawlMaster = Context.ActorOf(Props.Create(() => new CrawlMaster(JobToStart.Job)),
-                            Uri.EscapeUriString(JobToStart.Job.ToString()));
+                            JobToStart.Job.Root.ToActorName());
+                        crawlMaster.Tell(JobToStart);
                         ApiBroadcaster.Tell(new JobFound(JobToStart.Job, crawlMaster));
                     }
                 }
@@ -141,7 +142,7 @@ namespace WebCrawler.Service.Actors
 
         private void HandleFindRunningJob(FindRunningJob job)
         {
-            var haveChild = Context.Child(Uri.EscapeUriString(job.Key.Root.ToString()));
+            var haveChild = Context.Child(job.Key.Root.ToActorName());
 
             //found a running job already
             if (haveChild != ActorRef.Nobody)

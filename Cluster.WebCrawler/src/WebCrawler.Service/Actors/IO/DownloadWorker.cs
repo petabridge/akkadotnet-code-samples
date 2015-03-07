@@ -225,7 +225,11 @@ namespace WebCrawler.Service.Actors.IO
         {
             Receive<DownloadHtmlDocument>(i => CanDoDownload, html =>
             {
-                _currentDownloads.Add(html);
+                if (!(Uri.UriSchemeHttp.Equals(html.Document.DocumentUri.Scheme) ||
+                    Uri.UriSchemeHttps.Equals(html.Document.DocumentUri.Scheme)))
+                    return;
+
+                 _currentDownloads.Add(html);
                 _httpClient.GetStringAsync(html.Document.DocumentUri).ContinueWith(tr =>
                 {
                     // bad request, server error, or timeout

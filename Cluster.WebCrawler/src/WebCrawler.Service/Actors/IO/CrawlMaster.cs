@@ -38,8 +38,8 @@ namespace WebCrawler.Service.Actors.IO
         public CrawlMaster(CrawlJob job)
         {
             Job = job;
-            TotalStats = new CrawlJobStats(Job);
             RunningStatus = new JobStatusUpdate(Job);
+            TotalStats = new CrawlJobStats(Job);
             Context.SetReceiveTimeout(TimeSpan.FromSeconds(5));
             WaitingForTracker();
         }
@@ -82,7 +82,7 @@ namespace WebCrawler.Service.Actors.IO
             {
                 CoordinatorRouter =
                     Context.ActorOf(
-                        Props.Create(() => new DownloadCoordinator(Self, DownloadTracker, 50))
+                        Props.Create(() => new DownloadCoordinator(Job, Self, DownloadTracker, 50))
                             .WithRouter(FromConfig.Instance), CoordinatorRouterName);
             }
             else //in the event of a restart

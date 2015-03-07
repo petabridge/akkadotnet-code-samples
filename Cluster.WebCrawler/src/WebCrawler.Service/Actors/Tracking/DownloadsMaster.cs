@@ -164,6 +164,11 @@ namespace WebCrawler.Service.Actors.Downloads
             //stash any further requests for trackers
             Receive<RequestDownloadTrackerFor>(request => Stash.Stash());
 
+            Receive<GetDownloadTracker>(get =>
+            {
+                HandleGetDownloadTracker(get);
+            });
+
             Receive<ReceiveTimeout>(timeout => Self.Tell(new TrackerNotFound(RequestedTracker.Key)));
 
             Receive<TrackerNotFound>(notfound =>
@@ -177,7 +182,10 @@ namespace WebCrawler.Service.Actors.Downloads
                     if (OutstandingAcknowledgments == 0)
                     {
                         var tracker = Context.ActorOf(Props.Create(() => new DownloadsTracker()),
-                            Uri.EscapeUriString(RequestedTracker.Key.Root.ToString()));
+                           RequestedTracker.Key.Root.ToActorName());
+
+                        var found = new TrackerFound(RequestedTracker.Key, tracker);
+                        BecomeReadyIfFound(found);
 
                         MasterBroadcast.Tell(new CreatedTracker(RequestedTracker.Key, tracker));
                     }
@@ -225,9 +233,9 @@ namespace WebCrawler.Service.Actors.Downloads
         private void HandleGetDownloadTracker(GetDownloadTracker get)
         {
             // this tracker is a child of the current actor
-            if (Context.Child(Uri.EscapeUriString(get.Key.ToString())) != ActorRef.Nobody)
+            if (Context.Child(get.Key.Root.ToActorName()) != ActorRef.Nobody)
             {
-                var tracker = Context.Child(Uri.EscapeUriString(get.Key.ToString()));
+                var tracker = Context.Child(get.Key.Root.ToActorName());
 
                 //let everyone know this tracker exists
                 MasterBroadcast.Tell(new TrackerFound(get.Key, tracker));

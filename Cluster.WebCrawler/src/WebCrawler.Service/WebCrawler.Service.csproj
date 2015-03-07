@@ -73,12 +73,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActorSafeNameFromUri.cs" />
+    <Compile Include="Actors\ApiMaster.cs" />
     <Compile Include="Actors\IO\CrawlMaster.cs" />
     <Compile Include="Actors\Tracking\DownloadsMaster.cs" />
     <Compile Include="Actors\Tracking\DownloadsTracker.cs" />
     <Compile Include="Actors\IO\DownloadCoordinator.cs" />
     <Compile Include="Actors\IO\DownloadWorker.cs" />
     <Compile Include="Actors\IO\ParseWorker.cs" />
+    <Compile Include="CrawlerService.cs" />
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="Messages\CheckDocuments.cs" />
     <Compile Include="Messages\ProcessDocuments.cs" />

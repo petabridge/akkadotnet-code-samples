@@ -146,7 +146,8 @@ namespace WebCrawler.Service.Actors.IO
             try
             {
                 var absUri = new Uri(JobRoot.Root, rawUri);
-                return true;
+                var returnVal = absUri.Scheme.Equals(Uri.UriSchemeHttp) || absUri.Scheme.Equals(Uri.UriSchemeHttps);
+                return returnVal;
             }
             catch
             {

@@ -51,12 +51,16 @@ namespace WebCrawler.Service.Actors.IO
         protected CrawlJob Job;
         protected CrawlJobStats Stats;
 
-        protected readonly int MaxConcurrentDownloads;
+        protected readonly long MaxConcurrentDownloads;
 
         private CancellationTokenSource _publishStatsTask = new CancellationTokenSource();
 
-        public DownloadCoordinator(ActorRef commander, ActorRef downloadsTracker, int maxConcurrentDownloads)
+        //public DownloadCoordinator(object job, object commander, object downloadsTracker, object maxConcurrentDownloads)
+        //    : this(job as CrawlJob, commander as ActorRef, downloadsTracker as ActorRef, (int)maxConcurrentDownloads) { }
+
+        public DownloadCoordinator(CrawlJob job, ActorRef commander, ActorRef downloadsTracker, long maxConcurrentDownloads)
         {
+            Job = job;
             DownloadsTracker = downloadsTracker;
             MaxConcurrentDownloads = maxConcurrentDownloads;
             Commander = commander;
@@ -71,7 +75,7 @@ namespace WebCrawler.Service.Actors.IO
             if (Context.Child(Downloader) == ActorRef.Nobody)
             {
                 DownloaderRouter = Context.ActorOf(
-                    Props.Create(() => new DownloadWorker(HttpClientFactory.GetClient, Self, MaxConcurrentDownloads)).WithRouter(new SmallestMailboxPool(10)),
+                    Props.Create(() => new DownloadWorker(HttpClientFactory.GetClient, Self, (int)MaxConcurrentDownloads)).WithRouter(new RoundRobinPool(10)),
                     Downloader);
             }
 
@@ -79,7 +83,7 @@ namespace WebCrawler.Service.Actors.IO
             if (Context.Child(Parser) == ActorRef.Nobody)
             {
                 ParserRouter = Context.ActorOf(
-                    Props.Create(() => new ParseWorker(Job, Self)).WithRouter(new SmallestMailboxPool(10)),
+                    Props.Create(() => new ParseWorker(Job, Self)).WithRouter(new RoundRobinPool(10)),
                     Parser);
             }
 
@@ -108,10 +112,13 @@ namespace WebCrawler.Service.Actors.IO
         {
             Receive<PublishStatsTick>(stats =>
             {
-                Commander.Tell(Stats.Copy());
+                if (!Stats.IsEmpty)
+                {
+                    Commander.Tell(Stats.Copy());
 
-                //reset our stats after publishing
-                Stats = Stats.Reset();
+                    //reset our stats after publishing
+                    Stats = Stats.Reset();
+                }
             });
 
             //Received word from a ParseWorker that we need to check for new documents
@@ -145,7 +152,10 @@ namespace WebCrawler.Service.Actors.IO
             });
 
             //hand the work off to the downloaders
-            Receive<DownloadWorker.IDownloadDocument>(download => DownloaderRouter.Tell(download));
+            Receive<DownloadWorker.IDownloadDocument>(download =>
+            {
+                DownloaderRouter.Tell(download);
+            });
 
             Receive<CompletedDocument>(completed =>
             {
@@ -154,10 +164,16 @@ namespace WebCrawler.Service.Actors.IO
             });
 
             /* Set all of our local downloaders to message our local parsers */
-            Receive<DownloadWorker.RequestParseActor>(request => Sender.Tell(ParserRouter));
+            Receive<DownloadWorker.RequestParseActor>(request =>
+            {
+                Sender.Tell(new DownloadWorker.SetParseActor(ParserRouter));
+            });
 
             /* Set all of our local parsers to message our local downloaders */
-            Receive<ParseWorker.RequestDownloadActor>(request => Sender.Tell(DownloaderRouter));
+            Receive<ParseWorker.RequestDownloadActor>(request =>
+            {
+                Sender.Tell(new ParseWorker.SetDownloadActor(DownloaderRouter));
+            });
         }
     }
 }
