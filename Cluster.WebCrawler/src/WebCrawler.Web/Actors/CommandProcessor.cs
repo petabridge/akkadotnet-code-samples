@@ -2,6 +2,7 @@
 using System.Linq;
 using Akka.Actor;
 using Akka.Routing;
+using Akka.Util.Internal;
 using WebCrawler.Messages.Commands;
 using WebCrawler.Messages.State;
 
@@ -55,8 +56,17 @@ namespace WebCrawler.Web.Actors
                 {
                     var startJob = new StartJob(new CrawlJob(new Uri(attempt.RawStr, UriKind.Absolute), true), Sender);
                     CommandRouter.Tell(startJob);
-                    CommandRouter.Ask<Routees>(new GetRoutees()).ContinueWith(tr => new SignalRActor.DebugCluster(string.Format("{0} has {1} routees: {2}", CommandRouter,
-                        tr.Result.Members.Count(), string.Join(",", tr.Result.Members.Select(y => y.ToString()))))).PipeTo(Sender);
+                    CommandRouter.Ask<Routees>(new GetRoutees()).ContinueWith(tr =>
+                    {
+                        var grrr =
+                            new SignalRActor.DebugCluster(string.Format("{0} has {1} routees: {2}", CommandRouter,
+                                tr.Result.Members.Count(),
+                                string.Join(",",
+                                    tr.Result.Members.Select(
+                                        y => y.ToString()))));
+
+                        return grrr;
+                    }).PipeTo(Sender);
                     Sender.Tell(startJob);
                 }
                 else
