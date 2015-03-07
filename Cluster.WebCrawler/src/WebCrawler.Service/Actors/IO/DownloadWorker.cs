@@ -206,6 +206,11 @@ namespace WebCrawler.Service.Actors.IO
             base.PreRestart(reason, message);
         }
 
+        protected override void PostRestart(Exception reason)
+        {
+            Become(WaitingForParseActor);
+        }
+
         private void WaitingForParseActor()
         {
             Receive<SetParseActor>(parse =>
