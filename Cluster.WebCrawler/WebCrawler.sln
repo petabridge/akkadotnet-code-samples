@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Messages", "src\WebCrawler.Messages\WebCrawler.Messages.csproj", "{8A2A881E-63AC-4292-89B7-473FFBFD0F99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Shared", "src\WebCrawler.Messages\WebCrawler.Shared.csproj", "{8A2A881E-63AC-4292-89B7-473FFBFD0F99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Service", "src\WebCrawler.Service\WebCrawler.Service.csproj", "{2DEE00D3-5706-4534-B5CF-6E85D576701C}"
 EndProject

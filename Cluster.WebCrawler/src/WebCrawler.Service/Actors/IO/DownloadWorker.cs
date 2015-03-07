@@ -4,9 +4,10 @@ using System.Net;
 using System.Net.Http;
 using Akka.Actor;
 using Akka.Util;
+using WebCrawler.Messages.State;
 using WebCrawler.Service.State;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.Service.Actors.IO
 {
     /// <summary>
     /// Actor responsible for using <see cref="HttpClient"/>
@@ -313,7 +314,7 @@ namespace WebCrawler.Service.Actors
             _currentDownloads.Remove(html.Command);
 
             //forward the completed HTML download to the CoordinatorActor
-            CoordinatorActor.Tell(html);
+            CoordinatorActor.Tell(new CompletedDocument(html.Command.Document, html.Content.Length*2, Self));
 
             //tell the parser actor to begin processing this document
             ParseActor.Tell(html);
@@ -325,7 +326,7 @@ namespace WebCrawler.Service.Actors
             _currentDownloads.Remove(image.Command);
 
             //forward the completed image download to the CoordinatorActor
-            CoordinatorActor.Tell(image);
+            CoordinatorActor.Tell(new CompletedDocument(image.Command.Document, image.Bytes.Length, Self));
         }
 
         #endregion

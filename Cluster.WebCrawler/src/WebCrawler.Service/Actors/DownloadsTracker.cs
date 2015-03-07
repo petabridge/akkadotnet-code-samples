@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Akka.Actor;
+using WebCrawler.Messages.State;
 using WebCrawler.Service.Messages;
 using WebCrawler.Service.State;
 
@@ -13,6 +14,8 @@ namespace WebCrawler.Service.Actors
     {
         private readonly Dictionary<CrawlDocument, CrawlStatus> _recordedDocuments;
         private readonly TimeSpan _defaultCrawlTime;
+
+        public DownloadsTracker() : this(new Dictionary<CrawlDocument, CrawlStatus>(), TimeSpan.FromSeconds(30)) { }
 
         public DownloadsTracker(Dictionary<CrawlDocument, CrawlStatus> recordedDocuments, TimeSpan defaultCrawlTime)
         {
@@ -27,6 +30,7 @@ namespace WebCrawler.Service.Actors
             Receive<CheckDocuments>(check =>
             {
                 var availableDocs = new List<CrawlDocument>();
+                var discoveredDocs = new List<CrawlDocument>();
                 foreach (var doc in check.Documents)
                 {
                     //first time we've seen this doc
@@ -34,15 +38,17 @@ namespace WebCrawler.Service.Actors
                     {
                         _recordedDocuments[doc] = CrawlStatus.StartCrawl(check.Requestor, check.EstimatedCrawlTime ?? _defaultCrawlTime);
                         availableDocs.Add(doc);
+                        discoveredDocs.Add(doc);
                     }
                     else if(_recordedDocuments[doc].TryClaim(check.Requestor, check.EstimatedCrawlTime ?? _defaultCrawlTime))
                     {
-                        //TODO: add status message about taking over processing here
+                        //TODO: add status message about new actor taking over processing here
                         availableDocs.Add(doc);
                     }
                 }
 
                 Sender.Tell(new ProcessDocuments(availableDocs, check.Requestor));
+                Sender.Tell(new DiscoveredDocuments(discoveredDocs, check.Requestor));
             });
 
             Receive<CompletedDocument>(doc =>

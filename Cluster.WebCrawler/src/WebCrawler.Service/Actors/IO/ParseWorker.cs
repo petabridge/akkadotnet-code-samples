@@ -7,7 +7,7 @@ using WebCrawler.Messages.State;
 using WebCrawler.Service.Messages;
 using WebCrawler.Service.State;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.Service.Actors.IO
 {
     /// <summary>
     /// Actor responsibile for using the HTML Agility Pack to parse links to other content

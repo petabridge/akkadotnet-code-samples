@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Akka.Actor;
 using WebCrawler.Service.State;
 
@@ -16,6 +17,10 @@ namespace WebCrawler.Service.Messages
         }
 
         public IList<CrawlDocument> Documents { get; private set; }
+
+        public int HtmlDocs { get { return Documents.Count(x => !x.IsImage); } }
+
+        public int Images { get { return Documents.Count(x => x.IsImage); } }
 
         /// <summary>
         /// Reference to the actor who should take on the cleared documents
