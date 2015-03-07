@@ -5,7 +5,7 @@ using WebCrawler.Messages.State;
 using WebCrawler.Service.Messages;
 using WebCrawler.Service.State;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.Service.Actors.Downloads
 {
     /// <summary>
     /// Actor responsible for documenting the persistence of documents

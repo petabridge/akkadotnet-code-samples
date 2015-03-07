@@ -73,10 +73,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actors\DownloadsTracker.cs" />
-    <Compile Include="Actors\Gruntwork\DownloadCoordinator.cs" />
-    <Compile Include="Actors\Gruntwork\DownloadWorker.cs" />
-    <Compile Include="Actors\Gruntwork\ParseWorker.cs" />
+    <Compile Include="Actors\IO\CrawlMaster.cs" />
+    <Compile Include="Actors\Tracking\DownloadsMaster.cs" />
+    <Compile Include="Actors\Tracking\DownloadsTracker.cs" />
+    <Compile Include="Actors\IO\DownloadCoordinator.cs" />
+    <Compile Include="Actors\IO\DownloadWorker.cs" />
+    <Compile Include="Actors\IO\ParseWorker.cs" />
+    <Compile Include="HttpClientFactory.cs" />
     <Compile Include="Messages\CheckDocuments.cs" />
     <Compile Include="Messages\ProcessDocuments.cs" />
     <Compile Include="Program.cs" />

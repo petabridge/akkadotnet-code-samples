@@ -5,14 +5,14 @@ using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.State;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.Service.Actors.Downloads
 {
     /// <summary>
     /// Actor responsible for managing the <see cref="DownloadsTracker"/> for each job.
     /// </summary>
     public class DownloadsMaster : ReceiveActor, WithUnboundedStash
     {
-        public const string MasterBroadcastName = "broadcaster";
+        public const string DownloadsBroadcastName = "broadcaster";
 
         #region Messages
 
@@ -107,14 +107,14 @@ namespace WebCrawler.Service.Actors
 
         protected override void PreStart()
         {
-            MasterBroadcast = Context.Child(MasterBroadcastName) == ActorRef.Nobody ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), MasterBroadcastName)
-                : Context.Child(MasterBroadcastName);
+            MasterBroadcast = Context.Child(DownloadsBroadcastName) == ActorRef.Nobody ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), DownloadsBroadcastName)
+                : Context.Child(DownloadsBroadcastName);
         }
 
         protected override void PreRestart(System.Exception reason, object message)
         {
             /* don't kill the children */
-            base.PostStop();
+            PostStop();
         }
 
         private void Ready()
