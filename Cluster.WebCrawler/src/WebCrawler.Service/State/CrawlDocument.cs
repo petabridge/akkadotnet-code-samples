@@ -9,8 +9,9 @@ namespace WebCrawler.Service.State
     /// </summary>
     public class CrawlDocument : IEquatable<CrawlDocument>
     {
-        public CrawlDocument(Uri documentUri)
+        public CrawlDocument(Uri documentUri, bool isImage = false)
         {
+            IsImage = isImage;
             Guard.Assert(documentUri.IsAbsoluteUri, "documentUri must be absolute");
             DocumentUri = documentUri;
         }
@@ -19,6 +20,8 @@ namespace WebCrawler.Service.State
         /// Absolute URI of the document
         /// </summary>
         public Uri DocumentUri { get; private set; }
+
+        public bool IsImage { get; private set; }
 
         public bool Equals(CrawlDocument other)
         {

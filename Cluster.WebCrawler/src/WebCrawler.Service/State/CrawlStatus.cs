@@ -10,16 +10,8 @@ namespace WebCrawler.Service.State
     /// If the crawl operatoin isn't completed before the elapsed time, another actor can start
     /// the process.
     /// </summary>
-    public class DocumentCrawlStatus
+    public class CrawlStatus
     {
-        public DocumentCrawlStatus(CrawlDocument document, Deadline timeout)
-        {
-            Timeout = timeout;
-            Document = document;
-        }
-
-        public CrawlDocument Document { get; private set; }
-
         public bool IsComplete { get; private set; }
 
         public Deadline Timeout { get; private set; }
@@ -31,7 +23,14 @@ namespace WebCrawler.Service.State
 
         public ActorRef Owner { get; private set; }
 
-        public DocumentCrawlStatus MarkAsComplete()
+        public static CrawlStatus StartCrawl(ActorRef owner, TimeSpan crawlTime)
+        {
+            var crawl = new CrawlStatus();
+            crawl.TryClaim(owner, crawlTime);
+            return crawl;
+        }
+
+        public CrawlStatus MarkAsComplete()
         {
             IsComplete = true;
             Timeout = null; //let it get GC'ed
