@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using Akka.Actor;
+using Akka.Event;
 using Akka.Routing;
 using WebCrawler.Messages.State;
 using WebCrawler.Service.Messages;
@@ -55,8 +56,7 @@ namespace WebCrawler.Service.Actors.IO
 
         private CancellationTokenSource _publishStatsTask = new CancellationTokenSource();
 
-        //public DownloadCoordinator(object job, object commander, object downloadsTracker, object maxConcurrentDownloads)
-        //    : this(job as CrawlJob, commander as ActorRef, downloadsTracker as ActorRef, (int)maxConcurrentDownloads) { }
+        private LoggingAdapter _logger = Context.GetLogger();
 
         public DownloadCoordinator(CrawlJob job, ActorRef commander, ActorRef downloadsTracker, long maxConcurrentDownloads)
         {
@@ -114,6 +114,8 @@ namespace WebCrawler.Service.Actors.IO
             {
                 if (!Stats.IsEmpty)
                 {
+                    _logger.Info("Publishing {0} to parent", Stats);
+
                     Commander.Tell(Stats.Copy());
 
                     //reset our stats after publishing
