@@ -6,7 +6,8 @@ In this sample you'll also see how to integrate Akka.NET with the following tech
 
 - **[ASP.NET MVC5](http://www.asp.net/mvc/mvc5)**;
 - **[SignalR](http://signalr.net/ "Websockets for .NET")** - Websockets library for .NET;
--  **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")** - Windows Services made easy; and
+-  **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")** - Windows Services made easy; 
+-  **[HTML Agility Pack](http://htmlagilitypack.codeplex.com/)** - for parsing crawled web pages; and
 - **[Lighthouse](https://github.com/petabridge/lighthouse "Lighthouse - Service Discovery for Akka.NET")** - a lightweight service discovery platform for Akka.Cluster.
 
 ## Sample Overview
@@ -19,14 +20,17 @@ In the `WebCrawler` sample we're actually going to run three different pieces of
 
 > NOTE: `WebCrawler.sln` should attempt to launch one instance of `[Crawler]` and `[Web]` by default.
 
-### Goal: Use Microservices with Akka.Cluster to Crawl Specific Domains
+### Goal: Use Microservices Built with Akka.Cluster to Crawl Web Domains with Elastic Scale
 
 The goal of this sample is to have all three of these services work cooperatively together to crawl multiple web domains in parallel. Here's what the data flow of an individual domain crawl looks like:
 
+![WebCrawler crawl data flow for a single domain](diagrams/cluster-webcrawl-data-flow.png)
 
+The crawl begins by downloading the root document of the domain, so if we were to crawl [http://petabridge.com/](http://petabridge.com "Petabridge LLC homepage") we'd begin by downloading `index.html`.
 
+On `index.html` we discover links to more images and documents, so we mark those new pages as "discovered" and repeat the downloading / parsing process until no more content has discovered.
 
+> NOTE: the only thing this sample does not attempt to do is save the documents to a persistent store; that's an exercise left up to readers.
 
+### Microservice Architecture
 
-
- 
