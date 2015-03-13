@@ -1,0 +1,1636 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Akka.Remote</name>
+    </assembly>
+    <members>
+        <member name="T:Akka.Remote.SeqNo">
+            <summary>
+            Implements a 64-bit sequence number with proper overflow ordering
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.SeqNo.IsSuccessor(Akka.Remote.SeqNo)">
+            <summary>
+            Checks if this sequence number is an immediate successor of the provided one.
+            </summary>
+            <param name="that">The second sequence number that has to be exactly one less</param>
+            <returns>true if this sequence number is the successor of the provided one</returns>
+        </member>
+        <member name="T:Akka.Remote.SeqNo.HasSeqNoComparer`1">
+            <summary>
+            Implements wrap-around comparison, in the event of a 64-bit overflow
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.IHasSequenceNumber">
+            <summary>
+            Messages that are to be buffered in an <see cref="T:Akka.Remote.AckedSendBuffer`1"/> or <see cref="T:Akka.Remote.AckedReceiveBuffer`1"/> has
+            to implement this interface to provide the sequence needed by the buffers
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.IHasSequenceNumber.Seq">
+            <summary>
+            Sequence number of the message
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Ack.#ctor(Akka.Remote.SeqNo,System.Collections.Generic.IEnumerable{Akka.Remote.SeqNo})">
+            <summary>
+            Class representing an acknowledgement with select negative acknowledgements.
+            </summary>
+            <param name="cumulativeAck">Represents the highest sequence number received</param>
+            <param name="nacks">Set of sequence numbers between the last delivered one and <see cref="!:cumulativeAck"/> that has not been received.</param>
+        </member>
+        <member name="M:Akka.Remote.Ack.#ctor(Akka.Remote.SeqNo)">
+            <summary>
+            Class representing an acknowledgement with select negative acknowledgements.
+            </summary>
+            <param name="cumulativeAck">Represents the highest sequence number received</param>
+        </member>
+        <member name="T:Akka.Remote.AckedSendBuffer`1">
+            <summary>
+            Implements an immutable resend buffer that buffers messages until they have been acknowledged. Properly removes messages
+            when an <see cref="T:Akka.Remote.Ack"/> is received. This buffer works together with <see cref="T:Akka.Remote.AckedReceiveBuffer`1"/> on the receiving end.
+            </summary>
+            <typeparam name="T">The type of message being stored - has to implement <see cref="T:Akka.Remote.IHasSequenceNumber"/></typeparam>
+        </member>
+        <member name="M:Akka.Remote.AckedSendBuffer`1.Acknowledge(Akka.Remote.Ack)">
+            <summary>
+            Processes an incoming acknowledgement and returns a new buffer with only unacknowledged elements remaining.
+            </summary>
+            <param name="ack">The received acknowledgement</param>
+            <exception cref="T:Akka.Remote.ResendUnfulfillableException">Thrown if we couldn't fit all of the nacks stored inside <see cref="T:Akka.Remote.Ack"/> onto the buffer.</exception>
+            <returns>An updated buffer containing the remaining unacknowledged messages</returns>
+        </member>
+        <member name="M:Akka.Remote.AckedSendBuffer`1.Buffer(`0)">
+            <summary>
+            Puts a new message in the buffer. 
+            </summary>
+            <param name="msg">The message to be stored for possible future transmission.</param>
+            <exception cref="T:System.ArgumentException">Thrown if an out-of-sequence message is attempted to be stored.</exception>
+            <exception cref="T:Akka.Remote.ResendBufferCapacityReachedException">Thrown if the resend buffer is beyond its capacity.</exception>
+            <returns>The updated buffer.</returns>
+        </member>
+        <member name="T:Akka.Remote.AckReceiveDeliverable`1">
+            <summary>
+            Helper class that makes it easier to work with <see cref="T:Akka.Remote.AckedReceiveBuffer`1"/> deliverables.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.AckedReceiveBuffer`1">
+            <summary>
+            Implements an immutable receive buffer that buffers incoming messages until they can be safely delivered. This
+            buffer works together with an <see cref="T:Akka.Remote.AckedSendBuffer`1"/> on the sender() side.
+            </summary>
+            <typeparam name="T">The type of messages being buffered; must implement <see cref="T:Akka.Remote.IHasSequenceNumber"/>.</typeparam>
+        </member>
+        <member name="M:Akka.Remote.AckedReceiveBuffer`1.#ctor(Akka.Remote.SeqNo,Akka.Remote.SeqNo,System.Collections.Generic.SortedSet{`0})">
+            <summary>
+            Constructor
+            </summary>
+            <param name="lastDelivered">Sequence number of the last message that has been delivered.</param>
+            <param name="cumulativeAck">The highest sequence number received so far</param>
+            <param name="buffer">Buffer of messages that are waiting for delivery.</param>
+        </member>
+        <member name="M:Akka.Remote.AckedReceiveBuffer`1.Receive(`0)">
+            <summary>
+            Puts a sequenced message in the receive buffer returning a new buffer.
+            </summary>
+            <param name="arrivedMsg">Message to be put into the buffer</param>
+            <returns>The updated buffer containing the message</returns>
+        </member>
+        <member name="M:Akka.Remote.AckedReceiveBuffer`1.MergeFrom(Akka.Remote.AckedReceiveBuffer{`0})">
+            <summary>
+            Merges two receive buffers. Merging preserves sequencing of messages, and drops all messages that has been
+            safely acknowledged by any of the participating buffers. Also updates the expected sequence numbers.
+            </summary>
+            <param name="other">The receive buffer to merge with</param>
+            <returns>The merged receive buffer</returns>
+        </member>
+        <member name="P:Akka.Remote.AckedReceiveBuffer`1.ExtractDeliverable">
+            <summary>
+            Extract all messages that could be safely delivered, an updated ack to be sent to the sender(), and
+            an updated buffer that has the messages removed that can be delivered.
+            </summary>
+            <returns>Triplet of the updated buffer, messages that can be delivered, and the updated acknowledgement.</returns>
+        </member>
+        <member name="T:Akka.Remote.AddressUidExtension">
+            <summary>
+            <see cref="T:Akka.Actor.IExtension"/> provider for <see cref="T:Akka.Remote.AddressUid"/>
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.AddressUid">
+            <summary>
+            Extension that holds a UID that is assigned as a random 'Int'.
+            
+            The UID is intended to be used together with an <see cref="T:Akka.Actor.Address"/> to be
+            able to distinguish restarted actor system using the same host and port.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Configuration.RemoteConfigFactory">
+            <summary>
+            Internal class used for loading remote configuration values
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Configuration.RemoteConfigFactory.Default">
+            <summary>
+            Defaults this instance.
+            </summary>
+            <returns>Config.</returns>
+        </member>
+        <member name="M:Akka.Remote.Configuration.RemoteConfigFactory.FromResource(System.String)">
+            <summary>
+            Froms the resource.
+            </summary>
+            <param name="resourceName">Name of the resource.</param>
+            <returns>Config.</returns>
+        </member>
+        <member name="T:Akka.Remote.Deadline">
+            <summary>
+            Import of the scala.concurrent.duration.Deadline class
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Deadline.op_Addition(Akka.Remote.Deadline,System.TimeSpan)">
+            <summary>
+            Adds a given <see cref="T:System.TimeSpan"/> to the due time of this <see cref="T:Akka.Remote.Deadline"/>
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Deadline.op_Addition(Akka.Remote.Deadline,System.Nullable{System.TimeSpan})">
+            <summary>
+            Adds a given <see cref="T:System.Nullable`1"/> to the due time of this <see cref="T:Akka.Remote.Deadline"/>
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Deadline.TimeLeft">
+            <summary>
+            Warning: creates a new <see cref="T:System.TimeSpan"/> instance each time it's used
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Deadline.Now">
+            <summary>
+            Returns a deadline that is due <see cref="P:System.DateTime.Now"/>
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.DeadlineFailureDetector">
+            <summary>
+            Implementation of failure detector using an absolute timeout of missing heartbeats
+            to trigger unavailability
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.FailureDetector">
+            <summary>
+            A failure detector must be a thread-safe, mutable construct that registers heartbeat events of a resource and
+            is able to decide the availability of that monitored resource
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.FailureDetector.HeartBeat">
+            <summary>
+            Notifies the <see cref="T:Akka.Remote.FailureDetector"/> that a heartbeat arrived from the monitored resource.
+            This causes the <see cref="T:Akka.Remote.FailureDetector"/> to update its state.
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.FailureDetector.IsAvailable">
+            <summary>
+            Returns true if the resource is considered to be up and healthy; false otherwise
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.FailureDetector.IsMonitoring">
+            <summary>
+            Returns true if the failure detector has received any heartbeats and started monitoring
+            the resource
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.DeadlineFailureDetector.#ctor(System.TimeSpan,Akka.Remote.Clock)">
+            <summary>
+            Procedural constructor for <see cref="T:Akka.Remote.DeadlineFailureDetector"/>
+            </summary>
+            <param name="acceptableHeartbeatPause">Duration corresponding to number of potentially lost/delayed
+            heartbeats that will be accepted before considering it to be an anomaly.
+            This margin is important to be able to survive sudden, occasional, pauses in heartbeat
+            arrivals, due to for example garbage collect or network drop.</param>
+            <param name="clock">The clock, returning current time in milliseconds, but can be faked for testing
+            purposes. It is only used for measuring intervals (duration).</param>
+        </member>
+        <member name="M:Akka.Remote.DeadlineFailureDetector.#ctor(Akka.Configuration.Config,Akka.Event.EventStream)">
+            <summary>
+            Constructor that reads parameters from an Akka <see cref="T:Akka.Configuration.Config"/> section.
+            Expects property 'acceptable-heartbeat-pause'.
+            </summary>
+            <param name="config"></param>
+            <param name="ev"></param>
+        </member>
+        <member name="T:Akka.Remote.DefaultFailureDetectorRegistry`1">
+            <summary>
+            A lock-less, thread-safe implementation of <see cref="T:Akka.Remote.IFailureDetectorRegistry`1"/>.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="T:Akka.Remote.IFailureDetectorRegistry`1">
+            <summary>
+            Interface for a registry of Akka <see cref="T:Akka.Remote.FailureDetector"/>s. New resources are implicitly registered when heartbeat is first
+            called with the resource given as parameter.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.IFailureDetectorRegistry`1.IsAvailable(`0)">
+            <summary>
+            Returns true if the resource is considered to be up and healthy, false otherwise.
+            For unregistered resources it returns true.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.IFailureDetectorRegistry`1.IsMonitoring(`0)">
+            <summary>
+            Returns true if the failure detector has received any heartbeats and started monitoring
+            the resource.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.IFailureDetectorRegistry`1.Heartbeat(`0)">
+            <summary>
+            Records a heartbeat for a resource. If the resource is not yet registered (i.e. this is the first heartbeat) then
+            is it automatically registered.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.IFailureDetectorRegistry`1.Remove(`0)">
+            <summary>
+            Remove the heartbeat management for a resource
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.IFailureDetectorRegistry`1.Reset">
+            <summary>
+            Removes all resources and any associated failure detector state.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.DefaultFailureDetectorRegistry`1.#ctor(System.Func{Akka.Remote.FailureDetector})">
+            <summary>
+            Instantiates the DefaultFailureDetectorRegistry an uses a factory method for creating new instances
+            </summary>
+            <param name="factory"></param>
+        </member>
+        <member name="M:Akka.Remote.DefaultFailureDetectorRegistry`1.GetFailureDetector(`0)">
+            <summary>
+            Get the underlying <see cref="T:Akka.Remote.FailureDetector"/> for a resource.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.InboundMessageDispatcher">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.DefaultMessageDispatcher">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointException">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.IAssociationProblem">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.ShutDownAssociation">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.HopelessAssociation">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointDisassociatedException">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointAssociationException">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.OversizedPayloadException">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.ReliableDeliverySupervisor">
+            <summary>
+            INTERNAL API
+            
+            <remarks>
+            [Aaronontheweb] so this class is responsible for maintaining a buffer of retriable messages in
+            Akka and it expects an ACK / NACK response pattern before it considers a message to be sent or received.
+            
+            Currently AkkaDotNet does not have any form of guaranteed message delivery in the stack, since that was
+            considered outside the scope of V1. However, this class needs to be revisited and updated to support it,
+            along with others.
+            
+            For the time being, the class remains just a proxy for spawning <see cref="T:Akka.Remote.EndpointWriter"/> actors and
+            forming any outbound associations.
+            </remarks>
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.ReliableDeliverySupervisor.UidConfirmed">
+            <summary>
+            Processing of <see cref="T:Akka.Remote.Ack"/>s has to be delayed until the UID is discovered after a reconnect. Dependig whether the
+            UID matches the expected one, pending Acks can be processed or must be dropped. It is guaranteed that for any inbound
+            connectiosn (calling <see cref="M:Akka.Remote.ReliableDeliverySupervisor.CreateWriter"/>) the first message from that connection is <see cref="T:Akka.Remote.ReliableDeliverySupervisor.GotUid"/>, therefore it serves
+            a separator.
+            
+            If we already have an inbound handle then UID is initially confirmed.
+            (This actor is never restarted.)
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointActor">
+            <summary>
+            Abstract base class for <see cref="T:Akka.Remote.EndpointReader"/> classes
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointActor`2">
+            <summary>
+            INTERNAL API.
+            
+            Abstract base class for Endpoint writers that require a <see cref="T:Akka.Actor.FSM`2"/> implementation.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointWriter">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointWriter.TakeOver">
+            <summary>
+            This message signals that the current association maintained by the local <see cref="T:Akka.Remote.EndpointWriter"/> and
+            <see cref="T:Akka.Remote.EndpointReader"/> is to be overridden by a new inbound association. This is needed to avoid parallel inbound
+            associations from the same remote endpoint: when a parallel inbound association is detected, the old one is removed and the new
+            one is used instead.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.EndpointWriter.TakeOver.#ctor(Akka.Remote.Transport.AkkaProtocolHandle,Akka.Actor.ActorRef)">
+            <summary>
+            Create a new TakeOver command
+            </summary>
+            <param name="protocolHandle">The handle of the new association</param>
+        </member>
+        <member name="T:Akka.Remote.EndpointReader">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointManager">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.EndpointManager.endpoints">
+            <summary>
+            Mapping between addresses and endpoint actors. If passive connections are turned off, incoming connections
+            will not be part of this map!
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.EndpointManager._transportMapping">
+            <summary>
+            Mapping between transports and the local addresses they listen to
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.EndpointManager.PruneTimerCancelleable">
+            <summary>
+            Cancellable task for terminating <see cref="T:Akka.Remote.EndpointManager.Prune"/> operations.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.EndpointManager.EndpointPolicy.IsTombstone">
+            <summary>
+            Indicates that the policy does not contain an active endpoint, but it is a tombstone of a previous failure
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointManager.RemotingCommand">
+            <summary>
+            Messages sent between <see cref="T:Akka.Remote.Remoting"/> and <see cref="T:Akka.Remote.EndpointManager"/>
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.EndpointManager.Send.SenderOption">
+            <summary>
+            Can be null!
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointManager.Link">
+            <summary>
+            Helper class to store address pairs
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.EndpointManager.Link.GetHashCode">
+            <summary>
+            Overrode this to make sure that the <see cref="T:Akka.Remote.ReliableDeliverySupervisor"/> can correctly store
+            <see cref="T:Akka.Remote.AckedReceiveBuffer`1"/> data for each <see cref="T:Akka.Remote.EndpointManager.Link"/> individually, since the HashCode
+            is what Dictionary types use internally for equality checking by default.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.EndpointRegistry">
+            <summary>
+            Not threadsafe - only to be used in HeadActor
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.EndpointRegistry.MarkAsFailed(Akka.Actor.ActorRef,Akka.Remote.Deadline)">
+            <summary>
+            Marking an endpoint as failed means that we will not try to connect to the remote system within
+            the gated period but it is ok for the remote system to try to connect with us (inbound-only.)
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.EndpointRegistry.PruneFilterFunction(Akka.Remote.EndpointManager.EndpointPolicy)">
+            <summary>
+            Internal function used for filtering endpoints that need to be pruned due to non-recovery past their deadlines
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Clock">
+            <summary>
+            Abstraction of a clock that returns time in milliseconds. Can only be used to measure the elapsed time
+            and is not related to any other notion of system or wall-clock time.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.FailureDetectorLoader">
+            <summary>
+            INTERNAL API
+            
+            Utility class to create <see cref="T:Akka.Remote.FailureDetector"/> instances via reflection.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.FailureDetectorLoader.Load(System.String,Akka.Configuration.Config,Akka.Actor.ActorSystem)">
+            <summary>
+            Loads an instantiates a given <see cref="T:Akka.Remote.FailureDetector"/> implementation. The class to be loaded must have a constructor
+            that accepts a <see cref="T:Akka.Configuration.Config"/> and an <see cref="T:Akka.Event.EventStream"/> parameter. Will throw <see cref="T:Akka.Configuration.ConfigurationException"/>
+            if the implementation cannot be loaded.
+            </summary>
+            <param name="fqcn">The fully-qualified .NET assembly name of the FailureDetector implementation class to be loaded.</param>
+            <param name="config">Configuration that will be passed to the implementation.</param>
+            <param name="system">ActorSystem to be used for loading the implementation.</param>
+            <returns>A configured instance of the given <see cref="T:Akka.Remote.FailureDetector"/> implementation.</returns>
+        </member>
+        <member name="M:Akka.Remote.FailureDetectorLoader.LoadFailureDetector(Akka.Actor.IActorContext,System.String,Akka.Configuration.Config)">
+            <summary>
+            Loads an instantiates a given <see cref="T:Akka.Remote.FailureDetector"/> implementation. The class to be loaded must have a constructor
+            that accepts a <see cref="T:Akka.Configuration.Config"/> and an <see cref="T:Akka.Event.EventStream"/> parameter. Will throw <see cref="T:Akka.Configuration.ConfigurationException"/>
+            if the implementation cannot be loaded.
+            </summary>
+            <param name="fqcn">The fully-qualified .NET assembly name of the FailureDetector implementation class to be loaded.</param>
+            <param name="config">Configuration that will be passed to the implementation.</param>
+            <param name="context">The ActorContext used to resolve an <see cref="T:Akka.Actor.ActorSystem"/> for this <see cref="T:Akka.Remote.FailureDetector"/> instance.</param>
+            <returns>A configured instance of the given <see cref="T:Akka.Remote.FailureDetector"/> implementation.</returns>
+        </member>
+        <member name="T:Akka.Remote.MessageSerializer">
+            <summary>
+            Class MessageSerializer.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.MessageSerializer.Deserialize(Akka.Actor.ActorSystem,SerializedMessage)">
+            <summary>
+            Deserializes the specified message.
+            </summary>
+            <param name="system">The system.</param>
+            <param name="messageProtocol">The message protocol.</param>
+            <returns>System.Object.</returns>
+        </member>
+        <member name="M:Akka.Remote.MessageSerializer.Serialize(Akka.Actor.ActorSystem,System.Object)">
+            <summary>
+            Serializes the specified message.
+            </summary>
+            <param name="system">The system.</param>
+            <param name="message">The message.</param>
+            <returns>SerializedMessage.</returns>
+        </member>
+        <member name="T:Akka.Remote.PhiAccrualFailureDetector">
+             Implementation of 'The Phi Accrual Failure Detector' by Hayashibara et al. as defined in their paper:
+             [http://ddg.jaist.ac.jp/pub/HDY+04.pdf]
+            
+             The suspicion level of failure is given by a value called φ (phi).
+             The basic idea of the φ failure detector is to express the value of φ on a scale that
+             is dynamically adjusted to reflect current network conditions. A configurable
+             threshold is used to decide if φ is considered to be a failure.
+            
+             The value of φ is calculated as:
+            
+             {{{
+             φ = -log10(1 - F(timeSinceLastHeartbeat)
+             }}}
+             where F is the cumulative distribution function of a normal distribution with mean
+             and standard deviation estimated from historical heartbeat inter-arrival times.
+        </member>
+        <member name="M:Akka.Remote.PhiAccrualFailureDetector.#ctor(System.Double,System.Int32,System.TimeSpan,System.TimeSpan,System.TimeSpan,Akka.Remote.Clock)">
+            <summary>
+            Procedural constructor for PhiAccrualDetector
+            </summary>
+            <param name="threshold">A low threshold is prone to generate many wrong suspicions but ensures a quick detection in the event
+            of a real crash. Conversely, a high threshold generates fewer mistakes but needs more time to detect actual crashes</param>
+            <param name="maxSampleSize">Number of samples to use for calculation of mean and standard deviation of inter-arrival times.</param>
+            <param name="minStdDeviation">Minimum standard deviation to use for the normal distribution used when calculating phi.
+            Too low standard deviation might result in too much sensitivity for sudden, but normal, deviations 
+            in heartbeat inter arrival times.</param>
+            <param name="acceptableHeartbeatPause">Duration corresponding to number of potentially lost/delayed
+            heartbeats that will be accepted before considering it to be an anomaly.
+            This margin is important to be able to survive sudden, occasional, pauses in heartbeat
+            arrivals, due to for example garbage collect or network drop.</param>
+            <param name="firstHeartbeatEstimate">Bootstrap the stats with heartbeats that corresponds to
+            to this duration, with a with rather high standard deviation (since environment is unknown
+            in the beginning)</param>
+            <param name="clock">The clock, returning current time in milliseconds, but can be faked for testing
+            purposes. It is only used for measuring intervals (duration).</param>
+        </member>
+        <member name="M:Akka.Remote.PhiAccrualFailureDetector.#ctor(Akka.Configuration.Config,Akka.Event.EventStream)">
+            <summary>
+            Constructor that reads parameters from config.
+            Expecting config properties named 'threshold', 'max-sample-size',
+            'min-std-deviation', 'acceptable-heartbeat-pause', and 'heartbeat-interval'.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.PhiAccrualFailureDetector.Phi(System.Int64,System.Double,System.Double)">
+            <summary>
+             Calculation of phi, derived from the Cumulative distribution function for
+            N(mean, stdDeviation) normal distribution, given by
+            1.0 / (1.0 + math.exp(-y * (1.5976 + 0.070566 * y * y)))
+            where y = (x - mean) / standard_deviation
+            This is an approximation defined in β Mathematics Handbook (Logistic approximation).
+             Error is 0.00014 at +- 3.16
+            The calculated value is equivalent to -log10(1 - CDF(y))
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.PhiAccrualFailureDetector.FirstHeartBeat">
+            <summary>
+            Guess statistics for first heartbeat,
+            important so that connections with only one heartbeat becomes unavailable
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.PhiAccrualFailureDetector.State">
+            <summary>
+            Uses volatile memory and immutability for lockless concurrency.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.HeartbeatHistory">
+            <summary>
+            Holds the heartbeat statistics for a specific node <see cref="T:Akka.Actor.Address"/>.
+            It is capped by the number of samples specified in 'maxSampleSize.'
+            
+            The stats (mean, variance, stdDeviation) are not defined for empty
+            <see cref="T:Akka.Remote.HeartbeatHistory"/>, i.e. throws Exception
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.HeartbeatHistory.Apply(System.Int32)">
+            <summary>
+            Create an empty <see cref="T:Akka.Remote.HeartbeatHistory"/> without any history.
+            Can only be used as starting point for appending intervals.
+            The stats (mean, variance, stdDeviation) are not defined for empty
+            HeartbeatHistory and will throw DivideByZero exceptions
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteRef">
+            <summary>
+            Marker interface for Actors that are deployed in a remote scope
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteActorRef">
+            <summary>
+            Class RemoteActorRef.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.RemoteActorRef._deploy">
+            <summary>
+            The deploy
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.RemoteActorRef._parent">
+            <summary>
+            The parent
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.RemoteActorRef._props">
+            <summary>
+            The props
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.#ctor(Akka.Remote.RemoteTransport,Akka.Actor.Address,Akka.Actor.ActorPath,Akka.Actor.InternalActorRef,Akka.Actor.Props,Akka.Actor.Deploy)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Akka.Remote.RemoteActorRef"/> class.
+            </summary>
+            <param name="remote">The remote.</param>
+            <param name="localAddressToUse">The local address to use.</param>
+            <param name="path">The path.</param>
+            <param name="parent">The parent.</param>
+            <param name="props">The props.</param>
+            <param name="deploy">The deploy.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.GetChild(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Gets the child.
+            </summary>
+            <param name="name">The name.</param>
+            <returns>ActorRef.</returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.Resume(System.Exception)">
+            <summary>
+            Resumes the specified caused by failure.
+            </summary>
+            <param name="causedByFailure">The caused by failure.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.Stop">
+            <summary>
+            Stops this instance.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.Restart(System.Exception)">
+            <summary>
+            Restarts the specified cause.
+            </summary>
+            <param name="cause">The cause.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.Suspend">
+            <summary>
+            Suspends this instance.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.SendSystemMessage(Akka.Dispatch.SysMsg.SystemMessage)">
+            <summary>
+            Sends the system message.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.TellInternal(System.Object,Akka.Actor.ActorRef)">
+            <summary>
+            Tells the internal.
+            </summary>
+            <param name="message">The message.</param>
+            <param name="sender">The sender.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRef.Start">
+            <summary>
+            Starts this instance.
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.RemoteActorRef.LocalAddressToUse">
+            <summary>
+            Gets the local address to use.
+            </summary>
+            <value>The local address to use.</value>
+        </member>
+        <member name="P:Akka.Remote.RemoteActorRef.Remote">
+            <summary>
+            Gets the remote.
+            </summary>
+            <value>The remote.</value>
+        </member>
+        <member name="P:Akka.Remote.RemoteActorRef.Parent">
+            <summary>
+            Gets the parent.
+            </summary>
+            <value>The parent.</value>
+        </member>
+        <member name="P:Akka.Remote.RemoteActorRef.Provider">
+            <summary>
+            Gets the provider.
+            </summary>
+            <value>The provider.</value>
+        </member>
+        <member name="T:Akka.Remote.IDaemonMsg">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.DaemonMsgCreate">
+            <summary>
+             INTERNAL API
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.DaemonMsgCreate.#ctor(Akka.Actor.Props,Akka.Actor.Deploy,System.String,Akka.Actor.ActorRef)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Akka.Remote.DaemonMsgCreate"/> class.
+            </summary>
+            <param name="props">The props.</param>
+            <param name="deploy">The deploy.</param>
+            <param name="path">The path.</param>
+            <param name="supervisor">The supervisor.</param>
+        </member>
+        <member name="P:Akka.Remote.DaemonMsgCreate.Props">
+            <summary>
+                Gets the props.
+            </summary>
+            <value>The props.</value>
+        </member>
+        <member name="P:Akka.Remote.DaemonMsgCreate.Deploy">
+            <summary>
+                Gets the deploy.
+            </summary>
+            <value>The deploy.</value>
+        </member>
+        <member name="P:Akka.Remote.DaemonMsgCreate.Path">
+            <summary>
+                Gets the path.
+            </summary>
+            <value>The path.</value>
+        </member>
+        <member name="P:Akka.Remote.DaemonMsgCreate.Supervisor">
+            <summary>
+                Gets the supervisor.
+            </summary>
+            <value>The supervisor.</value>
+        </member>
+        <member name="T:Akka.Remote.RemoteDaemon">
+            <summary>
+             INTERNAL API
+            
+            Internal system "daemon" actor for remote internal communication.
+            
+            It acts as the brain of the remote that response to system remote messages and executes actions accordingly.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteDaemon.#ctor(Akka.Actor.Internals.ActorSystemImpl,Akka.Actor.ActorPath,Akka.Actor.InternalActorRef,Akka.Event.LoggingAdapter)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Akka.Remote.RemoteDaemon"/> class.
+            </summary>
+            <param name="system">The system.</param>
+            <param name="path">The path.</param>
+            <param name="parent">The parent.</param>
+            <param name="log"></param>
+        </member>
+        <member name="M:Akka.Remote.RemoteDaemon.OnReceive(System.Object)">
+            <summary>
+                Called when [receive].
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteDaemon.TellInternal(System.Object,Akka.Actor.ActorRef)">
+            <summary>
+                Tells the internal.
+            </summary>
+            <param name="message">The message.</param>
+            <param name="sender">The sender.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteDaemon.HandleDaemonMsgCreate(Akka.Remote.DaemonMsgCreate)">
+            <summary>
+                Handles the daemon MSG create.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Akka.Remote.RemoteDaemon.GetChild(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+                Gets the child.
+            </summary>
+            <param name="name">The name.</param>
+            <returns>ActorRef.</returns>
+        </member>
+        <member name="T:Akka.Remote.RemoteDeployer">
+            <summary>
+            INTERNAL API
+            
+            Used for deployment of actors on remote systems
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteDeployer.CheckRemoteRouterConfig(Akka.Actor.Deploy)">
+            <summary>
+            Used to determine if a given <see cref="!:deploy"/> is an instance of <see cref="T:Akka.Remote.Routing.RemoteRouterConfig"/>.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.RemoteSettings.AkkaScheme">
+            <summary>
+            Used for augmenting outbound messages with the Akka scheme
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteTransport">
+            <summary>
+            INTERNAL API.
+            
+            The remote transport is responsible for sending and receiving messages.
+            Each transport has an address, which it should provide in Serialization.CurrentTransportInformation (thread-local)
+            while serializing ActorReferences (which might also be part of messages). This address must
+            be available (i.e. fully initialized) by the time the first message is received or when the Start() method
+            returns, whichever happens first.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.Start">
+            <summary>
+            Start up the transport, i.e. enable incoming connections
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.Shutdown">
+            <summary>
+            Shuts down the remoting
+            </summary>
+            <returns>A Task that can be waited on until shutdown is complete</returns>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.Send(System.Object,Akka.Actor.ActorRef,Akka.Remote.RemoteActorRef)">
+            <summary>
+            Sends the given message to the recipient, supplying <see cref="!:sender"/> if any.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.ManagementCommand(System.Object)">
+            <summary>
+            Sends a management command to the underlying transport stack. The call returns with a Task that
+            indicates if the command was handled successfully or dropped.
+            </summary>
+            <param name="cmd">a Command message to send to the transport</param>
+            <returns>A task that indicates when the message was successfully handled or dropped</returns>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.LocalAddressForRemote(Akka.Actor.Address)">
+            <summary>
+            Resolves the correct local address to be used for contacting the given remote address
+            </summary>
+            <param name="remote">The remote address</param>
+            <returns>the local address to be used for the given remote address</returns>
+        </member>
+        <member name="M:Akka.Remote.RemoteTransport.Quarantine(Akka.Actor.Address,System.Nullable{System.Int32})">
+            <summary>
+            Marks a remote system as out of sync and prevents reconnects until the quarantine timeout elapses.
+            </summary>
+            <param name="address">Address of the remote system to be quarantined</param>
+            <param name="uid">UID of the remote system; if the uid is not defined it will not be a strong quarantine but the current
+            endpoint writer will be stopped (dropping system messages) and the address will be gated.</param>
+        </member>
+        <member name="P:Akka.Remote.RemoteTransport.Addresses">
+            <summary>
+            Addresses to be used in <see cref="T:Akka.Actor.RootActorPath"/> of refs generated for this transport.
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.RemoteTransport.DefaultAddress">
+            <summary>
+            The default transport address of the <see cref="T:Akka.Actor.ActorSystem"/>. 
+            This is the listen address of the default transport.
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.RemoteTransport.UseUntrustedMode">
+            <summary>
+            When true, some functionality will be turned off for security purposes
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.RemoteTransport.Log">
+            <summary>
+            A logger that can be used to log issues that may occur
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteTransportException">
+            <summary>
+            Represents a general failure within a <see cref="T:Akka.Remote.RemoteTransport"/>, such as
+            the inabiltiy to start, wrong configuration, etc...
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteWatcher">
+             <summary>
+             Remote nodes with actors that are watched are monitored by this actor to be able
+             to detect network failures and process crashes. <see cref="T:Akka.Remote.RemoteActorRefProvider"/>
+             intercepts Watch and Unwatch system messages and sends corresponding
+             <see cref="T:Akka.Remote.RemoteWatcher.WatchRemote"/> and <see cref="T:Akka.Remote.RemoteWatcher.UnwatchRemote"/> to this actor.
+            
+             For a new node to be watched this actor periodically sends <see cref="T:Akka.Remote.RemoteWatcher.Heartbeat"/>
+             to the peer actor on the other node, which replies with <see cref="T:Akka.Remote.RemoteWatcher.HeartbeatRsp"/>
+             message back. The failure detector on the watching side monitors these heartbeat messages.
+             If arrival of hearbeat messages stops it will be detected and this actor will publish
+             <see cref="T:Akka.Actor.AddressTerminated"/> to the <see cref="T:Akka.Event.AddressTerminatedTopic"/>.
+            
+             When all actors on a node have been unwatched it will stop sending heartbeat messages.
+            
+             For bi-directional watch between two nodes the same thing will be established in
+             both directions, but independent of each other.
+             </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteWatcher.ReWatch(Akka.Actor.Address)">
+            <summary>
+            To ensure that we receive heartbeat messages from the right actor system
+            incarnation we send Watch again for the first HeartbeatRsp (containing
+            the system UID) and if HeartbeatRsp contains a new system UID.
+            Terminated will be triggered if the watchee (including correct Actor UID)
+            does not exist.
+            </summary>
+            <param name="address"></param>
+        </member>
+        <member name="T:Akka.Remote.IPriorityMessage">
+            <summary>
+            INTERNAL API
+            Messages marked with this interface will be sent before other messages when buffering is active.
+            This means that these messages don't obey normal message ordering.
+            It is used for failure detector heartbeat messages.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.AddressUrlEncoder">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.AddressUrlEncoder.Encode(Akka.Actor.Address)">
+            <summary>
+            URL-encodes an actor <see cref="T:Akka.Actor.Address"/>. Used when generating the names
+            of some system remote actors.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RARP">
+            <summary>
+            INTERNAL API
+            
+            (used for forcing all /system level remoting actors onto a dedicated dispatcher)
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RARP.#ctor">
+            <summary>
+            Used as part of the <see cref="T:Akka.Actor.ExtensionIdProvider`1"/>
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Remoting">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemotingLifecycleEvent">
+            <summary>
+            Remote lifecycle events that are published to the <see cref="T:Akka.Event.EventStream"/> when
+            initialization / connect / disconnect events that occur during network operations
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemotingLifecycleEvent.LogLevel">
+            <summary>
+                Logs the level.
+            </summary>
+            <returns>LogLevel.</returns>
+        </member>
+        <member name="T:Akka.Remote.EventPublisher">
+            <summary>
+            INTERNAL API.
+            
+            Used for publishing remote lifecycle events to the <see cref="T:Akka.Event.EventStream"/> of the provided <see cref="T:Akka.Actor.ActorSystem"/>.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Routing.RemoteRouterConfig">
+            <summary>
+            <see cref="T:Akka.Routing.RouterConfig"/> implementation for remote deployment of 
+            routees on defined target nodes. Delegates other duties to the local <see cref="T:Akka.Routing.Pool"/>,
+            which makes it possible to mix this with built-in routers such as <see cref="T:Akka.Routing.RoundRobinGroup"/> or custom routers.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Routing.RemoteRouterConfig._nodeAddrEnumerator">
+            <summary>
+            Used for distributing routees to <see cref="F:Akka.Remote.Routing.RemoteRouterConfig.Nodes"/>. Needs to be an instance variable since <see cref="P:Akka.Remote.Routing.RemoteRouterConfig.Resizer"/> may call <see cref="M:Akka.Routing.RoutedActorCell.AddRoutees(Akka.Routing.Routee[])"/> several times.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Routing.RemoteRouterConfig._childNameCounter">
+            <summary>
+            Used for naming child routees. Needs to be an instance variable since <see cref="P:Akka.Remote.Routing.RemoteRouterConfig.Resizer"/> may call <see cref="M:Akka.Routing.RoutedActorCell.AddRoutees(Akka.Routing.Routee[])"/> several times.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.RemoteActorRefProvider">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRefProvider.LookUpRemotes(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Looks up local overrides for remote deployments
+            </summary>
+            <param name="p"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRefProvider.ResolveActorRefWithLocalAddress(System.String,Akka.Actor.Address)">
+            <summary>
+            INTERNAL API.
+            
+            Called in deserialization of incoming remote messages where the correct local address is known.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRefProvider.Quarantine(Akka.Actor.Address,System.Nullable{System.Int32})">
+            <summary>
+            Marks a remote system as out of sync and prevents reconnects until the quarantine timeout elapses.
+            </summary>
+            <param name="address">Address of the remote system to be quarantined</param>
+            <param name="uid">UID of the remote system, if the uid is not defined it will not be a strong quarantine but
+            the current endpoint writer will be stopped (dropping system messages) and the address will be gated
+            </param>
+        </member>
+        <member name="M:Akka.Remote.RemoteActorRefProvider.AfterSendSystemMessage(Akka.Dispatch.SysMsg.SystemMessage)">
+            <summary>
+                Afters the send system message.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="T:Akka.Remote.Transport.PduCodecException">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AckAndMessage">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AkkaPduCodec">
+            <summary>
+            INTERNAL API
+            
+            A Codec that is able to convert Akka PDUs from and to <see cref="T:Google.ProtocolBuffers.ByteString"/>
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.AkkaPduCodec.DecodePdu(Google.ProtocolBuffers.ByteString)">
+            <summary>
+            Return an <see cref="T:Akka.Remote.Transport.IAkkaPdu"/> instance that represents a PDU contained in the raw
+            <see cref="T:Google.ProtocolBuffers.ByteString"/>.
+            </summary>
+            <param name="raw">Encoded raw byte representation of an Akka PDU</param>
+            <returns>Class representation of a PDU that can be used in a <see cref="T:Akka.PatternMatch"/>.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AkkaPduCodec.EncodePdu(Akka.Remote.Transport.IAkkaPdu)">
+            <summary>
+            Takes an <see cref="T:Akka.Remote.Transport.IAkkaPdu"/> representation of an Akka PDU and returns its encoded form
+            as a <see cref="T:Google.ProtocolBuffers.ByteString"/>.
+            </summary>
+            <param name="pdu"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Akka.Remote.Transport.FailureInjectorProvider">
+            <summary>
+            Provider implementation for creating <see cref="T:Akka.Remote.Transport.FailureInjectorTransportAdapter"/> instances.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ITransportAdapterProvider.Create(Akka.Remote.Transport.Transport,Akka.Actor.ExtendedActorSystem)">
+            <summary>
+            Create a transport adapter that wraps the underlying transport
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.FailureInjectorException">
+            <summary>
+            The failure we're going to inject into a transport, of course :)
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AbstractTransportAdapter">
+            <summary>
+            An adapter that wraps a transport and provides interception capabilities
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.Transport.Associate(Akka.Actor.Address)">
+            <summary>
+            Asynchronously opens a logical duplex link between two <see cref="T:Akka.Remote.Transport.Transport"/> entities over a network. It could be backed
+            with a real transport layer connection (TCP), socketless connections provided over datagram protocols (UDP), and more.
+            
+            This call returns a Task of an <see cref="T:Akka.Remote.Transport.AssociationHandle"/>. A faulted Task indicates that the association attempt was
+            unsuccessful. If the exception is <see cref="T:Akka.Remote.Transport.InvalidAssociationException"/> then the association request was invalid and it's
+            impossible to recover.
+            </summary>
+            <param name="remoteAddress">The address of the remote transport entity.</param>
+            <returns>A status representing the failure or success containing an <see cref="T:Akka.Remote.Transport.AssociationHandle"/>.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.Transport.Shutdown">
+            <summary>
+            Shuts down the transport layer and releases all of the corresponding resources. Shutdown is asynchronous and is signaled
+            by the result of the returned Task.
+            
+            The transport SHOULD try flushing pending writes before becoming completely closed.
+            </summary>
+            <returns>Task signaling the completion of the shutdown.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.Transport.ManagementCommand(System.Object)">
+            <summary>
+            This method allows upper layers to send management commands to the transport. It is the responsibility of the sender to
+            send appropriate commands to different transport implementations. Unknown commands will be ignored.
+            </summary>
+            <param name="message">Command message to send to the transport.</param>
+            <returns>A Task that succeeds when the command was handled or dropped.</returns>
+        </member>
+        <member name="T:Akka.Remote.Transport.IAssociationEventListener">
+            <summary>
+            Listener interface for any object that can handle <see cref="T:Akka.Remote.Transport.IAssociationEvent"/> messages.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.FailureInjectorHandle">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AssociationHandle">
+            <summary>
+            A Service Provider Interface (SPI) layer for abstracting over logical links (associations) created by a <see cref="T:Akka.Remote.Transport.Transport"/>.
+            Handles are responsible for providing an API for sending and receiving from the underlying channel.
+            
+            To register a listener for processing incoming payload data, the listener must be registered by completing the Task returned by
+            <see cref="P:Akka.Remote.Transport.AssociationHandle.ReadHandlerSource"/>. Incoming data is not processed until this registration takes place.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationHandle.Write(Google.ProtocolBuffers.ByteString)">
+            <summary>
+            Asynchronously sends the specified <see cref="!:payload"/> to the remote endpoint. This method's implementation MUST be thread-safe
+            as it might be called from different threads. This method MUST NOT block.
+            
+            Writes guarantee ordering of messages, but not their reception. The call to write returns with a boolean indicating if the
+            channel was ready for writes or not. A return value of false indicates that the channel is not yet ready for deliver 
+            (e.g.: the write buffer is full)and the sender  needs to wait until the channel becomes ready again.
+            
+            Returning false also means that the current write was dropped (this MUST be guaranteed to ensure duplication-free delivery).
+            </summary>
+            <param name="payload">The payload to be delivered to the remote endpoint.</param>
+            <returns>
+            Bool indicating the availability of the association for subsequent writes.
+            </returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationHandle.Disassociate">
+            <summary>
+            Closes the underlying transport link, if needed. Some transports might not need an explicit teardown (UDP) and some
+            transports may not support it. Remote endpoint of the channel or connection MAY be notified, but this is not
+            guaranteed.
+            
+            The transport that provides the handle MUST guarantee that <see cref="M:Akka.Remote.Transport.AssociationHandle.Disassociate"/> could be called arbitrarily many times.
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.AssociationHandle.LocalAddress">
+            <summary>
+            Address of the local endpoint
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.AssociationHandle.RemoteAddress">
+            <summary>
+            Address of the remote endpoint
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.AssociationHandle.ReadHandlerSource">
+            <summary>
+            The TaskCompletionSource returned by this call must be completed with an <see cref="T:Akka.Remote.Transport.IHandleEventListener"/> to
+            register a listener responsible for handling the incoming payload. Until the listener is not registered the
+            transport SHOULD buffer incoming messages.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.IHandleEventListener">
+            <summary>
+            An interface that needs to be implemented by a user of an <see cref="T:Akka.Remote.Transport.AssociationHandle"/>
+            in order to listen to association events
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.HeliosHelpers">
+            <summary>
+            INTERNAL API
+            
+            Abstract base class for adapting Helios <see cref="T:Helios.Net.IConnection"/> objects to work with Akka.Remote.Transports
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.Helios.HeliosHelpers.BindEvents(Helios.Net.IConnection)">
+            <summary>
+            Binds the events for any incoming TCP activity
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.Helios.HeliosHelpers.ToData(Google.ProtocolBuffers.ByteString,Akka.Actor.Address)">
+            <summary>
+            Converts a <see cref="T:Google.ProtocolBuffers.ByteString"/> structure into a Helios <see cref="T:Helios.Net.NetworkData"/> structure
+            </summary>
+            <param name="byteString">The data to send over the network</param>
+            <param name="address">The address that we received data from / are sending data to</param>
+            <returns>a new <see cref="T:Helios.Net.NetworkData"/> struct</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.Helios.HeliosHelpers.FromData(Helios.Net.NetworkData)">
+            <summary>
+            Converts a <see cref="T:Helios.Net.NetworkData"/> structure into a <see cref="T:Google.ProtocolBuffers.ByteString"/>
+            </summary>
+            <param name="data">The data we received from the network</param>
+            <returns>A populated <see cref="T:Google.ProtocolBuffers.ByteString"/> instance</returns>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.ChannelLocalActor">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.TcpHandlers">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.TcpAssociationHandle">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.HeliosTransport">
+            <summary>
+            Abstract base class for HeliosTransport - has separate child implementations for TCP / UDP respectively
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.Helios.HeliosTransport.ConnectionGroup">
+            <summary>
+            maintains a list of all established connections, so we can close them easily
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.Helios.HeliosTransport.Executor">
+            <summary>
+            the internal executor used
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.Helios.HeliosTransport.ClientFactory">
+            <summary>
+            Internal factory used for creating new outbound connection transports
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.Helios.HeliosTransport.ServerFactory">
+            <summary>
+            Internal factory used for creating inbound connection listeners
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.SystemNanoTime">
+            <summary>
+            INTERNAL API - used to get precise elapsed time.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.SystemNanoTime.StopWatch">
+            <summary>
+            Need to have time that is much more precise than <see cref="P:System.DateTime.Now"/> when throttling sends
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.SystemNanoTime.ToNanos(System.Int64)">
+            <summary>
+            Ticks represent 100 nanos. https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
+            
+            This extension method converts a Ticks value to nano seconds.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.SystemNanoTime.ToTicks(System.Int64)">
+            <summary>
+            Ticks represent 100 nanos. https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
+            
+            This extension method converts a nano seconds value to Ticks.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ThrottlerProvider">
+            <summary>
+            Used to provide throttling controls for remote <see cref="T:Akka.Remote.Transport.Transport"/> instances.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ForceDisassociate">
+            <summary>
+            Management command to force disassociation of an address
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ForceDisassociateExplicitly">
+            <summary>
+            Management command to force disassociation of an address with an explicit error.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ForceDisassociateAck">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ThrottlerManager">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ActorTransportAdapterManager.DelayedEvents">
+            <summary>
+            Lightweight Stash implementation
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ActorTransportAdapterManager.Ready(System.Object)">
+            <summary>
+            Method to be implemented for child classes - processes messages once the transport is ready to send / receive
+            </summary>
+            <param name="message"></param>
+        </member>
+        <member name="T:Akka.Remote.Transport.ThrottlerHandle">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ThrottledAssociation">
+            <summary>
+            INTERNAL API
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.Codec">
+            <summary>
+            Used for decoding certain types of throttled messages on-the-fly
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ThrottledAssociation.PeekOrigin(Google.ProtocolBuffers.ByteString)">
+            <summary>
+            This method captures ASSOCIATE packets and extracts the origin <see cref="T:Akka.Actor.Address"/>.
+            </summary>
+            <param name="b">Inbound <see cref="T:Google.ProtocolBuffers.ByteString"/> received from network.</param>
+            <returns></returns>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.WaitExposedHandle">
+            <summary>
+            Waiting for the <see cref="T:Akka.Remote.Transport.ThrottlerHandle"/> coupled with the throttler actor.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.WaitOrigin">
+            <summary>
+            Waiting for the ASSOCIATE message that contains the origin address of the remote endpoint
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.WaitMode">
+            <summary>
+            After origin is known and a Checkin message is sent to the manager, we must wait for the <see cref="T:Akka.Remote.Transport.ThrottleMode"/>
+            for the address
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.WaitUpstreamListener">
+            <summary>
+            After all information is known, the throttler must wait for the upstream listener to be able to forward messages
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.WaitModeAndUpstreamListener">
+            <summary>
+            Waiting for the tuple containing the upstream listener and the <see cref="T:Akka.Remote.Transport.ThrottleMode"/>
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.ThrottledAssociation.ThrottlerState.Throttling">
+            <summary>
+            Fully initialized state
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.TransportAdapters">
+            <summary>
+            INTERNAL API
+            
+            Extension that allows us to look up transport adapters based upon the settings provided inside <see cref="T:Akka.Remote.RemoteSettings"/>
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.TransportOperation">
+            <summary>
+            Marker interface for all transport operations
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AkkaProtocolTransport">
+            <summary>
+            Implementation of the Akka protocol as a (logical) <see cref="T:Akka.Remote.Transport.Transport"/> that wraps an underlying (physical) <see cref="T:Akka.Remote.Transport.Transport"/> instance.
+            
+            Features provided by this transport include:
+             - Soft-state associations via the use of heartbeats and failure detectors
+             - Transparent origin address handling
+            
+            This transport is loaded automatically by <see cref="T:Akka.Remote.Remoting"/> and will wrap all dynamically loaded transports.
+            </summary>
+        </member>
+        <member name="F:Akka.Remote.Transport.AkkaProtocolManager._supervisor">
+            <summary>
+            The <see cref="T:Akka.Remote.Transport.AkkaProtocolTransport"/> does not handle recovery of associations, this task is implemented
+            in the remoting itself. Hence the strategy <see cref="F:Akka.Actor.Directive.Stop"/>.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.OutboundUnassociated">
+            <summary>
+            Neither the underlying nor the provided transport is associated
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.OutboundUnderlyingAssociated">
+            <summary>
+            The underlying transport is associated, but the handshake of the Akka protocol is not yet finished
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.InboundUnassociated">
+            <summary>
+            The underlying transport is associated, but the handshake of the akka protocol is not yet finished
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.AssociatedWaitHandler">
+            <summary>
+            The underlying transport is associated, but the handler for the handle has not been provided yet
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ListenerReady">
+            <summary>
+            System ready!
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.TimeoutReason">
+            <summary>
+            Message sent when a <see cref="P:Akka.Remote.FailureDetector.IsAvailable"/> returns false, signaling a transport timeout.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ProtocolStateActor.#ctor(Akka.Remote.Transport.HandshakeInfo,Akka.Actor.Address,System.Threading.Tasks.TaskCompletionSource{Akka.Remote.Transport.AssociationHandle},Akka.Remote.Transport.Transport,Akka.Remote.AkkaProtocolSettings,Akka.Remote.Transport.AkkaPduCodec,Akka.Remote.FailureDetector,System.Nullable{System.Int32})">
+            <summary>
+            Constructor for outbound ProtocolStateActors
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ProtocolStateActor.#ctor(Akka.Remote.Transport.HandshakeInfo,Akka.Remote.Transport.AssociationHandle,Akka.Remote.Transport.IAssociationEventListener,Akka.Remote.AkkaProtocolSettings,Akka.Remote.Transport.AkkaPduCodec,Akka.Remote.FailureDetector)">
+            <summary>
+            Constructor for inbound ProtocolStateActors
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ProtocolStateActor.#ctor(Akka.Remote.Transport.InitialProtocolStateData,Akka.Remote.Transport.HandshakeInfo,Akka.Remote.AkkaProtocolSettings,Akka.Remote.Transport.AkkaPduCodec,Akka.Remote.FailureDetector,System.Nullable{System.Int32})">
+            <summary>
+            Common constructor used by both the outbound and the inbound cases
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.ProtocolStateActor.PublishError(Akka.Remote.Transport.UnderlyingTransportError)">
+            <summary>
+            Publishes a transport error to the message stream
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.Helios.HeliosTransportSettings.Hostname">
+            <summary>
+            The hostname that this server binds to
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.Helios.HeliosTransportSettings.PublicHostname">
+            <summary>
+            If different from <see cref="P:Akka.Remote.Transport.Helios.HeliosTransportSettings.Hostname"/>, this is the public "address" that is bound to the <see cref="T:Akka.Actor.ActorSystem"/>,
+            whereas <see cref="P:Akka.Remote.Transport.Helios.HeliosTransportSettings.Hostname"/> becomes the physical address that the low-level socket connects to.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.ServerHandler">
+            <summary>
+            INTERNAL API
+            
+            Used for accepting inbound connections
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Helios.ClientHandler">
+            <summary>
+            INTERNAL API
+            
+            Used for creating outbound connections
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.TestTransport">
+            <summary>
+            Transport implementation used for testing.
+            
+            The TestTransport is basically shared memory between actor systems. It can be programmed to emulate
+            different failure modes of a <see cref="T:Akka.Remote.Transport.Transport"/> implementation. TestTransport keeps a log of the activities
+            it was requested to do. This class is not optimized for performance and MUST not be used in production systems.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.Activity">
+            <summary>
+            Base trait for remote activities that are logged by <see cref="T:Akka.Remote.Transport.TestTransport"/>
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.SwitchableLoggedBehavior`2">
+            <summary>
+            Test utility to make behavior of functions that return some Task controllable form tests.
+            
+            This tool is able to override default behavior with any generic behavior, including failure, and exposes
+            control to the timing of completion of the associated Task.
+            
+            The utility is implemented as a stack of behaviors, where the behavior on the top of the stack represents the
+            currently active behavior. The bottom of the stack alway contains the <see cref="P:Akka.Remote.Transport.SwitchableLoggedBehavior`2.DefaultBehavior"/> which
+            can not be popped out.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.SwitchableLoggedBehavior`2.Push(System.Func{`0,System.Threading.Tasks.Task{`1}})">
+            <summary>
+            Changes the current behavior to the provided one
+            </summary>
+            <param name="behavior">Function that takes a parameter type <typeparam name="TIn"/> and returns a Task<typeparam name="TOut"></typeparam></param>
+        </member>
+        <member name="M:Akka.Remote.Transport.SwitchableLoggedBehavior`2.PushConstant(`1)">
+            <summary>
+            Changes the behavior to return a completed Task with the given constant value.
+            </summary>
+            <param name="result">The constant the Task will be completed with.</param>
+        </member>
+        <member name="M:Akka.Remote.Transport.SwitchableLoggedBehavior`2.PushError(System.Exception)">
+            <summary>
+            Changes the behavior to return a faulted Task with the given exception
+            </summary>
+            <param name="e">The exception responsible for faulting this task</param>
+        </member>
+        <member name="M:Akka.Remote.Transport.SwitchableLoggedBehavior`2.PushDelayed">
+            <summary>
+            Enables control of the completion of the previously active behavior. Wraps the previous behavior in
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Akka.Remote.Transport.AssociationRegistry">
+            <summary>
+            Shared state among <see cref="T:Akka.Remote.Transport.TestTransport"/> instances. Coordinates the transports and the means of
+            communication between them.
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.RemoteListenerRelativeTo(Akka.Remote.Transport.TestAssociationHandle,System.Tuple{Akka.Remote.Transport.IHandleEventListener,Akka.Remote.Transport.IHandleEventListener})">
+            <summary>
+            Returns the remote endpoint for a pair of endpoints relative to the owner of the supplied <see cref="T:Akka.Remote.Transport.TestAssociationHandle"/>.
+            </summary>
+            <param name="handle">The reference handle to determine the remote endpoint relative to</param>
+            <param name="listenerPair">pair of listeners in initiator, receiver order</param>
+            <returns></returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.LogActivity(Akka.Remote.Transport.Activity)">
+            <summary>
+            Logs a transport activity
+            </summary>
+            <param name="activity">The activity to be logged</param>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.LogSnapshot">
+            <summary>
+            Gets a snapshot of the current transport activity log
+            </summary>
+            <returns>A IList of activities ordered left-to-right in chronological order (element[0] is the oldest)</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.ClearLog">
+            <summary>
+            Clears the current contents of the log
+            </summary>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.RegisterTransport(Akka.Remote.Transport.TestTransport,System.Threading.Tasks.Task{Akka.Remote.Transport.IAssociationEventListener})">
+            <summary>
+            Records a mapping between an address and the corresponding (transport, associationEventListener) pair.
+            </summary>
+            <param name="transport">The transport that is to be registered. The address of this transport will be used as a key.</param>
+            <param name="associationEventListenerTask">The Task that will be completed with the listener that will handle the events for the given transport.</param>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.TransportsReady(Akka.Actor.Address[])">
+            <summary>
+            Indicates if all given transports were successfully registered. No associations can be established between
+            transports that are not yet registered.
+            </summary>
+            <param name="addresses">The listen addresses of transports that participate in the test case.</param>
+            <returns>True if all transports are successfully registered.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.RegisterListenerPair(System.Tuple{Akka.Actor.Address,Akka.Actor.Address},System.Tuple{Akka.Remote.Transport.IHandleEventListener,Akka.Remote.Transport.IHandleEventListener})">
+            <summary>
+            Registers two event listeners corresponding to the two endpoints of an association.
+            </summary>
+            <param name="key">Ordered pair of addresses representing an association. First element must be the address of the initiator.</param>
+            <param name="listeners">A pair of listeners that will be responsible for handling the events of the two endpoints
+            of the association. Elements in the Tuple must be in the same order as the addresses in <see cref="!:key"/>.</param>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.DeregisterAssociation(System.Tuple{Akka.Actor.Address,Akka.Actor.Address})">
+            <summary>
+            Removes an association.
+            </summary>
+            <param name="key">Ordered pair of addresses representing an association. First element must be the address of the initiator.</param>
+            <returns>The original entries, or null if the key wasn't found in the table.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.ExistsAssociation(Akka.Actor.Address,Akka.Actor.Address)">
+            <summary>
+            Tests if an association was registered.
+            </summary>
+            <param name="initiatorAddress">The initiator of the association.</param>
+            <param name="remoteAddress">The other address of the association.</param>
+            <returns>True if there is an association for the given address.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.GetRemoteReadHandlerFor(Akka.Remote.Transport.TestAssociationHandle)">
+            <summary>
+            Returns the event handler corresponding to the remote endpoint of the given local handle. In other words
+            it returns the listener that will receive <see cref="T:Akka.Remote.Transport.InboundPayload"/> events when <seealso cref="M:Akka.Remote.Transport.AssociationHandle.Write(Google.ProtocolBuffers.ByteString)"/> is called.
+            </summary>
+            <param name="localHandle">The handle</param>
+            <returns>The option that contains the listener if it exists.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.TransportFor(Akka.Actor.Address)">
+            <summary>
+            Returns the transport bound to the given address.
+            </summary>
+            <param name="address">The address bound to the transport.</param>
+            <returns>The transport, if it exists.</returns>
+        </member>
+        <member name="M:Akka.Remote.Transport.AssociationRegistry.Reset">
+            <summary>
+            Clears the state of the entire registry.
+            
+            <remarks>
+            This method is not atomic and does not use a critical section when clearing transports, listeners, and logs.
+            </remarks>
+            </summary>
+        </member>
+        <member name="P:Akka.Remote.Transport.TestAssociationHandle.Key">
+            <summary>
+            Key used in <see cref="T:Akka.Remote.Transport.AssociationRegistry"/> to identify associations. Contains an ordered Tuple of addresses,
+            where the first address is always the initiator of the association.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.InvalidAssociationException">
+            <summary>
+            Indicates that the association setup request is invalid and it is impossible to recover (malformed IP address, unknown hostname, etc...)
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.IHandleEvent">
+            <summary>
+            Marker interface for events that the registered listener for a <see cref="T:Akka.Remote.Transport.AssociationHandle"/> might receive.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.InboundPayload">
+            <summary>
+            Message sent to the listener registered to an association (via the TaskCompletionSource returned by <see cref="P:Akka.Remote.Transport.AssociationHandle.ReadHandlerSource"/>)
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.UnderlyingTransportError">
+            <summary>
+            The underlying transport reported a non-fatal error
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.DisassociateInfo">
+            <summary>
+            Supertype of possible disassociation reasons
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ActorHandleEventListener">
+            <summary>
+            Converts an <see cref="T:Akka.Actor.ActorRef"/> instance into an <see cref="T:Akka.Remote.Transport.IHandleEventListener"/>, so <see cref="T:Akka.Remote.Transport.IHandleEvent"/> messages
+            can be passed directly to the Actor.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.IAssociationEvent">
+            <summary>
+            Marker type for whenever new actors / endpoints are associated with this <see cref="T:Akka.Actor.ActorSystem"/> via remoting.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.InboundAssociation">
+            <summary>
+            Message sent to <see cref="T:Akka.Remote.Transport.IAssociationEventListener"/> registered to a transport (via the TaskCompletionSource returned by <see cref="M:Akka.Remote.Transport.Transport.Listen"/>)
+            when the inbound association request arrives.
+            </summary>
+        </member>
+        <member name="T:Akka.Remote.Transport.ActorAssociationEventListener">
+            <summary>
+            Converts an <see cref="T:Akka.Actor.ActorRef"/> instance into an <see cref="T:Akka.Remote.Transport.IAssociationEventListener"/>, so <see cref="T:Akka.Remote.Transport.IAssociationEvent"/> messages
+            can be passed directly to the Actor.
+            </summary>
+        </member>
+    </members>
+</doc>

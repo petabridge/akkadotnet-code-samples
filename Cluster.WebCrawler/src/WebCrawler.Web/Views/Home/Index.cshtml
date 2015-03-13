@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Crawler Status";
+}
+
+<div class="jumbotron">
+    <h1>Web Crawler of Doom</h1>
+    <p class="lead">Akka.NET on Gorilla Steroids</p>
+    <p><a href="http://getakka.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+    <div class="input-group">
+        <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="btnQuery">Query</button>
+        </span>
+        <input type="text" class="form-control" placeholder="Crawl domain..." id="crawlDomain">
+    </div><!-- /input-group -->
+    <div class="well" id="output">
+        <!-- ko foreach: messages -->
+        <p data-bind="text:message"></p>
+        <!-- /ko -->
+    </div>
+
+</div>
+
+@section Scripts{
+    @Scripts.Render("~/bundles/signalr")
+    <script src="~/signalr/hubs"></script>
+    <script>
+        function StreamViewModel() {
+            var self = this;
+
+            self.messages = ko.observableArray([]);
+
+            self.addMessage = function(message) {
+                self.messages.unshift({ message: message });
+            };
+        }
+
+        var stream = new StreamViewModel();
+        ko.applyBindings(stream);
+
+        $(function() {
+            // Reference the auto-generated proxy for the hub.
+            var chat = $.connection.crawlHub;
+            // Create a function that the hub can call back to display messages.
+            chat.client.writeStatus = function(message) {
+                stream.addMessage(message);
+            };
+
+
+            $.connection.hub.start().done(function() {
+                $('#btnQuery').click(function() {
+                    //call the StartCrawl method on the hub
+                    chat.server.startCrawl($('#crawlDomain').val());
+
+                    $('#crawlDomain').val('').focus();
+                });
+            });
+        });
+    </script>
+
+}
