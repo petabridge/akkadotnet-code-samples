@@ -1,4 +1,4 @@
-# ASP.NET and Windows Serivce Microservices with Akka.Cluster
+# ASP.NET and Windows Service Microservices with Akka.Cluster
 
 The goal of this sample is to show you how to use `Akka.Cluster` to form resilient systems that can scale out across multiple processes or machines without complicated user-defined code or expensive tools.
 
