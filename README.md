@@ -10,7 +10,7 @@ That's the goal of this repository - to provide a small number of *exceptionally
 
 **[Doing Asynchronous Operations inside Actors with PipeTo](/PipeTo/)** - how to use `Task<T>` and `async` operations inside your actors using the `PipeTo` pattern in Akka.NET.
 
-**[ASP.NET and Windows Serivce Microservices with Akka.Cluster](Cluster.WebCrawler)** - build an elastically scalable web-crawler using Akka.Cluster in Windows Services and ASP.NET MVC.
+**[ASP.NET and Windows Service Microservices with Akka.Cluster](Cluster.WebCrawler)** - build an elastically scalable web-crawler using Akka.Cluster in Windows Services and ASP.NET MVC.
 
 ## Contributing
 
