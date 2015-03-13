@@ -41,11 +41,55 @@ Here's an example of the service in-action, crawling MSDN and Rotten Tomatoes si
 
 In this example you'll be exposed to the following concepts:
 
-1. **Clustering** - a distributed programming technique that uses peer-to-peer networking, gossip protocols, addressing systems, and other tools to allow multiple processes and machines to work cooperatively together in an elastic fashion.  
+1. **Akka.NET Remoting** - how remote addressing, actor deployment, and message delivery works in Akka.NET.
 2. **Microservices** - the software architecture style used to organize the WebCrawler sample into dedicated services for maximum resiliency and parallelism.
-3. **Akka.NET Remoting** - how remote addressing, actor deployment, and message delivery works in Akka.NET.
+3. **Clustering** - a distributed programming technique that uses peer-to-peer networking, gossip protocols, addressing systems, and other tools to allow multiple processes and machines to work cooperatively together in an elastic fashion.  
 4. **ASP.NET & Windows Services Integration** - how to integrate Akka.NET into the most commonly deployed types of networked applications in the .NET universe.
 
+### Akka.NET Remoting
+Akka.NET's true power is unleashed when you start using `Akka.Remote` and the remoting capabilities it brings to Akka.NET.
+
+#### Actors can be "deployed" anywhere
+One of the important concepts behind Akka.NET is the notion of actor "deployments" - when you create an actor it can be deployed in any one of the following three modes:
+
+1. **Local** deployments - this actor will be deployed on the machine calling `Context.ActorOf`.
+2. **Remote** deployments - this actor will be deployed on a specific remote machine on the network, identified by its `Address`.
+3. **Cluster** deployments - when the `Akka.Cluster` module is running, an actor can be deployed on *any* of the nodes that satisfy the cluster deployment criteria.
+
+Here's an example of what a remote deployment actually looks like:
+
+```csharp
+ var remoteActorRef = myActorSystem.ActorOf(Props.Create<Echo>()
+                .WithDeploy(new Deploy(
+				new RemoteScope(new Address("akka.tcp", "mySys", "localhost", 4033))), "remote-actor");
+/*
+ * If an actor system can be found at `akka.tcp://mySys@localhost:4033` 
+ * then a new actor will be deployed at `akka.tcp://mySys@localhost:4033/user/remote-actor`.
+ */
+```
+
+**When this code is run, `ActorRef` is still returned on the actor system who deployed onto `akka.tcp://mySys@localhost:4033`.** And that `ActorRef` can be passed around locally anywhere within that process and all messages sent to it will be delivered remotely to the actual actor instance running on `akka.tcp://mySys@localhost:4033` .
+
+#### An `ActorRef` is just an `ActorRef`, regardless of how it was deployed
+
+[Because Akka.NET `ActorRef`s have location transparency](http://petabridge.com/blog/akkadotnet-what-is-an-actor/), one of the amazing benefits of this is that when you write your Akka.NET actor code it will work seamlessly for all actors regardless of how they're deployed.
+
+This means that [the following code from the `[Crawler]` service](src/WebCrawler.Service/Actors/IO/DownloadCoordinator.cs) will work equally well with actors running on remote systems or locally within the same process:
+
+```csharp
+// commander and downloadstracker can both be running on different systems
+public DownloadCoordinator(CrawlJob job, ActorRef commander, ActorRef downloadsTracker, long maxConcurrentDownloads)
+    {
+        Job = job;
+        DownloadsTracker = downloadsTracker;
+        MaxConcurrentDownloads = maxConcurrentDownloads;
+        Commander = commander;
+        Stats = new CrawlJobStats(Job);
+        Receiving();
+    }
+```
+
+Location transparency and the ability to send messages to any actor of regardless of where it's actually deployed is how Akka.NET is able to achieve elastic scale-out so seamlessly - you, as the application developer, simply don't need to care how an actor was deployed.
 
 ### Microservice Architecture
 
@@ -55,5 +99,223 @@ In this example you'll be exposed to the following concepts:
 
 Microservices aren't so different from traditional [Service Oriented Architecture (SOA)](https://msdn.microsoft.com/en-us/library/aa480021.aspx) approaches to software design, the key difference being that microservices break up applications into physically separate services running in their own processes and (often) hardware. At Petabridge we describe Microservices as "SOA 2.0."
 
-Akka.Cluster makes it trivially easy to build apps that leverage a variety of microservices, and here's how:
+For the purposes of this WebCrawler sample, here's how our application is broken apart to into different services:
 
+![WebCrawler Microservices architecture](diagrams/crawler-microservices.png)
+
+> **NOTE**: We're going to start using the word "role" interchangeably with "service" going forward - this is because Akka.Cluster "roles" are how you describe different services within an Akka.Cluster. Roles are effectively microservices.
+
+#### `[Lighthouse]` Role
+[Lighthouse is a piece of free open-source software for Akka.Cluster service discovery](https://github.com/petabridge/lighthouse "Lighthouse - Service Discovery for Akka.NET"), developed by Petabridge.
+
+It has two jobs:
+
+1. Act as the dedicated seed node for all `[Crawler]` and `[Web]` roles when they attempt to join the Akka.Cluster and
+2. Broadcast the availability of new nodes to all `[Crawler]` and `[Web]` instances so they can leverage the newly available nodes for work.
+
+There can be multiple `[Lighthouse]` roles running in parallel, but all of their addresses need to be written into the `akka.cluster` HOCON configuration section of each `[Crawler]` and `[Web]` role in order to use Lighthouse's capabilities effectively.
+
+#### `[Web]` Role
+The `[Web]` role corresponds to everything inside the [WebCrawler.Web project](src/WebCrawler.Web) - it's an ASP.NET + SignalR application that uses a lightweight `ActorSystem` to communicate with all `[Crawler]` roles. It's meant to act as the user-interface to the WebCrawler.
+
+When a job is received by a `[Crawler]` and is able to be processed, the `[Crawler]` nodes will begin publishing their messages back to the `SignalRActor` (**[source](src/WebCrawler.Web/Actors/SignalRActor.cs)**) that wraps the SignalR hub used to display the results on the page.
+
+There can be more than one instance of the `[Web]` role, although in order to receive updates on an in-progress crawl job it will need to resubmit the `CrawlJob` to one of the `[Crawler]` instances.
+
+#### `[Crawler]` Role
+The workhorse of the WebCrawler sample, the `[Crawler]` role is a Windows Service built using [Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services") that asynchronously downloads and parses HTML documents during a `CrawlJob` per the process flow defined earlier.
+
+The `[Crawler]` makes note of which actor requested the job originally (in this case, a `[Web]` role's `SignalRActor`) and uses pub / sub to broadcast incremental updates it receives from its `DownloadCoordinator` actors.
+
+One really interesting thing about the `[Crawler]` node is that it looks for and communicates almost exclusively with other `[Crawler]` nodes. If a new `[Crawler]` node joins in the middle of a large `CrawlJob`, the `[Crawler]` node responsible for initially starting the job will automatically deploy worker actor hierarchies onto the new node and begin giving it work to do.
+
+Additionally, the `[Crawler]` node also has some transactional qualities - there can only be:
+1. One instance of each `CrawlJob` running throughout the cluster at a time, i.e. there can't be two parallel crawls of MSDN.com at a time, but multiple domains can be crawled at once. And
+2. There can only be one `DownloadsTracker` ([source](src/WebCrawler.Service/Actors/Tracking/DownloadsTracker.cs)) actor per `CrawlJob`, because figuring out which documents are new and which ones aren't requires a strong level of consistency.
+
+For each of these scenarios the `[Crawler]` node must effectively execute a distributed transaction, where all nodes agree on the answer to a question like "is there a job currently running for this domain?"
+
+### Akka.Cluster and Clustering
+Clustering is an ambiguous term that means different things to different systems, but here's what we mean when we refer to a cluster:
+
+![WebCrawler Akka.Cluster network topology](diagrams/crawler-cluster-topology.png)
+
+Every node has a distinct address every node is connected to every other node. We can get away with this because we're using [inexpensive Helios `IConnection` objects](https://github.com/helios-io/helios "Helios - reactive socket middleware for .NET") to run the underlying TCP / UDP transport that Akka.Remoting uses, and just like actors, Helios connections are lazy too.
+
+Clustering is essentially peer-to-peer networking between servers - there are no load-balancers or client-server semantics. This is a radically different way of thinking about your networked applications than just throwing stateless ASP.NET applications under a load-balancer, but it also allows you to do much more.
+
+#### How Akka.Cluster Works
+Akka.Cluster can't magically connect all of your nodes together - there has to be a process of node discovery and "joining" the cluster.
+
+![Initial Akka.Cluster state](diagrams/akka-cluster-concept.png)
+
+There are two types of nodes in an Akka.Cluster:
+* __Seed nodes__, which have well-known addresses that are described inside your `Config`
+* __Non-seed nodes__, which are dynamically deployed nodes that join the cluster by establishing contact with a seed nodes.
+
+The majority of your nodes will typically be __non-seed nodes__ for production clusters - this is because they're easier to manage from a configuration standpoint and it also requires fewer static IP addresses and deployment overhead. 
+
+So here's why seed nodes are important:
+
+![Akka.Cluster Joining State](diagrams/akka-cluster-joining.png)
+
+Seed nodes are used to start the conversation (known as _gossip_) between all nodes - every node has to contact them in order to join the cluster. You can have a cluster with a single seed node - if it goes down then you can't deploy any new nodes without changing your configuration, which is why you typically see 2-3 seed nodes in live deployments.
+
+For this example, I gave all of the nodes different deployment configurations just to show how establishing a cluster works - in real-life these nodes would all be deployed with the same configuration usually.
+
+![Akka.Cluster leader election](diagrams/akka-cluster-leader.png)
+
+Once nodes establish connectivity to each other, they begin exchanging information using what's known as a [Gossip protocol](http://en.wikipedia.org/wiki/Gossip_protocol) - regularly delivered peer-to-peer messages that contain time-versioned information about the status of all known peers in the network. Each of these gossip messages includes a version number expressed as a [Vector clock](http://en.wikipedia.org/wiki/Vector_clock) which gives each node the ability to determine which information arriving from the network is actually more recent than what the node's most recent gossip state already contains.
+
+After a period of initial gossip, the nodes have begun to establish connectivity with each other and know now about at least 1 neighbor each. In addition, a `leader` node has been elected for every role in the cluster (more on that later.) The leader's job is to dictate which nodes are up and which nodes are down, based on the consensus of gossip information from the other peers.
+
+![Akka.Cluster gossip spreads awareness of nodes to other nodes](diagrams/akka-cluster-ring.png)
+
+Once the gossip has had a chance to propagate across the cluster, all nodes are now aware of each other and the ring of nodes are all considered `Up` - therefore you can start doing things such as cluster-aware routers.
+
+![Akka.Cluster node dies](diagrams/akka-cluster-leaves.png)
+
+Whoops! Looks like a node just died! At least two of the other nodes in the cluster (usually nodes that _are not_ adjacent to it) noticed either because (1) C started missing cluster heartbeats or (2) the TCP connection to C died. The remaining nodes will gossip this information and mark the node as unreachable for now and will eventually prune it from the set of known nodes if the node doesn't return after a period of time.
+
+If the node that died was the leader, a new leader would be elected.
+
+![Akka.Cluster reforms](diagrams/akka-cluster-reestablish.png)
+
+And thus the cluster's network topology changes. New nodes may join later and other nodes may still leave, but the gossip protocol and interconnectivity between peers is what keeps the wheels turning no matter how things change.
+
+#### Akka.Cluster Roles
+In addition to being able to gossip about the availability or lack thereof for each individual node, nodes are also able to pass around one very important piece of meta-data: the "roles" that they fulfill in a cluster.
+
+You can declare a specific Akka.Cluster application as a member of the "crawler" role via configuration, like this:
+
+```xml
+akka {
+    actor {
+      provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+     
+    remote {
+      log-remote-lifecycle-events = DEBUG
+      log-received-messages = on
+      
+      helios.tcp {
+        transport-class = "Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote"
+            applied-adapters = []
+            transport-protocol = tcp
+        #will be populated with a dynamic host-name at runtime if left uncommented
+        #public-hostname = "POPULATE STATIC IP HERE"
+        hostname = "127.0.0.1"
+        port = 4054
+      }
+    }            
+
+    cluster {
+	  #manually populate other seed nodes here, i.e. "akka.tcp://lighthouse@127.0.0.1:4053"
+      seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"] 
+      roles = [crawler]
+    }
+  }
+```
+
+A role is literally a string that gets attached to each node inside the gossip, and roles are used by the Akka.NET developer to know which code is running where.
+
+A node can also have multiple roles if needed.
+
+#### Akka.Cluster inside WebCrawler
+Akka.Cluster is a headtrip if you've never used Cassandra, Riak, or any other technologies that use this type of networking - don't sweat it.
+
+In terms of how we actually use Akka.Cluster inside the WebCrawler sample, the answer is that it's done entirely through configuration:
+
+```xml
+akka {
+    actor {
+      provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+      deployment {
+        /api/broadcaster {
+          router = broadcast-group
+          routees.paths = ["user/api"]
+          cluster {
+              enabled = on
+              max-nr-of-instances-per-node = 1
+              allow-local-routees = on
+              use-role = crawler
+          }
+        }
+        
+        /downloads/broadcaster {
+          router = broadcast-group
+          routees.paths = ["user/downloads"]
+          cluster {
+              enabled = on
+              max-nr-of-instances-per-node = 1
+              allow-local-routees = on
+              use-role = crawler
+          }
+        }
+        
+        "/api/*/coordinators" {
+          router = round-robin-pool
+          nr-of-instances = 10
+          cluster {
+            enabled = on
+            max-nr-of-instances-per-node = 2
+            allow-local-routees = on
+            use-role = crawler
+          }
+        }             
+        
+      }
+    }
+    
+    remote {
+      log-remote-lifecycle-events = DEBUG
+      log-received-messages = on
+      
+      helios.tcp {
+        transport-class = "Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote"
+            applied-adapters = []
+            transport-protocol = tcp
+        #will be populated with a dynamic host-name at runtime if left uncommented
+        #public-hostname = "POPULATE STATIC IP HERE"
+        hostname = "127.0.0.1"
+        port = 0 #dynamically assign port
+      }
+    }            
+
+    cluster {
+	   #manually populate other seed nodes here, i.e. "akka.tcp://lighthouse@127.0.0.1:4053"
+      seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"]
+      roles = [crawler]
+    }
+  }
+```
+
+Inside each router deployment specification in `[Crawler]`'s App.config we are able to turn on certain clustering attributes, such as this one for any actor matching path `/api/*/coordinators` (there's one of these per `CrawlJob`:)
+
+```xml
+ "/api/*/coordinators" {
+  router = round-robin-pool
+  nr-of-instances = 10
+  cluster {
+    enabled = on
+    max-nr-of-instances-per-node = 2
+    allow-local-routees = on
+    use-role = crawler
+  }
+}    
+```
+
+What this configuration section translates to is:
+
+* We're going to create one instance of this router on this machine locally;
+* It's going to be a `RoundRobinPool`;
+* It's going to use the cluster to deploy routees;
+* It will allow up to two routees deployed per node in the cluster;
+* With a maximum of 10 routees total, cluster-wide;
+* Local routees deployed on the same machine as the router are allowed; and
+* And we will only deploy these routees on nodes matching role `crawler`.
+
+Akka.NET will use this information to do just that - deploy routees onto new `[Crawler]` instances when they join the cluster and mark those routees as dead if a node with deployed routees leaves the cluster.
+
+This how the WebCrawler sample is able to scale-out jobs in the middle of running them!
+
+## ASP.NET and Windows Service Integration
