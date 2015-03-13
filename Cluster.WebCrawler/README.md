@@ -318,4 +318,115 @@ Akka.NET will use this information to do just that - deploy routees onto new `[C
 
 This how the WebCrawler sample is able to scale-out jobs in the middle of running them!
 
-## ASP.NET and Windows Service Integration
+### ASP.NET and Windows Service Integration
+
+In `[Web]` we integrate Akka.NET inside an ASP.NET MVC5 application and in `[Crawler]` we integrate inside a Windows Service. Both are fairly easy to do.
+
+#### Best Practices for ASP.NET and Akka.NET Integration
+Typically what we see is a really lightweight `ActorSystem` inside ASP.NET applications - heavy-duty work usually gets offloaded via Akka.Remote / Akka.Cluster to a separate Windows Service.
+
+Here's how we wire up our `ActorSystem` inside `[Web]` via Global.asax ([source](/src/WebCrawler.Web/Global.asax.cs)):
+
+```csharp
+public class MvcApplication : System.Web.HttpApplication
+{
+    protected static ActorSystem ActorSystem;
+
+    protected void Application_Start()
+    {
+        AreaRegistration.RegisterAllAreas();
+        FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+        RouteConfig.RegisterRoutes(RouteTable.Routes);
+        BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+        ActorSystem = ActorSystem.Create("webcrawler");
+        var router = ActorSystem.ActorOf(Props.Create(() => new RemoteJobActor()).WithRouter(FromConfig.Instance), "tasker");
+        SystemActors.CommandProcessor = ActorSystem.ActorOf(Props.Create(() => new CommandProcessor(router)),
+            "commands");
+        SystemActors.SignalRActor = ActorSystem.ActorOf(Props.Create(() => new SignalRActor()), "signalr");
+    }
+}
+```
+
+Typically you need to stick a reference to your `ActorSystem` into a static field somewhere in your application - that way it can't accidentally get garbage collected.
+
+You also want to make sure you include your Akka.NET HOCON configuration inside `Web.config`, that way you can take advantage of [Web.config Configuration Transformations](https://msdn.microsoft.com/en-us/library/dd465326(v=vs.110).aspx) in combination with HOCON.
+
+From there, create any top-level actors you need and you're good to go.
+
+#### Best Practices for Windows Services and Akka.NET Integration
+The best recommendation is to always use [Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services") to build your Windows Services - it radically simplifies everything about Windows Service deployment and development.
+
+Here's what the `[Crawler]` Windows Service definition looks like using Topshelf:
+
+
+**Program.cs**
+```csharp
+class Program
+{
+    static int Main(string[] args)
+    {
+        return (int)HostFactory.Run(x =>
+        {
+            x.SetServiceName("Crawler");
+            x.SetDisplayName("Akka.NET Crawler");
+            x.SetDescription("Akka.NET Cluster Demo - Web Crawler.");
+
+            x.UseAssemblyInfoForServiceInfo();
+            x.RunAsLocalSystem();
+            x.StartAutomatically();
+            //x.UseNLog();
+            x.Service<CrawlerService>();
+            x.EnableServiceRecovery(r => r.RestartService(1));
+        });
+    }
+}
+```
+
+**CrawlerService.cs**
+```csharp
+public class CrawlerService : ServiceControl
+{
+    protected ActorSystem ClusterSystem;
+    protected ActorRef ApiMaster;
+    protected ActorRef DownloadMaster;
+    
+
+    public bool Start(HostControl hostControl)
+    {
+        ClusterSystem = ActorSystem.Create("webcrawler");
+        ApiMaster = ClusterSystem.ActorOf(Props.Create(() => new ApiMaster()), "api");
+        DownloadMaster = ClusterSystem.ActorOf(Props.Create(() => new DownloadsMaster()), "downloads");
+        return true;
+    }
+
+    public bool Stop(HostControl hostControl)
+    {
+        ClusterSystem.Shutdown();
+        return true;
+    }
+}
+```
+
+It's as easy as that.
+
+## Running the Sample
+
+1. Clone this repository to your local computer - we highly recommend installing [Github for Windows](https://windows.github.com/ "Github for Windows") if you don't already have a Git client installed.
+2. Clone [Lighthouse](https://github.com/petabridge/lighthouse) to your local computer.
+3. Open the `Lighthouse.sln` and change this line in App.config  `lighthouse{
+  actorsystem: "webcrawler" #change from "lighthouse" to "webcrawler"
+}`
+4. Press `F6` to start Lighthouse.
+4. Open `WebCrawler.sln` in Visual Studio 2012 or later.
+5. Press `F6` to build the sample - this solution has [NuGet package restore](http://docs.nuget.org/docs/workflows/using-nuget-without-committing-packages) enabled, so any third party dependencies will automatically be downloaded and added as references.
+6. Press `F5` to run the sample.
+
+And then give it a try!
+
+<a href=
+"diagrams/crawler-live-run.gif"><img src="diagrams/crawler-live-run.gif" style="width:600px; margin:auto;" alt="WebCrawler Demo In-Action (animated gif)"/><p>Click for a full-sized image.</p></a>
+
+## Questions?
+
+If you have any questions about this sample, please [create a Github issue for us](https://github.com/petabridge/akkadotnet-code-samples/issues)!
