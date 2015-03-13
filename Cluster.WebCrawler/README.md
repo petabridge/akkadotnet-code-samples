@@ -32,5 +32,28 @@ On `index.html` we discover links to more images and documents, so we mark those
 
 > NOTE: the only thing this sample does not attempt to do is save the documents to a persistent store; that's an exercise left up to readers.
 
+Here's an example of the service in-action, crawling MSDN and Rotten Tomatoes simultaneously across two `[Crawler]` processes:
+
+<a href=
+"diagrams/crawler-live-run.gif"><img src="diagrams/crawler-live-run.gif" style="width:600px; margin:auto;" alt="WebCrawler Demo In-Action (animated gif)"/><p>Click for a full-sized image.</p></a>
+
+## Critical Concepts
+
+In this example you'll be exposed to the following concepts:
+
+1. **Clustering** - a distributed programming technique that uses peer-to-peer networking, gossip protocols, addressing systems, and other tools to allow multiple processes and machines to work cooperatively together in an elastic fashion.  
+2. **Microservices** - the software architecture style used to organize the WebCrawler sample into dedicated services for maximum resiliency and parallelism.
+3. **Akka.NET Remoting** - how remote addressing, actor deployment, and message delivery works in Akka.NET.
+4. **ASP.NET & Windows Services Integration** - how to integrate Akka.NET into the most commonly deployed types of networked applications in the .NET universe.
+
+
 ### Microservice Architecture
+
+"Microservice" is a relatively new term in the lexicon of distributed systems programming. Here's [how "Microservice" is defined by Martin Fowler](http://martinfowler.com/articles/microservices.html):
+
+> In short, the microservice architectural style [1] is an approach to developing a single application as a suite of small services, each running in its own process and communicating with lightweight mechanisms, often an HTTP resource API. These services are built around business capabilities and independently deployable by fully automated deployment machinery. There is a bare minimum of centralized management of these services, which may be written in different programming languages and use different data storage technologies.
+
+Microservices aren't so different from traditional [Service Oriented Architecture (SOA)](https://msdn.microsoft.com/en-us/library/aa480021.aspx) approaches to software design, the key difference being that microservices break up applications into physically separate services running in their own processes and (often) hardware. At Petabridge we describe Microservices as "SOA 2.0."
+
+Akka.Cluster makes it trivially easy to build apps that leverage a variety of microservices, and here's how:
 
