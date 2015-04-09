@@ -46,15 +46,15 @@ namespace PipeTo.App.Actors
         #endregion
 
         private readonly IFeedFactory _feedFactory;
-        private ActorRef _downloadActor;
+        private IActorRef _downloadActor;
         private readonly string _consoleWriterActorPath;
 
-        public FeedParserActor(IFeedFactory feedFactory, ActorRef downloadActor) 
+        public FeedParserActor(IFeedFactory feedFactory, IActorRef downloadActor) 
             : this(feedFactory, downloadActor, ActorNames.ConsoleWriterActor.Path)
         {
         }
 
-        public FeedParserActor(IFeedFactory feedFactory, ActorRef downloadActor, string consoleWriterActorPath)
+        public FeedParserActor(IFeedFactory feedFactory, IActorRef downloadActor, string consoleWriterActorPath)
         {
             _feedFactory = feedFactory;
             _downloadActor = downloadActor;

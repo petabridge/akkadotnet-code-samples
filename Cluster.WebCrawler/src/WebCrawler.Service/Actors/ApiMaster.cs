@@ -12,7 +12,7 @@ namespace WebCrawler.Service.Actors
     /// <summary>
     /// The very top-level actor. Oversees all requests from front-end machines.
     /// </summary>
-    public class ApiMaster : ReceiveActor, WithUnboundedStash
+    public class ApiMaster : ReceiveActor, IWithUnboundedStash
     {
         public const string MasterBroadcastName = "broadcaster";
 
@@ -30,7 +30,7 @@ namespace WebCrawler.Service.Actors
 
         public class JobFound
         {
-            public JobFound(CrawlJob key, ActorRef crawlMaster)
+            public JobFound(CrawlJob key, IActorRef crawlMaster)
             {
                 CrawlMaster = crawlMaster;
                 Key = key;
@@ -38,7 +38,7 @@ namespace WebCrawler.Service.Actors
 
             public CrawlJob Key { get; private set; }
 
-            public ActorRef CrawlMaster { get; private set; }
+            public IActorRef CrawlMaster { get; private set; }
         }
 
         public class JobNotFound
@@ -53,7 +53,7 @@ namespace WebCrawler.Service.Actors
 
         #endregion
 
-        protected ActorRef ApiBroadcaster;
+        protected IActorRef ApiBroadcaster;
         protected StartJob JobToStart;
         protected int OutstandingAcknowledgements;
 
@@ -64,7 +64,7 @@ namespace WebCrawler.Service.Actors
 
         protected override void PreStart()
         {
-            ApiBroadcaster = Context.Child(MasterBroadcastName) == ActorRef.Nobody
+            ApiBroadcaster = Context.Child(MasterBroadcastName).Equals(ActorRefs.Nobody)
                 ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), MasterBroadcastName)
                 : Context.Child(MasterBroadcastName);
         }
@@ -145,7 +145,7 @@ namespace WebCrawler.Service.Actors
             var haveChild = Context.Child(job.Key.Root.ToActorName());
 
             //found a running job already
-            if (haveChild != ActorRef.Nobody)
+            if (!haveChild.Equals(ActorRefs.Nobody))
             {
                 ApiBroadcaster.Tell(new JobFound(job.Key, haveChild));
             }

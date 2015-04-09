@@ -40,9 +40,9 @@ namespace WebCrawler.Web.Actors
 
         #endregion
 
-        protected readonly ActorRef CommandRouter;
+        protected readonly IActorRef CommandRouter;
 
-        public CommandProcessor(ActorRef commandRouter)
+        public CommandProcessor(IActorRef commandRouter)
         {
             CommandRouter = commandRouter;
             Receives();

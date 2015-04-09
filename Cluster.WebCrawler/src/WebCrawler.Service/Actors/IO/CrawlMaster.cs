@@ -12,7 +12,7 @@ namespace WebCrawler.Service.Actors.IO
     /// <summary>
     /// Actor responsible for individual <see cref="CrawlJob"/>
     /// </summary>
-    public class CrawlMaster : ReceiveActor, WithUnboundedStash
+    public class CrawlMaster : ReceiveActor, IWithUnboundedStash
     {
         public const string CoordinatorRouterName = "coordinators";
         protected readonly CrawlJob Job;
@@ -20,7 +20,7 @@ namespace WebCrawler.Service.Actors.IO
         /// <summary>
         /// All of the actors subscribed to updates for <see cref="Job"/>
         /// </summary>
-        protected HashSet<ActorRef> Subscribers = new HashSet<ActorRef>();
+        protected HashSet<IActorRef> Subscribers = new HashSet<IActorRef>();
 
         protected JobStatusUpdate RunningStatus;
 
@@ -30,8 +30,8 @@ namespace WebCrawler.Service.Actors.IO
             set { RunningStatus.Stats = value; }
         }
 
-        protected ActorRef CoordinatorRouter;
-        protected ActorRef DownloadTracker;
+        protected IActorRef CoordinatorRouter;
+        protected IActorRef DownloadTracker;
 
         public IStash Stash { get; set; }
 
@@ -78,7 +78,7 @@ namespace WebCrawler.Service.Actors.IO
         }
         private void BecomeReady()
         {
-            if (Context.Child(CoordinatorRouterName) == ActorRef.Nobody)
+            if (Context.Child(CoordinatorRouterName).Equals(ActorRefs.Nobody))
             {
                 CoordinatorRouter =
                     Context.ActorOf(

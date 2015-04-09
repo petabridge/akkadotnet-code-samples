@@ -21,9 +21,9 @@ namespace WebCrawler.Service.State
             get { return !IsComplete && (Timeout == null || Timeout.IsOverdue); }
         }
 
-        public ActorRef Owner { get; private set; }
+        public IActorRef Owner { get; private set; }
 
-        public static CrawlStatus StartCrawl(ActorRef owner, TimeSpan crawlTime)
+        public static CrawlStatus StartCrawl(IActorRef owner, TimeSpan crawlTime)
         {
             var crawl = new CrawlStatus();
             crawl.TryClaim(owner, crawlTime);
@@ -38,7 +38,7 @@ namespace WebCrawler.Service.State
             return this;
         }
 
-        public bool TryClaim(ActorRef newOwner, TimeSpan crawlTime)
+        public bool TryClaim(IActorRef newOwner, TimeSpan crawlTime)
         {
             if (CanProcess)
             {

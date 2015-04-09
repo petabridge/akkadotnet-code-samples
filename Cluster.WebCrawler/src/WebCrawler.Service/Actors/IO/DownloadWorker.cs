@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using Akka.Actor;
@@ -12,7 +13,7 @@ namespace WebCrawler.Service.Actors.IO
     /// <summary>
     /// Actor responsible for using <see cref="HttpClient"/>
     /// </summary>
-    public class DownloadWorker : ReceiveActor, WithUnboundedStash
+    public class DownloadWorker : ReceiveActor, IWithUnboundedStash
     {
         #region Messages
 
@@ -124,12 +125,12 @@ namespace WebCrawler.Service.Actors.IO
         /// </summary>
         public class SetParseActor
         {
-            public SetParseActor(ActorRef parser)
+            public SetParseActor(IActorRef parser)
             {
                 Parser = parser;
             }
 
-            public ActorRef Parser { get; private set; }
+            public IActorRef Parser { get; private set; }
         }
 
         /// <summary>
@@ -162,16 +163,16 @@ namespace WebCrawler.Service.Actors.IO
             get { return CurrentDownloadCount < MaxConcurrentDownloads; }
         }
 
-        protected readonly ActorRef CoordinatorActor;
-        protected ActorRef ParseActor;
+        protected readonly IActorRef CoordinatorActor;
+        protected IActorRef ParseActor;
 
         private readonly HashSet<IDownloadDocument> _currentDownloads = new HashSet<IDownloadDocument>();
 
-        public DownloadWorker(Func<HttpClient> httpClientFactory, ActorRef coordinatorActor, int maxConcurrentDownloads = DefaultMaxConcurrentDownloads)
+        public DownloadWorker(Func<HttpClient> httpClientFactory, IActorRef coordinatorActor, int maxConcurrentDownloads = DefaultMaxConcurrentDownloads)
         {
             _httpClientFactory = httpClientFactory;
             MaxConcurrentDownloads = maxConcurrentDownloads;
-            Guard.Assert(maxConcurrentDownloads > 0, "maxConcurrentDownloads must be greater than 0");
+            Debug.Assert(maxConcurrentDownloads > 0, "maxConcurrentDownloads must be greater than 0");
             CoordinatorActor = coordinatorActor;
             WaitingForParseActor();
         }
