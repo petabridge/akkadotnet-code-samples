@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Akka.Util;
 
 namespace WebCrawler.Service.State
@@ -12,7 +13,7 @@ namespace WebCrawler.Service.State
         public CrawlDocument(Uri documentUri, bool isImage = false)
         {
             IsImage = isImage;
-            Guard.Assert(documentUri.IsAbsoluteUri, "documentUri must be absolute");
+            Debug.Assert(documentUri.IsAbsoluteUri, "documentUri must be absolute");
             DocumentUri = documentUri;
         }
 

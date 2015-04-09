@@ -9,7 +9,7 @@ namespace WebCrawler.Messages.Commands
     /// </summary>
     public class StartJob : IConsistentHashable
     {
-        public StartJob(CrawlJob job, ActorRef requestor)
+        public StartJob(CrawlJob job, IActorRef requestor)
         {
             Requestor = requestor;
             Job = job;
@@ -17,7 +17,7 @@ namespace WebCrawler.Messages.Commands
 
         public CrawlJob Job { get; private set; }
 
-        public ActorRef Requestor { get; private set; }
+        public IActorRef Requestor { get; private set; }
         public object ConsistentHashKey { get { return Job.Root.OriginalString; } }
     }
 
@@ -26,7 +26,7 @@ namespace WebCrawler.Messages.Commands
     /// </summary>
     public class StopJob
     {
-        public StopJob(CrawlJob job, ActorRef requestor)
+        public StopJob(CrawlJob job, IActorRef requestor)
         {
             Requestor = requestor;
             Job = job;
@@ -34,6 +34,6 @@ namespace WebCrawler.Messages.Commands
 
         public CrawlJob Job { get; private set; }
 
-        public ActorRef Requestor { get; private set; }
+        public IActorRef Requestor { get; private set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Akka.Actor;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using WebCrawler.Messages.Commands;
@@ -22,7 +23,7 @@ namespace WebCrawler.Web.Hubs
 
         public void StartCrawl(string message)
         {
-            SystemActors.SignalRActor.Tell(message);
+            SystemActors.SignalRActor.Tell(message, ActorRefs.Nobody);
         }
 
         internal void WriteRawMessage(string msg)

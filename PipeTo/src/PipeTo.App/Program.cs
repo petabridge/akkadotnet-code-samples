@@ -17,13 +17,13 @@ namespace PipeTo.App
             MyActorSystem = ActorSystem.Create("MyFirstActorSystem");
 
             //Create the actors who are going to validate RSS / ATOM feeds and start the parsing process
-            ActorRef feedValidator =
+            IActorRef feedValidator =
                 MyActorSystem.ActorOf(Props.Create(() => new FeedValidatorActor(new HttpFeedFactory(), ActorNames.ConsoleWriterActor.Path)),
                     ActorNames.FeedValidatorActor.Name);
 
             //Create the actors who are going to read from and write to the console
-            ActorRef consoleWriter = MyActorSystem.ActorOf(Props.Create<ConsoleWriterActor>(), ActorNames.ConsoleWriterActor.Name);
-            ActorRef consoleReader = MyActorSystem.ActorOf(Props.Create<ConsoleReaderActor>(), ActorNames.ConsoleReaderActor.Name);
+            IActorRef consoleWriter = MyActorSystem.ActorOf(Props.Create<ConsoleWriterActor>(), ActorNames.ConsoleWriterActor.Name);
+            IActorRef consoleReader = MyActorSystem.ActorOf(Props.Create<ConsoleReaderActor>(), ActorNames.ConsoleReaderActor.Name);
 
             Instructions.PrintWelcome();
 

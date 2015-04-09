@@ -10,7 +10,7 @@ namespace WebCrawler.Messages.State
     /// </summary>
     public class CompletedDocument
     {
-        public CompletedDocument(CrawlDocument document, int numBytes, ActorRef completedBy)
+        public CompletedDocument(CrawlDocument document, int numBytes, IActorRef completedBy)
         {
             CompletedBy = completedBy;
             NumBytes = numBytes;
@@ -21,7 +21,7 @@ namespace WebCrawler.Messages.State
 
         public int NumBytes { get; private set; }
 
-        public ActorRef CompletedBy { get; private set; }
+        public IActorRef CompletedBy { get; private set; }
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ namespace WebCrawler.Messages.State
     /// </summary>
     public class DiscoveredDocuments
     {
-        public DiscoveredDocuments(IList<CrawlDocument> documents, ActorRef discoveredBy)
+        public DiscoveredDocuments(IList<CrawlDocument> documents, IActorRef discoveredBy)
         {
             DiscoveredBy = discoveredBy;
             Documents = documents;
@@ -41,6 +41,6 @@ namespace WebCrawler.Messages.State
 
         public int Images { get { return Documents.Count(x => x.IsImage); } }
 
-        public ActorRef DiscoveredBy { get; private set; }
+        public IActorRef DiscoveredBy { get; private set; }
     }
 }

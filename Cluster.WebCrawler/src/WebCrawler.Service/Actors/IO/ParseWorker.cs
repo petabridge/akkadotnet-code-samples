@@ -13,7 +13,7 @@ namespace WebCrawler.Service.Actors.IO
     /// Actor responsibile for using the HTML Agility Pack to parse links to other content
     /// and images out of HTML documents
     /// </summary>
-    public class ParseWorker : ReceiveActor, WithUnboundedStash
+    public class ParseWorker : ReceiveActor, IWithUnboundedStash
     {
         #region Messages
 
@@ -22,12 +22,12 @@ namespace WebCrawler.Service.Actors.IO
         /// </summary>
         public class SetDownloadActor
         {
-            public SetDownloadActor(ActorRef downloader)
+            public SetDownloadActor(IActorRef downloader)
             {
                 Downloader = downloader;
             }
 
-            public ActorRef Downloader { get; private set; }
+            public IActorRef Downloader { get; private set; }
         }
 
         /// <summary>
@@ -42,12 +42,12 @@ namespace WebCrawler.Service.Actors.IO
         /// </summary>
         protected readonly CrawlJob JobRoot;
 
-        protected readonly ActorRef CoordinatorActor;
-        protected ActorRef DownloadActor;
+        protected readonly IActorRef CoordinatorActor;
+        protected IActorRef DownloadActor;
 
         public IStash Stash { get; set; }
 
-        public ParseWorker(CrawlJob jobRoot, ActorRef coordinatorActor)
+        public ParseWorker(CrawlJob jobRoot, IActorRef coordinatorActor)
         {
             JobRoot = jobRoot;
             CoordinatorActor = coordinatorActor;

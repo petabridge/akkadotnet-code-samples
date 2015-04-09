@@ -43,22 +43,22 @@ namespace WebCrawler.Service.Actors.IO
 
         #endregion
 
-        protected readonly ActorRef DownloadsTracker;
-        protected readonly ActorRef Commander;
+        protected readonly IActorRef DownloadsTracker;
+        protected readonly IActorRef Commander;
 
-        protected ActorRef DownloaderRouter;
-        protected ActorRef ParserRouter;
+        protected IActorRef DownloaderRouter;
+        protected IActorRef ParserRouter;
 
         protected CrawlJob Job;
         protected CrawlJobStats Stats;
 
         protected readonly long MaxConcurrentDownloads;
 
-        private CancellationTokenSource _publishStatsTask = new CancellationTokenSource();
+        private ICancelable _publishStatsTask;
 
-        private LoggingAdapter _logger = Context.GetLogger();
+        private ILoggingAdapter _logger = Context.GetLogger();
 
-        public DownloadCoordinator(CrawlJob job, ActorRef commander, ActorRef downloadsTracker, long maxConcurrentDownloads)
+        public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
         {
             Job = job;
             DownloadsTracker = downloadsTracker;
@@ -72,7 +72,7 @@ namespace WebCrawler.Service.Actors.IO
         {
 
             // Create our downloader pool
-            if (Context.Child(Downloader) == ActorRef.Nobody)
+            if (Context.Child(Downloader).Equals(ActorRefs.Nobody))
             {
                 DownloaderRouter = Context.ActorOf(
                     Props.Create(() => new DownloadWorker(HttpClientFactory.GetClient, Self, (int)MaxConcurrentDownloads)).WithRouter(new RoundRobinPool(10)),
@@ -80,7 +80,7 @@ namespace WebCrawler.Service.Actors.IO
             }
 
             // Create our parser pool
-            if (Context.Child(Parser) == ActorRef.Nobody)
+            if (Context.Child(Parser).Equals(ActorRefs.Nobody))
             {
                 ParserRouter = Context.ActorOf(
                     Props.Create(() => new ParseWorker(Job, Self)).WithRouter(new RoundRobinPool(10)),
@@ -88,8 +88,8 @@ namespace WebCrawler.Service.Actors.IO
             }
 
             // Schedule regular stats updates
-            Context.System.Scheduler.Schedule(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self,
-                PublishStatsTick.Instance, _publishStatsTask.Token);
+            _publishStatsTask = new Cancelable(Context.System.Scheduler);
+           Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self, PublishStatsTick.Instance, Self, _publishStatsTask);
         }
 
         protected override void PreRestart(Exception reason, object message)

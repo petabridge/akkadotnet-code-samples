@@ -19,8 +19,8 @@ namespace WebCrawler.Service
     public class CrawlerService : ServiceControl
     {
         protected ActorSystem ClusterSystem;
-        protected ActorRef ApiMaster;
-        protected ActorRef DownloadMaster;
+        protected IActorRef ApiMaster;
+        protected IActorRef DownloadMaster;
         
 
         public bool Start(HostControl hostControl)

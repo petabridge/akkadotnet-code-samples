@@ -8,7 +8,7 @@ namespace WebCrawler.Messages.Commands
     /// </summary>
     public class UnsubscribeFromJob
     {
-        public UnsubscribeFromJob(CrawlJob job, ActorRef subscriber)
+        public UnsubscribeFromJob(CrawlJob job, IActorRef subscriber)
         {
             Subscriber = subscriber;
             Job = job;
@@ -16,6 +16,6 @@ namespace WebCrawler.Messages.Commands
 
         public CrawlJob Job { get; private set; }
 
-        public ActorRef Subscriber { get; private set; }
+        public IActorRef Subscriber { get; private set; }
     }
 }

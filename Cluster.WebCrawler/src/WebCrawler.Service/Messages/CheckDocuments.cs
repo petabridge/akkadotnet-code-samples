@@ -13,7 +13,7 @@ namespace WebCrawler.Service.Messages
     /// </summary>
     public class CheckDocuments
     {
-        public CheckDocuments(IList<CrawlDocument> documents, ActorRef requestor, TimeSpan? estimatedCrawlTime)
+        public CheckDocuments(IList<CrawlDocument> documents, IActorRef requestor, TimeSpan? estimatedCrawlTime)
         {
             EstimatedCrawlTime = estimatedCrawlTime;
             Requestor = requestor;
@@ -29,7 +29,7 @@ namespace WebCrawler.Service.Messages
         /// <summary>
         /// Reference to the actor who should take on the cleared documents
         /// </summary>
-        public ActorRef Requestor { get; private set; }
+        public IActorRef Requestor { get; private set; }
 
         /// <summary>
         /// The amount of time we think it'll take to crawl this document

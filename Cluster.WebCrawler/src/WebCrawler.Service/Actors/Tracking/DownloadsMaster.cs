@@ -10,7 +10,7 @@ namespace WebCrawler.Service.Actors.Downloads
     /// <summary>
     /// Actor responsible for managing the <see cref="DownloadsTracker"/> for each job.
     /// </summary>
-    public class DownloadsMaster : ReceiveActor, WithUnboundedStash
+    public class DownloadsMaster : ReceiveActor, IWithUnboundedStash
     {
         public const string DownloadsBroadcastName = "broadcaster";
 
@@ -18,7 +18,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
         public class RequestDownloadTrackerFor
         {
-            public RequestDownloadTrackerFor(CrawlJob key, ActorRef originator)
+            public RequestDownloadTrackerFor(CrawlJob key, IActorRef originator)
             {
                 Originator = originator;
                 Key = key;
@@ -26,7 +26,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
             public CrawlJob Key { get; private set; }
 
-            public ActorRef Originator { get; private set; }
+            public IActorRef Originator { get; private set; }
         }
 
         public class GetDownloadTracker
@@ -51,7 +51,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
         public class TrackerFound
         {
-            public TrackerFound(CrawlJob key, ActorRef tracker)
+            public TrackerFound(CrawlJob key, IActorRef tracker)
             {
                 Key = key;
                 Tracker = tracker;
@@ -59,7 +59,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
             public CrawlJob Key { get; private set; }
 
-            public ActorRef Tracker { get; private set; }
+            public IActorRef Tracker { get; private set; }
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
         public class CreatedTracker
         {
-            public CreatedTracker(CrawlJob key, ActorRef tracker)
+            public CreatedTracker(CrawlJob key, IActorRef tracker)
             {
                 Tracker = tracker;
                 Key = key;
@@ -85,7 +85,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
             public CrawlJob Key { get; private set; }
 
-            public ActorRef Tracker { get; private set; }
+            public IActorRef Tracker { get; private set; }
         }
 
         #endregion
@@ -93,9 +93,9 @@ namespace WebCrawler.Service.Actors.Downloads
         /// <summary>
         /// The set of actors responsible for containing download state about a particular domain (defined by <see cref="CrawlJob"/>)
         /// </summary>
-        protected Dictionary<CrawlJob, ActorRef> Trackers = new Dictionary<CrawlJob, ActorRef>();
+        protected Dictionary<CrawlJob, IActorRef> Trackers = new Dictionary<CrawlJob, IActorRef>();
 
-        protected ActorRef MasterBroadcast;
+        protected IActorRef MasterBroadcast;
         protected RequestDownloadTrackerFor RequestedTracker;
 
         protected int OutstandingAcknowledgments = 0;
@@ -107,7 +107,7 @@ namespace WebCrawler.Service.Actors.Downloads
 
         protected override void PreStart()
         {
-            MasterBroadcast = Context.Child(DownloadsBroadcastName) == ActorRef.Nobody ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), DownloadsBroadcastName)
+            MasterBroadcast = Context.Child(DownloadsBroadcastName).Equals(ActorRefs.Nobody) ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), DownloadsBroadcastName)
                 : Context.Child(DownloadsBroadcastName);
         }
 
@@ -233,7 +233,7 @@ namespace WebCrawler.Service.Actors.Downloads
         private void HandleGetDownloadTracker(GetDownloadTracker get)
         {
             // this tracker is a child of the current actor
-            if (Context.Child(get.Key.Root.ToActorName()) != ActorRef.Nobody)
+            if (!Context.Child(get.Key.Root.ToActorName()).Equals(ActorRefs.Nobody))
             {
                 var tracker = Context.Child(get.Key.Root.ToActorName());
 

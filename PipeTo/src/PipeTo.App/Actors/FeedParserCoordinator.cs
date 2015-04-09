@@ -136,8 +136,8 @@ namespace PipeTo.App.Actors
         private readonly Uri _feedUri;
         private DownloadStats _downloadStats;
         private readonly string _consoleWriterActorPath;
-        private ActorRef _feedParserActor;
-        private ActorRef _httpDownloaderActor;
+        private IActorRef _feedParserActor;
+        private IActorRef _httpDownloaderActor;
 
         /// <summary>
         /// This constructor will actually get called by the <see cref="FeedValidatorActor"/> to begin processing messages
