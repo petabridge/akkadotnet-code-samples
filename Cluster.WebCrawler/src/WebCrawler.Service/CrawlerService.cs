@@ -8,14 +8,6 @@ using WebCrawler.Service.Actors.Downloads;
 
 namespace WebCrawler.Service
 {
-    public class GhettoConsoleActor : ReceiveActor
-    {
-        public GhettoConsoleActor()
-        {
-            Receive<JobStatusUpdate>(update => Console.WriteLine("[{0}]({1}) - {2} ({3}) [{4} elapsed]", DateTime.UtcNow, update.Job, update.Stats, update.Status, update.Elapsed));
-        }
-    }
-
     public class CrawlerService : ServiceControl
     {
         protected ActorSystem ClusterSystem;
@@ -28,7 +20,6 @@ namespace WebCrawler.Service
             ClusterSystem = ActorSystem.Create("webcrawler");
             ApiMaster = ClusterSystem.ActorOf(Props.Create(() => new ApiMaster()), "api");
             DownloadMaster = ClusterSystem.ActorOf(Props.Create(() => new DownloadsMaster()), "downloads");
-            var ghettoConsoleActor = ClusterSystem.ActorOf(Props.Create(() => new GhettoConsoleActor()));
             //ApiMaster.Tell(new StartJob(new CrawlJob(new Uri("http://www.rottentomatoes.com/", UriKind.Absolute), true), ghettoConsoleActor));
             return true;
         }
