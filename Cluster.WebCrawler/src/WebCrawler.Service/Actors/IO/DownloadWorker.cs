@@ -192,9 +192,12 @@ namespace WebCrawler.Service.Actors.IO
         {
             try
             {
-                // dispose the HttpClient
-                // ignore disposal exceptions
-                _httpClient.Dispose();
+                if (_httpClient != null)
+                {
+                    // dispose the HttpClient
+                    // ignore disposal exceptions
+                    _httpClient.Dispose();
+                }
             }
             catch { }
             base.PostStop();
