@@ -90,7 +90,8 @@ namespace WebCrawler.Service.Actors
                 Context.ActorSelection("/user/downloads").Tell(new DownloadsMaster.RequestDownloadTrackerFor(start.Job, Self));
 
                 Become(SearchingForJob);
-                OutstandingAcknowledgements = ApiBroadcaster.Ask<Routees>(new GetRoutees()).Result.Members.Count();
+                var members = ApiBroadcaster.Ask<Routees>(new GetRoutees()).Result.Members.ToList();
+                OutstandingAcknowledgements = members.Count();
                 Context.SetReceiveTimeout(TimeSpan.FromSeconds(3.0));
             });
 
