@@ -4,10 +4,10 @@ using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.Commands;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Actors.Downloads;
-using WebCrawler.Service.Actors.IO;
+using WebCrawler.TrackingService.Actors.Downloads;
+using WebCrawler.TrackingService.Actors.IO;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.TrackingService.Actors
 {
     /// <summary>
     /// The very top-level actor. Oversees all requests from front-end machines.

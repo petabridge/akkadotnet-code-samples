@@ -5,7 +5,7 @@ using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.State;
 
-namespace WebCrawler.Service.Actors.Downloads
+namespace WebCrawler.TrackingService.Actors.Downloads
 {
     /// <summary>
     /// Actor responsible for managing the <see cref="DownloadsTracker"/> for each job.

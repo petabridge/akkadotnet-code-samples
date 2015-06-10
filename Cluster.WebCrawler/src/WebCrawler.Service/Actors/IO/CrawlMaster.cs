@@ -4,10 +4,11 @@ using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.Commands;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Actors.Downloads;
-using WebCrawler.Service.State;
+using WebCrawler.Shared.IO;
+using WebCrawler.TrackingService.Actors.Downloads;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Actors.IO
+namespace WebCrawler.TrackingService.Actors.IO
 {
     /// <summary>
     /// Actor responsible for individual <see cref="CrawlJob"/>

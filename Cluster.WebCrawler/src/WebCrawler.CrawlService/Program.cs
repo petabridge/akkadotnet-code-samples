@@ -1,6 +1,6 @@
 ﻿using Topshelf;
 
-namespace WebCrawler.TrackingService
+namespace WebCrawler.CrawlService
 {
     class Program
     {
@@ -16,7 +16,7 @@ namespace WebCrawler.TrackingService
                 x.RunAsLocalSystem();
                 x.StartAutomatically();
                 //x.UseNLog();
-                x.Service<CrawlerService>();
+                x.Service<CrawlService>();
                 x.EnableServiceRecovery(r => r.RestartService(1));
             });
         }

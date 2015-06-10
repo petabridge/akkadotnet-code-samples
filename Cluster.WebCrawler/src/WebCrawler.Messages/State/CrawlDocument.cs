@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace WebCrawler.Service.State
+namespace WebCrawler.TrackingService.State
 {
     /// <summary>
     /// Represents a single document, regardless of content type, discovered but not downloaded

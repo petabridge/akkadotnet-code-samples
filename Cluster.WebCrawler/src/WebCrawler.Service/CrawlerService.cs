@@ -1,9 +1,9 @@
 ﻿using Akka.Actor;
 using Topshelf;
-using WebCrawler.Service.Actors;
-using WebCrawler.Service.Actors.Downloads;
+using WebCrawler.TrackingService.Actors;
+using WebCrawler.TrackingService.Actors.Downloads;
 
-namespace WebCrawler.Service
+namespace WebCrawler.TrackingService
 {
     public class CrawlerService : ServiceControl
     {

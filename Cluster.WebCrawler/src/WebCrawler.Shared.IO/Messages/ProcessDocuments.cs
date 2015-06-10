@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
-using WebCrawler.Service.State;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Messages
+namespace WebCrawler.Shared.IO.Messages
 {
     /// <summary>
     /// Message class used to confirm which documents are available for processing.

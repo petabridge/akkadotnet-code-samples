@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebCrawler.Service
+namespace WebCrawler.TrackingService
 {
     /// <summary>
     /// Convert a URI into an actor-friendly name

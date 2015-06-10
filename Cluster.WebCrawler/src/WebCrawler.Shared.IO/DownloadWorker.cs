@@ -5,12 +5,12 @@ using System.Net;
 using System.Net.Http;
 using Akka.Actor;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.State;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Actors.IO
+namespace WebCrawler.Shared.IO
 {
     /// <summary>
-    /// Actor responsible for using <see cref="HttpClient"/>
+    /// Actor responsible for using <see cref="System.Net.Http.HttpClient"/>
     /// </summary>
     public class DownloadWorker : ReceiveActor, IWithUnboundedStash
     {
@@ -238,7 +238,7 @@ namespace WebCrawler.Service.Actors.IO
                     return;
 
                  _currentDownloads.Add(html);
-                _httpClient.GetStringAsync(html.Document.DocumentUri).ContinueWith(tr =>
+                PipeToSupport.PipeTo<DownloadHtmlResult>(_httpClient.GetStringAsync(html.Document.DocumentUri).ContinueWith(tr =>
                 {
                     // bad request, server error, or timeout
                     if (tr.IsFaulted || tr.IsCanceled)
@@ -249,13 +249,13 @@ namespace WebCrawler.Service.Actors.IO
                         return new DownloadHtmlResult(html, string.Empty, HttpStatusCode.NotFound);
 
                     return new DownloadHtmlResult(html, tr.Result, HttpStatusCode.OK);
-                }).PipeTo(Self);
+                }), Self);
             });
 
             Receive<DownloadImage>(i => CanDoDownload, image =>
             {
                 _currentDownloads.Add(image);
-                _httpClient.GetByteArrayAsync(image.Document.DocumentUri).ContinueWith(tr =>
+                PipeToSupport.PipeTo<DownloadImageResult>(_httpClient.GetByteArrayAsync(image.Document.DocumentUri).ContinueWith(tr =>
                 {
                     // bad request, server error, or timeout
                     if (tr.IsFaulted || tr.IsCanceled)
@@ -266,7 +266,7 @@ namespace WebCrawler.Service.Actors.IO
                         return new DownloadImageResult(image, new byte[0], HttpStatusCode.NotFound);
 
                     return new DownloadImageResult(image, tr.Result, HttpStatusCode.OK);
-                }).PipeTo(Self);
+                }), Self);
             });
 
             // When we've hit maximum # of concurrent downloads
