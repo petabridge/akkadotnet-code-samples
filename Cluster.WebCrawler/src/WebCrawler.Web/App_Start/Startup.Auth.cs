@@ -1,5 +1,5 @@
-﻿using System;
-using Owin;
+﻿using Owin;
+
 namespace WebCrawler.Web
 {
     public partial class Startup

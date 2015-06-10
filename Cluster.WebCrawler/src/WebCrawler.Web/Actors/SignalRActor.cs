@@ -1,9 +1,7 @@
 ﻿using Akka.Actor;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
-using Microsoft.SqlServer.Server;
 using WebCrawler.Messages.Commands;
-using WebCrawler.Messages.State;
 using WebCrawler.Web.Hubs;
 
 namespace WebCrawler.Web.Actors

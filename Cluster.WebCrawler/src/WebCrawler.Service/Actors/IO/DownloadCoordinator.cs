@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
 using Akka.Actor;
 using Akka.Event;
 using Akka.Routing;

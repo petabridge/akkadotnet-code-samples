@@ -69,7 +69,7 @@ namespace WebCrawler.Service.Actors
                 : Context.Child(MasterBroadcastName);
         }
 
-        protected override void PreRestart(System.Exception reason, object message)
+        protected override void PreRestart(Exception reason, object message)
         {
             /* Don't kill the children */
             PostStop();
