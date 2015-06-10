@@ -1,7 +1,8 @@
 ﻿using Microsoft.Owin;
 using Owin;
+using WebCrawler.Web;
 
-[assembly: OwinStartupAttribute(typeof(WebCrawler.Web.Startup))]
+[assembly: OwinStartup(typeof(Startup))]
 namespace WebCrawler.Web
 {
     public partial class Startup

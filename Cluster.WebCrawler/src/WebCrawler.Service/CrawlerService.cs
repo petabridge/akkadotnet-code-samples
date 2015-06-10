@@ -1,8 +1,5 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Topshelf;
-using WebCrawler.Messages.Commands;
-using WebCrawler.Messages.State;
 using WebCrawler.Service.Actors;
 using WebCrawler.Service.Actors.Downloads;
 

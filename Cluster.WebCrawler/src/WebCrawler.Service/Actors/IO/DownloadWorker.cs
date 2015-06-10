@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using Akka.Actor;
-using Akka.Util;
 using WebCrawler.Messages.State;
 using WebCrawler.Service.State;
 

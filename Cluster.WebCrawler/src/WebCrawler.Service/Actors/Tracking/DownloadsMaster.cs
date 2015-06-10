@@ -111,7 +111,7 @@ namespace WebCrawler.Service.Actors.Downloads
                 : Context.Child(DownloadsBroadcastName);
         }
 
-        protected override void PreRestart(System.Exception reason, object message)
+        protected override void PreRestart(Exception reason, object message)
         {
             /* don't kill the children */
             PostStop();
