@@ -8,6 +8,5 @@ namespace WebCrawler.Messages.Commands.V1
     {
         CrawlJob Job { get; }
         IActorRef Requestor { get; }
-        object ConsistentHashKey { get; }
     }
 }
