@@ -1,14 +1,14 @@
 ﻿using Akka.Actor;
 using WebCrawler.Messages.State;
 
-namespace WebCrawler.Messages.Commands
+namespace WebCrawler.Messages.Commands.V1
 {
     /// <summary>
-    /// Subscribe an actor to a given <see cref="CrawlJob"/>
+    /// Unsuscribe an actor from a given <see cref="CrawlJob"/>
     /// </summary>
-    public class SubscribeToJob
+    public class UnsubscribeFromJob : IUnsubscribeFromJobV1
     {
-        public SubscribeToJob(CrawlJob job, IActorRef subscriber)
+        public UnsubscribeFromJob(CrawlJob job, IActorRef subscriber)
         {
             Subscriber = subscriber;
             Job = job;

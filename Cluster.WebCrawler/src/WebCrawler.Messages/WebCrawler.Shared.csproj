@@ -48,10 +48,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\RemoteJobActor.cs" />
-    <Compile Include="Commands\JobStatusUpdate.cs" />
-    <Compile Include="Commands\StartJob.cs" />
-    <Compile Include="Commands\SubscribeToJob.cs" />
-    <Compile Include="Commands\UnsubscribeFromJob.cs" />
+    <Compile Include="Commands\V1\IStartJobV1.cs" />
+    <Compile Include="Commands\V1\IStatusUpdateV1.cs" />
+    <Compile Include="Commands\V1\ISubscribeToJobV1.cs" />
+    <Compile Include="Commands\V1\IUnsubscribeFromJobV1.cs" />
+    <Compile Include="Commands\V1\JobStatusUpdate.cs" />
+    <Compile Include="Commands\V1\StartJob.cs" />
+    <Compile Include="Commands\V1\SubscribeToJob.cs" />
+    <Compile Include="Commands\V1\UnsubscribeFromJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="State\CompletedDocument.cs" />
     <Compile Include="State\CrawlDocument.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO;
 using WebCrawler.TrackingService.Actors.Downloads;
@@ -56,13 +57,13 @@ namespace WebCrawler.TrackingService.Actors.IO
             //job failed to start
             Receive<ReceiveTimeout>(timeout => EndJob(JobStatus.Failed));
 
-            Receive<SubscribeToJob>(subscribe =>
+            Receive<ISubscribeToJobV1>(subscribe =>
             {
                 if(subscribe.Job.Equals(Job))
                     Subscribers.Add(subscribe.Subscriber);
             });
 
-            Receive<UnsubscribeFromJob>(unsubscribe =>
+            Receive<IUnsubscribeFromJobV1>(unsubscribe =>
             {
                 if (unsubscribe.Job.Equals(Job))
                     Subscribers.Remove(unsubscribe.Subscriber);
@@ -98,7 +99,7 @@ namespace WebCrawler.TrackingService.Actors.IO
         private void Ready()
         {
             // kick off the job
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 Subscribers.Add(start.Requestor);
                 var downloadRootDocument = new DownloadWorker.DownloadHtmlDocument(new CrawlDocument(start.Job.Root));
@@ -116,20 +117,20 @@ namespace WebCrawler.TrackingService.Actors.IO
 
         private void Started()
         {
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 //treat the additional StartJob like a subscription
                 if (start.Job.Equals(Job))
                     Subscribers.Add(start.Requestor);
             });
 
-            Receive<SubscribeToJob>(subscribe =>
+            Receive<ISubscribeToJobV1>(subscribe =>
             {
                 if (subscribe.Job.Equals(Job))
                     Subscribers.Add(subscribe.Subscriber);
             });
 
-            Receive<UnsubscribeFromJob>(unsubscribe =>
+            Receive<IUnsubscribeFromJobV1>(unsubscribe =>
             {
                 if (unsubscribe.Job.Equals(Job))
                     Subscribers.Remove(unsubscribe.Subscriber);

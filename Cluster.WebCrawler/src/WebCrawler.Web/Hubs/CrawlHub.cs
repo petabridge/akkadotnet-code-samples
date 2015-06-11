@@ -3,6 +3,7 @@ using Akka.Actor;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 using WebCrawler.Web.Actors;
 
 namespace WebCrawler.Web.Hubs
@@ -10,7 +11,7 @@ namespace WebCrawler.Web.Hubs
     [HubName("crawlHub")]
     public class CrawlHub : Hub
     {
-        public void PushStatus(JobStatusUpdate update)
+        public void PushStatus(IStatusUpdateV1 update)
         {
             WriteMessage(string.Format("[{0}]({1}) - {2} ({3}) [{4} elapsed]", DateTime.UtcNow, update.Job, update.Stats, update.Status, update.Elapsed));
         }
