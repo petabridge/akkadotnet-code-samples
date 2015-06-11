@@ -1,4 +1,5 @@
-﻿using Topshelf;
+﻿using Akka.Actor;
+using Topshelf;
 
 namespace WebCrawler.CrawlService
 {
@@ -6,13 +7,15 @@ namespace WebCrawler.CrawlService
     {
         public bool Start(HostControl hostControl)
         {
-            // start system
+            ClusterSystem = ActorSystem.Create("webcrawler");
             return true;
         }
 
+        protected ActorSystem ClusterSystem { get; set; }
+
         public bool Stop(HostControl hostControl)
         {
-            // stop system
+            ClusterSystem.Shutdown();
             return true;
         }
     }

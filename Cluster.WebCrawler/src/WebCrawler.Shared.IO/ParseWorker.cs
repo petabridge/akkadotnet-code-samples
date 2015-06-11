@@ -6,7 +6,6 @@ using HtmlAgilityPack;
 using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
 using WebCrawler.TrackingService.State;
-using ActorRefImplicitSenderExtensions = Akka.Actor.ActorRefImplicitSenderExtensions;
 
 namespace WebCrawler.Shared.IO
 {
@@ -57,7 +56,7 @@ namespace WebCrawler.Shared.IO
 
         protected override void PreStart()
         {
-            ActorRefImplicitSenderExtensions.Tell(CoordinatorActor, new RequestDownloadActor());
+            CoordinatorActor.Tell(new RequestDownloadActor());
         }
 
         protected override void PreRestart(Exception reason, object message)
