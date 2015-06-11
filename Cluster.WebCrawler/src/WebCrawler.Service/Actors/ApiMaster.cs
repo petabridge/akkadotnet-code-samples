@@ -3,11 +3,12 @@ using System.Linq;
 using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Actors.Downloads;
-using WebCrawler.Service.Actors.IO;
+using WebCrawler.TrackingService.Actors.Downloads;
+using WebCrawler.TrackingService.Actors.IO;
 
-namespace WebCrawler.Service.Actors
+namespace WebCrawler.TrackingService.Actors
 {
     /// <summary>
     /// The very top-level actor. Oversees all requests from front-end machines.
@@ -54,7 +55,7 @@ namespace WebCrawler.Service.Actors
         #endregion
 
         protected IActorRef ApiBroadcaster;
-        protected StartJob JobToStart;
+        protected IStartJobV1 JobToStart;
         protected int OutstandingAcknowledgements;
 
         public ApiMaster()
@@ -79,7 +80,7 @@ namespace WebCrawler.Service.Actors
 
         private void Ready()
         {
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 JobToStart = start;
 
@@ -101,7 +102,7 @@ namespace WebCrawler.Service.Actors
         private void SearchingForJob()
         {
             //not able to start more jobs right now
-            Receive<StartJob>(s => Stash.Stash());
+            Receive<IStartJobV1>(s => Stash.Stash());
 
             Receive<FindRunningJob>(job => HandleFindRunningJob(job));
 

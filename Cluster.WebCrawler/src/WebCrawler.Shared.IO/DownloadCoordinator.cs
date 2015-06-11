@@ -3,9 +3,10 @@ using Akka.Actor;
 using Akka.Event;
 using Akka.Routing;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Messages;
+using WebCrawler.Shared.IO.Messages;
+using ActorRefImplicitSenderExtensions = Akka.Actor.ActorRefImplicitSenderExtensions;
 
-namespace WebCrawler.Service.Actors.IO
+namespace WebCrawler.Shared.IO
 {
     /// <summary>
     /// Actor responsible for managing pool of <see cref="DownloadWorker"/> and <see cref="ParseWorker"/> actors.
@@ -114,7 +115,7 @@ namespace WebCrawler.Service.Actors.IO
                 {
                     _logger.Info("Publishing {0} to parent", Stats);
 
-                    Commander.Tell(Stats.Copy());
+                    ActorRefImplicitSenderExtensions.Tell(Commander, Stats.Copy());
 
                     //reset our stats after publishing
                     Stats = Stats.Reset();
@@ -125,7 +126,7 @@ namespace WebCrawler.Service.Actors.IO
             Receive<CheckDocuments>(documents =>
             {
                 //forward this onto the downloads tracker, but have it reply back to us
-                DownloadsTracker.Tell(documents);
+                ((ICanTell) DownloadsTracker).Tell(documents, Self);
             });
 
             //Update our local stats
@@ -142,11 +143,11 @@ namespace WebCrawler.Service.Actors.IO
                     // Context.Parent is the router between the coordinators and the Commander
                     if (doc.IsImage)
                     {
-                        Context.Parent.Tell(new DownloadWorker.DownloadImage(doc));
+                        ActorRefImplicitSenderExtensions.Tell(Context.Parent, new DownloadWorker.DownloadImage(doc));
                     }
                     else
                     {
-                        Context.Parent.Tell(new DownloadWorker.DownloadHtmlDocument(doc));
+                        ActorRefImplicitSenderExtensions.Tell(Context.Parent, new DownloadWorker.DownloadHtmlDocument(doc));
                     }
                 }
             });
@@ -154,7 +155,7 @@ namespace WebCrawler.Service.Actors.IO
             //hand the work off to the downloaders
             Receive<DownloadWorker.IDownloadDocument>(download =>
             {
-                DownloaderRouter.Tell(download);
+                ActorRefImplicitSenderExtensions.Tell(DownloaderRouter, download);
             });
 
             Receive<CompletedDocument>(completed =>
@@ -166,13 +167,13 @@ namespace WebCrawler.Service.Actors.IO
             /* Set all of our local downloaders to message our local parsers */
             Receive<DownloadWorker.RequestParseActor>(request =>
             {
-                Sender.Tell(new DownloadWorker.SetParseActor(ParserRouter));
+                ActorRefImplicitSenderExtensions.Tell(Sender, new DownloadWorker.SetParseActor(ParserRouter));
             });
 
             /* Set all of our local parsers to message our local downloaders */
             Receive<ParseWorker.RequestDownloadActor>(request =>
             {
-                Sender.Tell(new ParseWorker.SetDownloadActor(DownloaderRouter));
+                ActorRefImplicitSenderExtensions.Tell(Sender, new ParseWorker.SetDownloadActor(DownloaderRouter));
             });
         }
     }

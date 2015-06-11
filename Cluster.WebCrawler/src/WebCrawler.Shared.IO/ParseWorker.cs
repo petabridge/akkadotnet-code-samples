@@ -4,10 +4,10 @@ using System.Linq;
 using Akka.Actor;
 using HtmlAgilityPack;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Messages;
-using WebCrawler.Service.State;
+using WebCrawler.Shared.IO.Messages;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Actors.IO
+namespace WebCrawler.Shared.IO
 {
     /// <summary>
     /// Actor responsibile for using the HTML Agility Pack to parse links to other content
@@ -128,7 +128,7 @@ namespace WebCrawler.Service.Actors.IO
 
                 // TODO: replace with some code that uses an estimated weighted moving average based on some combined query stats
                 // (probably an exercise for a different day)
-                CoordinatorActor.Tell(new CheckDocuments(requestedUrls, DownloadActor, TimeSpan.FromMilliseconds(requestedUrls.Count * 5000)));
+                CoordinatorActor.Tell(new CheckDocuments(requestedUrls, DownloadActor, TimeSpan.FromMilliseconds(requestedUrls.Count * 5000)), Self);
             });
 
             Receive<SetDownloadActor>(download =>

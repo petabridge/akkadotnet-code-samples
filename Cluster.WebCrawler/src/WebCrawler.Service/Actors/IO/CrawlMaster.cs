@@ -1,19 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Akka.Actor;
+using Akka.Event;
 using Akka.Routing;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Actors.Downloads;
-using WebCrawler.Service.State;
+using WebCrawler.Shared.IO;
+using WebCrawler.TrackingService.Actors.Downloads;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Actors.IO
+namespace WebCrawler.TrackingService.Actors.IO
 {
     /// <summary>
     /// Actor responsible for individual <see cref="CrawlJob"/>
     /// </summary>
     public class CrawlMaster : ReceiveActor, IWithUnboundedStash
     {
+
+        #region Messages
+
+        public class CrawlCanStart
+        {
+            public CrawlCanStart(IStartJobV1 job, int nodeCount)
+            {
+                Job = job;
+                NodeCount = nodeCount;
+            }
+
+            public IStartJobV1 Job { get; private set; }
+            public int NodeCount { get; private set; }
+        }
+
+        public class AttemptToStartJob
+        {
+            public AttemptToStartJob(IStartJobV1 job)
+            {
+                Job = job;
+            }
+
+            public IStartJobV1 Job { get; private set; }
+        }
+
+        #endregion
+
         public const string CoordinatorRouterName = "coordinators";
         protected readonly CrawlJob Job;
 
@@ -32,6 +63,8 @@ namespace WebCrawler.Service.Actors.IO
 
         protected IActorRef CoordinatorRouter;
         protected IActorRef DownloadTracker;
+        protected ICancelable JobStarter;
+        protected ILoggingAdapter Log = Context.GetLogger();
 
         public IStash Stash { get; set; }
 
@@ -55,13 +88,13 @@ namespace WebCrawler.Service.Actors.IO
             //job failed to start
             Receive<ReceiveTimeout>(timeout => EndJob(JobStatus.Failed));
 
-            Receive<SubscribeToJob>(subscribe =>
+            Receive<ISubscribeToJobV1>(subscribe =>
             {
-                if(subscribe.Job.Equals(Job))
+                if (subscribe.Job.Equals(Job))
                     Subscribers.Add(subscribe.Subscriber);
             });
 
-            Receive<UnsubscribeFromJob>(unsubscribe =>
+            Receive<IUnsubscribeFromJobV1>(unsubscribe =>
             {
                 if (unsubscribe.Job.Equals(Job))
                     Subscribers.Remove(unsubscribe.Subscriber);
@@ -72,7 +105,7 @@ namespace WebCrawler.Service.Actors.IO
                 DownloadTracker = tr.Tracker;
                 BecomeReady();
             });
-            
+
             // stash everything else until we have a tracker
             ReceiveAny(o => Stash.Stash());
         }
@@ -97,38 +130,62 @@ namespace WebCrawler.Service.Actors.IO
         private void Ready()
         {
             // kick off the job
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 Subscribers.Add(start.Requestor);
-                var downloadRootDocument = new DownloadWorker.DownloadHtmlDocument(new CrawlDocument(start.Job.Root));
+
+                JobStarter = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.FromMilliseconds(20),
+                    TimeSpan.FromMilliseconds(20), Self, new AttemptToStartJob(start), Self);
+            });
+
+            Receive<AttemptToStartJob>(start =>
+            {
+                var self = Self;
+                CoordinatorRouter.Ask<Routees>(new GetRoutees()).ContinueWith(tr =>
+                {
+                    return new CrawlCanStart(start.Job, tr.Result.Members.Count());
+                }).PipeTo(self);
+            });
+
+            Receive<CrawlCanStart>(start => start.NodeCount > 0, start =>
+            {
+                var downloadRootDocument = new DownloadWorker.DownloadHtmlDocument(new CrawlDocument(start.Job.Job.Root));
 
                 //should kick off the initial downloads and parsing
+                //var routees = CoordinatorRouter.Ask<Routees>(new GetRoutees()).Result;
                 CoordinatorRouter.Tell(downloadRootDocument);
+                JobStarter.Cancel();
 
                 Become(Started);
                 Stash.UnstashAll();
             });
 
+            Receive<CrawlCanStart>(start =>
+            {
+                Log.Debug("Can't start job yet. No routees.");
+            });
+
+
             ReceiveAny(o => Stash.Stash());
-          
+
         }
 
         private void Started()
         {
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 //treat the additional StartJob like a subscription
                 if (start.Job.Equals(Job))
                     Subscribers.Add(start.Requestor);
             });
 
-            Receive<SubscribeToJob>(subscribe =>
+            Receive<ISubscribeToJobV1>(subscribe =>
             {
                 if (subscribe.Job.Equals(Job))
                     Subscribers.Add(subscribe.Subscriber);
             });
 
-            Receive<UnsubscribeFromJob>(unsubscribe =>
+            Receive<IUnsubscribeFromJobV1>(unsubscribe =>
             {
                 if (unsubscribe.Job.Equals(Job))
                     Subscribers.Remove(unsubscribe.Subscriber);

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
-using WebCrawler.Service.State;
+using WebCrawler.TrackingService.State;
 
 namespace WebCrawler.Messages.State
 {

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using Akka.Actor;
 using WebCrawler.Messages.State;
-using WebCrawler.Service.Messages;
-using WebCrawler.Service.State;
+using WebCrawler.Shared.IO.Messages;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Actors.Downloads
+namespace WebCrawler.TrackingService.Actors.Downloads
 {
     /// <summary>
     /// Actor responsible for documenting the persistence of documents

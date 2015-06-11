@@ -2,7 +2,7 @@
 using Akka.Actor;
 using Helios.Util.TimedOps;
 
-namespace WebCrawler.Service.State
+namespace WebCrawler.TrackingService.State
 {
     /// <summary>
     /// The status of a particular <see cref="CrawlDocument"/> operation.

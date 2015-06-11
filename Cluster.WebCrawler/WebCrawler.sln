@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Shared", "src\WebCrawler.Messages\WebCrawler.Shared.csproj", "{8A2A881E-63AC-4292-89B7-473FFBFD0F99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Service", "src\WebCrawler.Service\WebCrawler.Service.csproj", "{2DEE00D3-5706-4534-B5CF-6E85D576701C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.TrackingService", "src\WebCrawler.Service\WebCrawler.TrackingService.csproj", "{2DEE00D3-5706-4534-B5CF-6E85D576701C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Web", "src\WebCrawler.Web\WebCrawler.Web.csproj", "{0B461C86-6E9F-4FD6-ADA6-B363C5206F9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.CrawlService", "src\WebCrawler.CrawlService\WebCrawler.CrawlService.csproj", "{6B02FE43-753C-493E-98FC-D49D4FE47881}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrawler.Shared.IO", "src\WebCrawler.Shared.IO\WebCrawler.Shared.IO.csproj", "{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +31,14 @@ Global
 		{0B461C86-6E9F-4FD6-ADA6-B363C5206F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B461C86-6E9F-4FD6-ADA6-B363C5206F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B461C86-6E9F-4FD6-ADA6-B363C5206F9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B02FE43-753C-493E-98FC-D49D4FE47881}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B02FE43-753C-493E-98FC-D49D4FE47881}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B02FE43-753C-493E-98FC-D49D4FE47881}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B02FE43-753C-493E-98FC-D49D4FE47881}.Release|Any CPU.Build.0 = Release|Any CPU
+		{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

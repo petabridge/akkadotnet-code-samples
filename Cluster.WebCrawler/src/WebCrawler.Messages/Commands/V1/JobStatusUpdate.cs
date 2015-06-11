@@ -1,7 +1,7 @@
 ﻿using System;
 using WebCrawler.Messages.State;
 
-namespace WebCrawler.Messages.Commands
+namespace WebCrawler.Messages.Commands.V1
 {
     public enum JobStatus
     {
@@ -12,7 +12,7 @@ namespace WebCrawler.Messages.Commands
         Stopped = 4
     }
 
-    public class JobStatusUpdate
+    public class JobStatusUpdate : IStatusUpdateV1
     {
         public JobStatusUpdate(CrawlJob job)
         {

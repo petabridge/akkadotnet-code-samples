@@ -2,6 +2,7 @@
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 using WebCrawler.Web.Hubs;
 
 namespace WebCrawler.Web.Actors
@@ -39,12 +40,12 @@ namespace WebCrawler.Web.Actors
                 _hub.CrawlFailed(string.Format("COULD NOT CRAWL {0}: {1}", bad.RawStr, bad.Message));
             });
 
-            Receive<JobStatusUpdate>(status =>
+            Receive<IStatusUpdateV1>(status =>
             {
                 _hub.PushStatus(status);
             });
 
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 _hub.WriteRawMessage(string.Format("Starting crawl of {0}", start.Job.Root.ToString()));
             });

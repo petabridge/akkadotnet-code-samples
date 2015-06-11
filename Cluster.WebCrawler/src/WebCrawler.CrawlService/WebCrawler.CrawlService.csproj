@@ -4,15 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8A2A881E-63AC-4292-89B7-473FFBFD0F99}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{6B02FE43-753C-493E-98FC-D49D4FE47881}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebCrawler.Messages</RootNamespace>
-    <AssemblyName>WebCrawler.Messages</AssemblyName>
+    <RootNamespace>WebCrawler.CrawlService</RootNamespace>
+    <AssemblyName>WebCrawler.CrawlService</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -30,41 +32,63 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akka, Version=1.0.2.9, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Akka">
       <HintPath>..\..\packages\Akka.1.0.2\lib\net45\Akka.dll</HintPath>
+    </Reference>
+    <Reference Include="Akka.Cluster">
+      <HintPath>..\..\packages\Akka.Cluster.1.0.2.9-beta\lib\net45\Akka.Cluster.dll</HintPath>
+    </Reference>
+    <Reference Include="Akka.Remote">
+      <HintPath>..\..\packages\Akka.Remote.1.0.2\lib\net45\Akka.Remote.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.ProtocolBuffers">
+      <HintPath>..\..\packages\Google.ProtocolBuffers.2.4.1.521\lib\net40\Google.ProtocolBuffers.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.ProtocolBuffers.Serialization">
+      <HintPath>..\..\packages\Google.ProtocolBuffers.2.4.1.521\lib\net40\Google.ProtocolBuffers.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Helios">
+      <HintPath>..\..\packages\Helios.1.4.0\lib\net45\Helios.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>..\..\packages\Microsoft.Bcl.Immutable.1.0.34\lib\portable-net45+win8+wp8+wpa81\System.Collections.Immutable.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Topshelf">
+      <HintPath>..\..\packages\Topshelf.3.2.0\lib\net40-full\Topshelf.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actors\RemoteJobActor.cs" />
-    <Compile Include="Commands\V1\IStartJobV1.cs" />
-    <Compile Include="Commands\V1\IStatusUpdateV1.cs" />
-    <Compile Include="Commands\V1\ISubscribeToJobV1.cs" />
-    <Compile Include="Commands\V1\IUnsubscribeFromJobV1.cs" />
-    <Compile Include="Commands\V1\JobStatusUpdate.cs" />
-    <Compile Include="Commands\V1\StartJob.cs" />
-    <Compile Include="Commands\V1\SubscribeToJob.cs" />
-    <Compile Include="Commands\V1\UnsubscribeFromJob.cs" />
+    <Compile Include="CrawlService.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="State\CompletedDocument.cs" />
-    <Compile Include="State\CrawlDocument.cs" />
-    <Compile Include="State\CrawlJob.cs" />
-    <Compile Include="State\CrawlJobStats.cs" />
-    <Compile Include="State\JobStatusMessage.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WebCrawler.Messages\WebCrawler.Shared.csproj">
+      <Project>{8a2a881e-63ac-4292-89b7-473ffbfd0f99}</Project>
+      <Name>WebCrawler.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WebCrawler.Shared.IO\WebCrawler.Shared.IO.csproj">
+      <Project>{085d6a95-bbc2-44d4-aa4f-3e1f91e658df}</Project>
+      <Name>WebCrawler.Shared.IO</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,13 +1,12 @@
 ﻿using Akka.Actor;
-using Akka.Routing;
 using WebCrawler.Messages.State;
 
-namespace WebCrawler.Messages.Commands
+namespace WebCrawler.Messages.Commands.V1
 {
     /// <summary>
     /// Launch a new <see cref="CrawlJob"/>
     /// </summary>
-    public class StartJob : IConsistentHashable
+    public class StartJob : IStartJobV1
     {
         public StartJob(CrawlJob job, IActorRef requestor)
         {

@@ -1,5 +1,6 @@
 ﻿using Akka.Actor;
 using WebCrawler.Messages.Commands;
+using WebCrawler.Messages.Commands.V1;
 
 namespace WebCrawler.Messages.Actors
 {
@@ -10,7 +11,7 @@ namespace WebCrawler.Messages.Actors
     {
         public RemoteJobActor()
         {
-            Receive<StartJob>(start =>
+            Receive<IStartJobV1>(start =>
             {
                 Context.ActorSelection("/user/api").Tell(start, Sender);
             });

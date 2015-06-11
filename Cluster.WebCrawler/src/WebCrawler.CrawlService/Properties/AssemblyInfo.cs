@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WebCrawler.TrackingService")]
+[assembly: AssemblyTitle("WebCrawler.CrawlService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WebCrawler.TrackingService")]
+[assembly: AssemblyProduct("WebCrawler.CrawlService")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("4dd8cb8b-a36f-4674-b7c7-77162f1216cb")]
+[assembly: Guid("d9e53cab-5bfa-4b71-b31d-937a4cce163c")]
 
 // Version information for an assembly consists of the following four values:
 //

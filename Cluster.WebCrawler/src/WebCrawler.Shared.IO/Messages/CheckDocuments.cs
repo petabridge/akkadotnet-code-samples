@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
-using WebCrawler.Service.State;
+using WebCrawler.TrackingService.State;
 
-namespace WebCrawler.Service.Messages
+namespace WebCrawler.Shared.IO.Messages
 {
     /// <summary>
     /// Message class used to check to see if any of the listed
