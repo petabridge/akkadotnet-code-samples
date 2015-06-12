@@ -85,7 +85,7 @@
     <Compile Include="Actors\IO\CrawlMaster.cs" />
     <Compile Include="Actors\Tracking\DownloadsMaster.cs" />
     <Compile Include="Actors\Tracking\DownloadsTracker.cs" />
-    <Compile Include="CrawlerService.cs" />
+    <Compile Include="TrackerService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="State\CrawlStatus.cs" />

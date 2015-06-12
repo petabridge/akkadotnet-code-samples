@@ -5,7 +5,7 @@ using WebCrawler.TrackingService.Actors.Downloads;
 
 namespace WebCrawler.TrackingService
 {
-    public class CrawlerService : ServiceControl
+    public class TrackerService : ServiceControl
     {
         protected ActorSystem ClusterSystem;
         protected IActorRef ApiMaster;
