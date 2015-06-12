@@ -132,10 +132,27 @@ Additionally, the `[Tracker]` node also has some transactional qualities - there
 
 For each of these scenarios the `[Tracker]` node must effectively execute a distributed transaction, where all nodes agree on the answer to a question like "is there a job currently running for this domain?"
 
+This is what the actor hierarchy for the `[Tracker]` role looks like:
+![Tracker role hierarchy - Petabridge Webcrawler Akka.Cluster demo](diagrams/tracking_service_hierarchy.png)
+
+
+
 #### `[Crawler]` Role
 The workhorse of the WebCrawler sample, the `[Crawler]` role is a Windows Service built using [Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services") that asynchronously downloads and parses HTML documents during a `CrawlJob` per the process flow defined earlier.
 
 If a new `[Crawler]` node joins in the middle of a large `CrawlJob`, the `[Tracker]` node responsible for initially starting the job will automatically deploy worker actor hierarchies onto the new node and begin giving it work to do.
+
+This is what the actor hierarchy for the `[Crawler]` role looks like:
+![Tracker role hierarchy - Petabridge Webcrawler Akka.Cluster demo](diagrams/crawl_service_hierarchy.png)
+
+#### Interaction Between `[Tracker]` and `[Crawler]` Roles
+Now that we've covered each role individually, let's touch briefly on how the roles interact. The `CrawlMaster` actor on each `[Tracker]` node remotely deploys a pool of `DownloadCoordinator`s onto `[Crawler]` nodes. Each of these `DownloadCoordinator` actors then fans out its own worker hierarchy of `ParseWorker` and `DownloadWorker` actors. 
+
+You may hear us refer to this pattern as a "remote fan-out pattern." This means that one node (`[Tracker]` here) is remotely deploying an actor onto another node (`[Crawler]` here), and that remotely-deployed actor will then "fan out" or build out a hierarchy of actors underneath it. This is a great way to scale out your processing-you get the benefit of elastic scalability across the cluster, but logistically you only have to remote-deploy one actor, the parent that will build out its own hierarchy once deployed.
+
+Here is what the remote fan-out pattern looks like, in the context of this `WebCrawler` sample:
+![Petabridge Akka.Cluster WebCrawler Sample - Remote Fan-Out Pattern](diagrams/tracker_crawler_interaction.png)
+
 
 ### Akka.Cluster and Clustering
 Clustering is an ambiguous term that means different things to different systems, but here's what we mean when we refer to a cluster:
