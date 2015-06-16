@@ -6,19 +6,20 @@ In this sample you'll also see how to integrate Akka.NET with the following tech
 
 - **[ASP.NET MVC5](http://www.asp.net/mvc/mvc5)**;
 - **[SignalR](http://signalr.net/ "Websockets for .NET")** - Websockets library for .NET;
--  **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")** - Windows Services made easy; 
+-  **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")** - Windows Services made easy;
 -  **[HTML Agility Pack](http://htmlagilitypack.codeplex.com/)** - for parsing crawled web pages; and
 - **[Lighthouse](https://github.com/petabridge/lighthouse "Lighthouse - Service Discovery for Akka.NET")** - a lightweight service discovery platform for Akka.Cluster.
 
 ## Sample Overview
 
-In the `WebCrawler` sample we're actually going to run three different pieces of software concurrently:
+In the `WebCrawler` sample we're actually going to run four different pieces of software concurrently:
 
 * **`[Lighthouse]`** - An instance of the **[Lighthouse](https://github.com/petabridge/lighthouse "Lighthouse - Service Discovery for Akka.NET")** service, so you'll want to clone and build that repository in you intend to run this sample;
-* **`[Crawler]`** - A dedicated Windows Service built using **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")**. This is where most of the heavy lifting is done in this sample, and multiple instances of these services can be run in parallel in order to cooperatively execute a web crawl. The source for `[Crawler]` is inside the [`src\WebCrawler.Service`](src\WebCrawler.Service) folder.
-* **`[Web]`** - An ASP.NET MVC5 application that uses **[SignalR](http://signalr.net/ "Websockets for .NET")** to send commands to and receive data from `[Crawler]` instances. Multiple `[Web]` instances may be run in parallel, but they're unaware of eachother's crawl jobs by default.
+* **`[Crawler]`** - A dedicated Windows Service built using **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")**. This is where all of the scalable processing work is done in this sample, and multiple instances of these services can be run in parallel in order to cooperatively execute a web crawl. The source for `[Crawler]` is inside the [`src\WebCrawler.CrawlService`](src/WebCrawler.CrawlService) folder. This is a stateless service, designed to be scaled out dynamically.
+* **`[Tracker]`** - A dedicated Windows Service built using **[Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services")**. This is where all the state of a webcrawl is managed, and the service that ensures that processing isn't wasted by allowing only one `CrawlJob` per domain. This is a stateful service that remotely deploys fan-out processing hierarchies under the `DownloadCoordinator` onto `[Crawler]` nodes in the cluster. The source for `[Tracker]` is inside the [`src\WebCrawler.TrackingService`](src/WebCrawler.Service) folder.
+* **`[Web]`** - An ASP.NET MVC5 application that uses **[SignalR](http://signalr.net/ "Websockets for .NET")** to send commands to and receive data from `[Tracker]` instances. Multiple `[Web]` instances may be run in parallel, but they're unaware of eachother's crawl jobs by default.
 
-> NOTE: `WebCrawler.sln` should attempt to launch one instance of `[Crawler]` and `[Web]` by default.
+> NOTE: `WebCrawler.sln` should attempt to launch one instance of `[Crawler]`, `[Tracker]` and `[Web]` by default.
 
 ### Goal: Use Microservices Built with Akka.Cluster to Crawl Web Domains with Elastic Scale
 
@@ -43,7 +44,7 @@ In this example you'll be exposed to the following concepts:
 
 1. **Akka.NET Remoting** - how remote addressing, actor deployment, and message delivery works in Akka.NET.
 2. **Microservices** - the software architecture style used to organize the WebCrawler sample into dedicated services for maximum resiliency and parallelism.
-3. **Clustering** - a distributed programming technique that uses peer-to-peer networking, gossip protocols, addressing systems, and other tools to allow multiple processes and machines to work cooperatively together in an elastic fashion.  
+3. **Clustering** - a distributed programming technique that uses peer-to-peer networking, gossip protocols, addressing systems, and other tools to allow multiple processes and machines to work cooperatively together in an elastic fashion.
 4. **ASP.NET & Windows Services Integration** - how to integrate Akka.NET into the most commonly deployed types of networked applications in the .NET universe.
 
 ### Akka.NET Remoting
@@ -63,22 +64,22 @@ Here's an example of what a remote deployment actually looks like:
                 .WithDeploy(new Deploy(
 				new RemoteScope(new Address("akka.tcp", "mySys", "localhost", 4033))), "remote-actor");
 /*
- * If an actor system can be found at `akka.tcp://mySys@localhost:4033` 
+ * If an actor system can be found at `akka.tcp://mySys@localhost:4033`
  * then a new actor will be deployed at `akka.tcp://mySys@localhost:4033/user/remote-actor`.
  */
 ```
 
-**When this code is run, `ActorRef` is still returned on the actor system who deployed onto `akka.tcp://mySys@localhost:4033`.** And that `ActorRef` can be passed around locally anywhere within that process and all messages sent to it will be delivered remotely to the actual actor instance running on `akka.tcp://mySys@localhost:4033` .
+**When this code is run, `IActorRef` is still returned on the actor system who deployed onto `akka.tcp://mySys@localhost:4033`.** And that `IActorRef` can be passed around locally anywhere within that process and all messages sent to it will be delivered remotely to the actual actor instance running on `akka.tcp://mySys@localhost:4033` .
 
-#### An `ActorRef` is just an `ActorRef`, regardless of how it was deployed
+#### An `IActorRef` is just an `IActorRef`, regardless of how it was deployed
 
-[Because Akka.NET `ActorRef`s have location transparency](http://petabridge.com/blog/akkadotnet-what-is-an-actor/), one of the amazing benefits of this is that when you write your Akka.NET actor code it will work seamlessly for all actors regardless of how they're deployed.
+[Because Akka.NET `IActorRef`s have location transparency](http://petabridge.com/blog/akkadotnet-what-is-an-actor/), one of the amazing benefits of this is that when you write your Akka.NET actor code it will work seamlessly for all actors regardless of how they're deployed.
 
-This means that [the following code from the `[Crawler]` service](src/WebCrawler.Service/Actors/IO/DownloadCoordinator.cs) will work equally well with actors running on remote systems or locally within the same process:
+This means that [the following code from the `[Crawler]` service](src/WebCrawler.Shared.IO/DownloadCoordinator.cs) will work equally well with actors running on remote systems or locally within the same process:
 
 ```csharp
 // commander and downloadstracker can both be running on different systems
-public DownloadCoordinator(CrawlJob job, ActorRef commander, ActorRef downloadsTracker, long maxConcurrentDownloads)
+public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
     {
         Job = job;
         DownloadsTracker = downloadsTracker;
@@ -110,30 +111,31 @@ For the purposes of this WebCrawler sample, here's how our application is broken
 
 It has two jobs:
 
-1. Act as the dedicated seed node for all `[Crawler]` and `[Web]` roles when they attempt to join the Akka.Cluster and
-2. Broadcast the availability of new nodes to all `[Crawler]` and `[Web]` instances so they can leverage the newly available nodes for work.
+1. Act as the dedicated seed node for all `[Crawler]`, `[Tracker]`, and `[Web]` roles when they attempt to join the Akka.Cluster and
+2. Broadcast the availability of new nodes to all `[Crawler]`, `[Tracker]`, and `[Web]` instances so they can leverage the newly available nodes for work.
 
-There can be multiple `[Lighthouse]` roles running in parallel, but all of their addresses need to be written into the `akka.cluster` HOCON configuration section of each `[Crawler]` and `[Web]` role in order to use Lighthouse's capabilities effectively.
+There can be multiple `[Lighthouse]` roles running in parallel, but all of their addresses need to be written into the `akka.cluster` HOCON configuration section of each `[Crawler]`, `[Tracker]` and `[Web]` node in order to use Lighthouse's capabilities effectively.
 
 #### `[Web]` Role
-The `[Web]` role corresponds to everything inside the [WebCrawler.Web project](src/WebCrawler.Web) - it's an ASP.NET + SignalR application that uses a lightweight `ActorSystem` to communicate with all `[Crawler]` roles. It's meant to act as the user-interface to the WebCrawler.
+The `[Web]` role corresponds to everything inside the [WebCrawler.Web project](src/WebCrawler.Web) - it's an ASP.NET + SignalR application that uses a lightweight `ActorSystem` to communicate with all `[Tracker]` roles. It's meant to act as the user-interface to the WebCrawler.
 
-When a job is received by a `[Crawler]` and is able to be processed, the `[Crawler]` nodes will begin publishing their messages back to the `SignalRActor` (**[source](src/WebCrawler.Web/Actors/SignalRActor.cs)**) that wraps the SignalR hub used to display the results on the page.
+When a job is received by a `[Tracker]` and is able to be processed, the `[Tracker]` nodes will begin publishing their messages back to the `SignalRActor` (**[source](src/WebCrawler.Web/Actors/SignalRActor.cs)**) that wraps the SignalR hub used to display the results on the page.
 
-There can be more than one instance of the `[Web]` role, although in order to receive updates on an in-progress crawl job it will need to resubmit the `CrawlJob` to one of the `[Crawler]` instances.
+There can be more than one instance of the `[Web]` role, although in order to receive updates on an in-progress crawl job it will need to resubmit the `CrawlJob` to one of the `[Tracker]` instances.
+
+#### `[Tracker]` Role
+The `[Tracker]` makes note of which actor requested the job originally (in this case, a `[Web]` role's `SignalRActor`) and uses pub / sub to broadcast incremental updates it receives from the `DownloadCoordinator` actors it deploys onto `[Crawler]` nodes.
+
+Additionally, the `[Tracker]` node also has some transactional qualities - there can only be:
+1. One instance of each `CrawlJob` running throughout the cluster at a time, i.e. there can't be two parallel crawls of MSDN.com at a time, but multiple domains can be crawled at once. And
+2. There can only be one `DownloadsTracker` ([source](src/WebCrawler.Service/Actors/Tracking/DownloadsTracker.cs)) actor per `CrawlJob`, because figuring out which documents are new and which ones aren't requires a strong level of consistency.
+
+For each of these scenarios the `[Tracker]` node must effectively execute a distributed transaction, where all nodes agree on the answer to a question like "is there a job currently running for this domain?"
 
 #### `[Crawler]` Role
 The workhorse of the WebCrawler sample, the `[Crawler]` role is a Windows Service built using [Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services") that asynchronously downloads and parses HTML documents during a `CrawlJob` per the process flow defined earlier.
 
-The `[Crawler]` makes note of which actor requested the job originally (in this case, a `[Web]` role's `SignalRActor`) and uses pub / sub to broadcast incremental updates it receives from its `DownloadCoordinator` actors.
-
-One really interesting thing about the `[Crawler]` node is that it looks for and communicates almost exclusively with other `[Crawler]` nodes. If a new `[Crawler]` node joins in the middle of a large `CrawlJob`, the `[Crawler]` node responsible for initially starting the job will automatically deploy worker actor hierarchies onto the new node and begin giving it work to do.
-
-Additionally, the `[Crawler]` node also has some transactional qualities - there can only be:
-1. One instance of each `CrawlJob` running throughout the cluster at a time, i.e. there can't be two parallel crawls of MSDN.com at a time, but multiple domains can be crawled at once. And
-2. There can only be one `DownloadsTracker` ([source](src/WebCrawler.Service/Actors/Tracking/DownloadsTracker.cs)) actor per `CrawlJob`, because figuring out which documents are new and which ones aren't requires a strong level of consistency.
-
-For each of these scenarios the `[Crawler]` node must effectively execute a distributed transaction, where all nodes agree on the answer to a question like "is there a job currently running for this domain?"
+If a new `[Crawler]` node joins in the middle of a large `CrawlJob`, the `[Tracker]` node responsible for initially starting the job will automatically deploy worker actor hierarchies onto the new node and begin giving it work to do.
 
 ### Akka.Cluster and Clustering
 Clustering is an ambiguous term that means different things to different systems, but here's what we mean when we refer to a cluster:
@@ -153,7 +155,7 @@ There are two types of nodes in an Akka.Cluster:
 * __Seed nodes__, which have well-known addresses that are described inside your `Config`
 * __Non-seed nodes__, which are dynamically deployed nodes that join the cluster by establishing contact with a seed nodes.
 
-The majority of your nodes will typically be __non-seed nodes__ for production clusters - this is because they're easier to manage from a configuration standpoint and it also requires fewer static IP addresses and deployment overhead. 
+The majority of your nodes will typically be __non-seed nodes__ for production clusters - this is because they're easier to manage from a configuration standpoint and it also requires fewer static IP addresses and deployment overhead.
 
 So here's why seed nodes are important:
 
@@ -192,11 +194,11 @@ You can declare a specific Akka.Cluster application as a member of the "crawler"
 akka {
     actor {
       provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
-     
+
     remote {
       log-remote-lifecycle-events = DEBUG
       log-received-messages = on
-      
+
       helios.tcp {
         transport-class = "Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote"
             applied-adapters = []
@@ -206,11 +208,11 @@ akka {
         hostname = "127.0.0.1"
         port = 4054
       }
-    }            
+    }
 
     cluster {
 	  #manually populate other seed nodes here, i.e. "akka.tcp://lighthouse@127.0.0.1:4053"
-      seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"] 
+      seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"]
       roles = [crawler]
     }
   }
@@ -228,68 +230,69 @@ In terms of how we actually use Akka.Cluster inside the WebCrawler sample, the a
 ```xml
 akka {
     actor {
-      provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
-      deployment {
-        /api/broadcaster {
-          router = broadcast-group
-          routees.paths = ["user/api"]
-          cluster {
-              enabled = on
-              max-nr-of-instances-per-node = 1
-              allow-local-routees = on
-              use-role = crawler
-          }
+        provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"
+        deployment {
+            /api/broadcaster {
+                router = broadcast-group
+                routees.paths = ["/user/api"]
+                cluster {
+                        enabled = on
+                        max-nr-of-instances-per-node = 1
+                        allow-local-routees = on
+                        use-role = tracker
+                }
+            }
+
+            /downloads/broadcaster {
+                router = broadcast-group
+                routees.paths = ["/user/downloads"]
+                cluster {
+                        enabled = on
+                        max-nr-of-instances-per-node = 1
+                        allow-local-routees = on
+                        use-role = tracker
+                }
+            }
+
+            "/api/*/coordinators" {
+                router = round-robin-pool
+                nr-of-instances = 10
+                cluster {
+                    enabled = on
+                    max-nr-of-instances-per-node = 2
+                    allow-local-routees = off
+                    use-role = crawler
+                }
+            }
+
         }
-        
-        /downloads/broadcaster {
-          router = broadcast-group
-          routees.paths = ["user/downloads"]
-          cluster {
-              enabled = on
-              max-nr-of-instances-per-node = 1
-              allow-local-routees = on
-              use-role = crawler
-          }
-        }
-        
-        "/api/*/coordinators" {
-          router = round-robin-pool
-          nr-of-instances = 10
-          cluster {
-            enabled = on
-            max-nr-of-instances-per-node = 2
-            allow-local-routees = on
-            use-role = crawler
-          }
-        }             
-        
-      }
     }
-    
+
     remote {
-      log-remote-lifecycle-events = DEBUG
-      log-received-messages = on
-      
-      helios.tcp {
-        transport-class = "Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote"
+        log-remote-lifecycle-events = DEBUG
+        log-received-messages = on
+
+        helios.tcp {
+            transport-class = "Akka.Remote.Transport.Helios.HeliosTcpTransport, Akka.Remote"
             applied-adapters = []
             transport-protocol = tcp
-        #will be populated with a dynamic host-name at runtime if left uncommented
-        #public-hostname = "POPULATE STATIC IP HERE"
-        hostname = "127.0.0.1"
-        port = 0 #dynamically assign port
-      }
-    }            
+            #will be populated with a dynamic host-name at runtime if left uncommented
+            #public-hostname = "POPULATE STATIC IP HERE"
+            hostname = "127.0.0.1"
+            port = 0
+        }
+    }
 
     cluster {
-	   #manually populate other seed nodes here, i.e. "akka.tcp://lighthouse@127.0.0.1:4053"
-      seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"]
-      roles = [crawler]
+        #will inject this node as a self-seed node at run-time
+        seed-nodes = ["akka.tcp://webcrawler@127.0.0.1:4053"] #manually populate other seed nodes here, i.e. "akka.tcp://lighthouse@127.0.0.1:4053", "akka.tcp://lighthouse@127.0.0.1:4044"
+        roles = [tracker]
+        auto-down-unreachable-after = 10s
     }
-  }
+}
 ```
 
-Inside each router deployment specification in `[Crawler]`'s App.config we are able to turn on certain clustering attributes, such as this one for any actor matching path `/api/*/coordinators` (there's one of these per `CrawlJob`:)
+Inside each router deployment specification in `[Tracker]`'s App.config we are able to turn on certain clustering attributes, such as this one for any actor matching path `/api/*/coordinators` (there's one of these per `CrawlJob`:)
 
 ```xml
  "/api/*/coordinators" {
@@ -301,7 +304,7 @@ Inside each router deployment specification in `[Crawler]`'s App.config we are a
     allow-local-routees = on
     use-role = crawler
   }
-}    
+}
 ```
 
 What this configuration section translates to is:
@@ -314,13 +317,13 @@ What this configuration section translates to is:
 * Local routees deployed on the same machine as the router are allowed; and
 * And we will only deploy these routees on nodes matching role `crawler`.
 
-Akka.NET will use this information to do just that - deploy routees onto new `[Crawler]` instances when they join the cluster and mark those routees as dead if a node with deployed routees leaves the cluster.
+Akka.NET will use this information to do just that - deploy routees from the `[Tracker]` onto new `[Crawler]` instances when they join the cluster and mark those routees as dead if a node with deployed routees leaves the cluster.
 
 This how the WebCrawler sample is able to scale-out jobs in the middle of running them!
 
 ### ASP.NET and Windows Service Integration
 
-In `[Web]` we integrate Akka.NET inside an ASP.NET MVC5 application and in `[Crawler]` we integrate inside a Windows Service. Both are fairly easy to do.
+In `[Web]` we integrate Akka.NET inside an ASP.NET MVC5 application, and in `[Crawler]` and `[Tracker]` we integrate inside a Windows Service. Both are fairly easy to do.
 
 #### Best Practices for ASP.NET and Akka.NET Integration
 Typically what we see is a really lightweight `ActorSystem` inside ASP.NET applications - heavy-duty work usually gets offloaded via Akka.Remote / Akka.Cluster to a separate Windows Service.
@@ -357,7 +360,7 @@ From there, create any top-level actors you need and you're good to go.
 #### Best Practices for Windows Services and Akka.NET Integration
 The best recommendation is to always use [Topshelf](http://topshelf-project.com/ "Topshelf Project - easily turn console apps into Windows Services") to build your Windows Services - it radically simplifies everything about Windows Service deployment and development.
 
-Here's what the `[Crawler]` Windows Service definition looks like using Topshelf:
+Here's what the `[Tracker]` Windows Service definition looks like using Topshelf:
 
 
 **Program.cs**
@@ -368,8 +371,8 @@ class Program
     {
         return (int)HostFactory.Run(x =>
         {
-            x.SetServiceName("Crawler");
-            x.SetDisplayName("Akka.NET Crawler");
+            x.SetServiceName("Tracker");
+            x.SetDisplayName("Akka.NET Crawl Tracker");
             x.SetDescription("Akka.NET Cluster Demo - Web Crawler.");
 
             x.UseAssemblyInfoForServiceInfo();
@@ -383,14 +386,13 @@ class Program
 }
 ```
 
-**CrawlerService.cs**
+**TrackerService.cs**
 ```csharp
-public class CrawlerService : ServiceControl
+public class TrackerService : ServiceControl
 {
     protected ActorSystem ClusterSystem;
     protected ActorRef ApiMaster;
     protected ActorRef DownloadMaster;
-    
 
     public bool Start(HostControl hostControl)
     {

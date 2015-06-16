@@ -8,15 +8,15 @@ namespace WebCrawler.TrackingService
         {
             return (int)HostFactory.Run(x =>
             {
-                x.SetServiceName("Crawler");
-                x.SetDisplayName("Akka.NET Crawler");
+                x.SetServiceName("Tracker");
+                x.SetDisplayName("Akka.NET Crawl Tracker");
                 x.SetDescription("Akka.NET Cluster Demo - Web Crawler.");
 
                 x.UseAssemblyInfoForServiceInfo();
                 x.RunAsLocalSystem();
                 x.StartAutomatically();
                 //x.UseNLog();
-                x.Service<CrawlerService>();
+                x.Service<TrackerService>();
                 x.EnableServiceRecovery(r => r.RestartService(1));
             });
         }
