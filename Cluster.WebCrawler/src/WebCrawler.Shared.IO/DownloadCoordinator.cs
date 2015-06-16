@@ -115,7 +115,7 @@ namespace WebCrawler.Shared.IO
                 {
                     _logger.Info("Publishing {0} to parent", Stats);
 
-                    ActorRefImplicitSenderExtensions.Tell(Commander, Stats.Copy());
+                    Commander.Tell(Stats.Copy());
 
                     //reset our stats after publishing
                     Stats = Stats.Reset();
@@ -143,11 +143,11 @@ namespace WebCrawler.Shared.IO
                     // Context.Parent is the router between the coordinators and the Commander
                     if (doc.IsImage)
                     {
-                        ActorRefImplicitSenderExtensions.Tell(Context.Parent, new DownloadWorker.DownloadImage(doc));
+                        Context.Parent.Tell(new DownloadWorker.DownloadImage(doc));
                     }
                     else
                     {
-                        ActorRefImplicitSenderExtensions.Tell(Context.Parent, new DownloadWorker.DownloadHtmlDocument(doc));
+                        Context.Parent.Tell(new DownloadWorker.DownloadHtmlDocument(doc));
                     }
                 }
             });
@@ -155,7 +155,7 @@ namespace WebCrawler.Shared.IO
             //hand the work off to the downloaders
             Receive<DownloadWorker.IDownloadDocument>(download =>
             {
-                ActorRefImplicitSenderExtensions.Tell(DownloaderRouter, download);
+                DownloaderRouter.Tell(download);
             });
 
             Receive<CompletedDocument>(completed =>
@@ -167,13 +167,13 @@ namespace WebCrawler.Shared.IO
             /* Set all of our local downloaders to message our local parsers */
             Receive<DownloadWorker.RequestParseActor>(request =>
             {
-                ActorRefImplicitSenderExtensions.Tell(Sender, new DownloadWorker.SetParseActor(ParserRouter));
+                Sender.Tell(new DownloadWorker.SetParseActor(ParserRouter));
             });
 
             /* Set all of our local parsers to message our local downloaders */
             Receive<ParseWorker.RequestDownloadActor>(request =>
             {
-                ActorRefImplicitSenderExtensions.Tell(Sender, new ParseWorker.SetDownloadActor(DownloaderRouter));
+                Sender.Tell(new ParseWorker.SetDownloadActor(DownloaderRouter));
             });
         }
     }
