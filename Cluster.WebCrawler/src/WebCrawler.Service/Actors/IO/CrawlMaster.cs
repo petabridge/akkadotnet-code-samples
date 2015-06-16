@@ -162,7 +162,7 @@ namespace WebCrawler.TrackingService.Actors.IO
 
             Receive<CrawlCanStart>(start =>
             {
-                Log.Debug("Can't start job yet. No routees.");
+                Log.Info("Can't start job yet. No routees.");
             });
 
 
