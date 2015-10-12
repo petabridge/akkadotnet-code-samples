@@ -47,7 +47,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actors\RemoteJobActor.cs" />
     <Compile Include="Commands\V1\IStartJobV1.cs" />
     <Compile Include="Commands\V1\IStatusUpdateV1.cs" />
     <Compile Include="Commands\V1\ISubscribeToJobV1.cs" />
@@ -65,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Actors\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
