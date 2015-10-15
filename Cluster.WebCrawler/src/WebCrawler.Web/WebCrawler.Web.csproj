@@ -20,6 +20,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -39,17 +40,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akka, Version=1.0.2.9, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Akka.1.0.2\lib\net45\Akka.dll</HintPath>
+    <Reference Include="Akka, Version=1.0.4.12, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.1.0.4\lib\net45\Akka.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Akka.Cluster, Version=1.0.2.9, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Akka.Cluster.1.0.2.9-beta\lib\net45\Akka.Cluster.dll</HintPath>
+    <Reference Include="Akka.Cluster, Version=1.0.4.12, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Cluster.1.0.4.12-beta\lib\net45\Akka.Cluster.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Akka.Remote, Version=1.0.2.9, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Akka.Remote.1.0.2\lib\net45\Akka.Remote.dll</HintPath>
+    <Reference Include="Akka.Remote, Version=1.0.4.12, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Remote.1.0.4\lib\net45\Akka.Remote.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Google.ProtocolBuffers">
       <HintPath>..\..\packages\Google.ProtocolBuffers.2.4.1.521\lib\net40\Google.ProtocolBuffers.dll</HintPath>
@@ -59,8 +60,8 @@
       <HintPath>..\..\packages\Google.ProtocolBuffers.2.4.1.521\lib\net40\Google.ProtocolBuffers.Serialization.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Helios">
-      <HintPath>..\..\packages\Helios.1.4.0\lib\net45\Helios.dll</HintPath>
+    <Reference Include="Helios, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Helios.1.4.1\lib\net45\Helios.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core">
@@ -70,9 +71,9 @@
       <HintPath>..\..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.2.0\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable">
