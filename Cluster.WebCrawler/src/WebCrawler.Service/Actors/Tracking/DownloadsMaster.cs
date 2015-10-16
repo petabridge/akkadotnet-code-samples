@@ -107,7 +107,8 @@ namespace WebCrawler.TrackingService.Actors.Downloads
 
         protected override void PreStart()
         {
-            MasterBroadcast = Context.Child(DownloadsBroadcastName).Equals(ActorRefs.Nobody) ? Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), DownloadsBroadcastName)
+            MasterBroadcast = Context.Child(DownloadsBroadcastName).Equals(ActorRefs.Nobody) ?
+                Context.ActorOf(Props.Empty.WithRouter(FromConfig.Instance), DownloadsBroadcastName)
                 : Context.Child(DownloadsBroadcastName);
         }
 
