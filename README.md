@@ -10,13 +10,15 @@ That's the goal of this repository - to provide a small number of *exceptionally
 
 **[Doing Asynchronous Operations inside Actors with PipeTo](/PipeTo/)** - how to use `Task<T>` and `async` operations inside your actors using the `PipeTo` pattern in Akka.NET.
 
+**[Testing actors with`Akka.TestKit`](/TestKit/)** — how to test your `ActorSystem`s, explanation of the core & advanced features of the testing framework, as well as addressing common testing FAQs and situations.
+
 **[ASP.NET and Windows Service Microservices with Akka.Cluster](Cluster.WebCrawler)** - build an elastically scalable web-crawler using Akka.Cluster in Windows Services and ASP.NET MVC.
 
 **[Remote Deployment of Actors with Akka.Remote](RemoteDeploy/)** - how to deploy actors over the network using the Akka.Remote module.
 
 ## Contributing
 
-We accept pull requests for new samples or changes to existing ones, but we maintain a very high standard of quality. 
+We accept pull requests for new samples or changes to existing ones, but we maintain a very high standard of quality.
 
 Please see our [PipeTo Sample](/PipeTo/) for an example.
 
