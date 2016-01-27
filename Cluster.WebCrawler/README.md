@@ -396,7 +396,7 @@ class Program
             x.RunAsLocalSystem();
             x.StartAutomatically();
             //x.UseNLog();
-            x.Service<CrawlerService>();
+            x.Service<TrackerService>();
             x.EnableServiceRecovery(r => r.RestartService(1));
         });
     }
