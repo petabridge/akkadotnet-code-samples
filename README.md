@@ -16,6 +16,8 @@ That's the goal of this repository - to provide a small number of *exceptionally
 
 **[Remote Deployment of Actors with Akka.Remote](RemoteDeploy/)** - how to deploy actors over the network using the Akka.Remote module.
 
+**[AtLeastOnceDelivery Actors and Guaranteed Message Delivery](AtLeastOnceDelivery/)** - how to use the `AtLeastOnceDeliveryActor` base class in Akka.Persistence to deliver messages multiple times until they're acknowledged by the recipient.
+
 ## Contributing
 
 We accept pull requests for new samples or changes to existing ones, but we maintain a very high standard of quality.
