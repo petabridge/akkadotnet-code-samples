@@ -6,8 +6,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Akka;
+using Akka.Actor;
 using Akka.Streams.Actors;
 using Akka.Streams.Dsl;
+using Akka.Util.Internal;
+using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
 using WebCrawler.TrackingService.State;
 
@@ -48,6 +51,15 @@ namespace WebCrawler.Shared.IO
             };
         }
 
+        public static Flow<DownloadHtmlResult, CompletedDocument, NotUsed> ProcessCompletedHtmlDownload()
+        {
+            return Flow.Create<DownloadHtmlResult>()
+                .Select(
+                    x =>
+                        new CompletedDocument(x.Command.AsInstanceOf<DownloadHtmlDocument>().Document, x.Content.Length*2,
+                            ActorRefs.NoSender));
+        }
+
         public static Flow<IDownloadDocument, DownloadImageResult, NotUsed> ProcessImageDownloadFor(
             int degreeOfParallelism, HttpClient client)
         {
@@ -58,6 +70,15 @@ namespace WebCrawler.Shared.IO
                     document =>
                         client.GetByteArrayAsync(document.Document.DocumentUri)
                             .ContinueWith(DownloadImageContinuationFunction(document)));
+        }
+
+        public static Flow<DownloadImageResult, CompletedDocument, NotUsed> ProcessCompletedDownload()
+        {
+            return Flow.Create<DownloadImageResult>()
+                .Select(
+                    x =>
+                        new CompletedDocument(x.Command.AsInstanceOf<DownloadImage>().Document, x.Bytes.Length,
+                            ActorRefs.NoSender));
         }
 
         private static Func<Task<byte[]>, DownloadImageResult> DownloadImageContinuationFunction(DownloadImage image)

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using Akka;
 using Akka.Actor;
 using Akka.Event;
 using Akka.Routing;
+using Akka.Streams;
 using Akka.Streams.Actors;
 using Akka.Streams.Dsl;
 using Akka.Streams.Implementation;
@@ -14,40 +16,6 @@ using ActorRefImplicitSenderExtensions = Akka.Actor.ActorRefImplicitSenderExtens
 
 namespace WebCrawler.Shared.IO
 {
-    public class ActorDownloadRunner : ActorSubscriber
-    {
-        private readonly Func<HttpClient> _httpClientFactory;
-        private readonly CrawlJob _crawlJob;
-
-        public ActorDownloadRunner(CrawlJob crawlJob, Func<HttpClient> httpClientFactory)
-        {
-            _httpClientFactory = httpClientFactory;
-            _crawlJob = crawlJob;
-        }
-
-        /// <summary>
-        /// Default number of maximum current operations per <see cref="DownloadWorker"/>
-        /// </summary>
-        public const int DefaultMaxConcurrentDownloads = 50;
-
-        protected override bool Receive(object message)
-        {
-            var next = message as OnNext;
-            var msg = next?.Element as ProcessDocuments;
-            if (msg != null)
-            {
-                var s = Source.From(msg.Documents);
-
-                var htmlProcessing = s
-                   
-                    .ToMaterialized();
-                return true;
-            }
-        }
-
-        public override IRequestStrategy RequestStrategy => new WatermarkRequestStrategy(100);
-    }
-
     /// <summary>
     /// Actor responsible for managing pool of <see cref="DownloadWorker"/> and <see cref="ParseWorker"/> actors.
     /// 
@@ -82,6 +50,7 @@ namespace WebCrawler.Shared.IO
 
         #endregion
 
+        const int DefaultMaxConcurrentDownloads = 50;
         protected readonly IActorRef DownloadsTracker;
         protected readonly IActorRef Commander;
 
@@ -97,8 +66,10 @@ namespace WebCrawler.Shared.IO
 
         private ILoggingAdapter _logger = Context.GetLogger();
 
-        private Sink<CheckDocuments, NotUsed> _selfSink;
-        private Flow<>
+        private Sink<CheckDocuments, NotUsed> _selfHtmlSink;
+        private Sink<CompletedDocument, NotUsed> _selfDocSink;
+        private Flow<CrawlDocument, CompletedDocument, NotUsed> _downloadImageFlow;
+        private Flow<CrawlDocument, DownloadHtmlResult, NotUsed> _downloadHtmlFlow;
 
         public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
         {
@@ -107,7 +78,18 @@ namespace WebCrawler.Shared.IO
             MaxConcurrentDownloads = maxConcurrentDownloads;
             Commander = commander;
             Stats = new CrawlJobStats(Job);
-            _selfSink = Sink.ActorRef<CheckDocuments>(Self, PublishStatsTick.Instance);
+            _selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, PublishStatsTick.Instance);
+            _selfDocSink = Sink.ActorRef<CompletedDocument>(Self, PublishStatsTick.Instance);
+            _downloadHtmlFlow = Flow.Create<CrawlDocument>().Via(DownloadFlow.SelectDocType())
+                .Buffer(10, OverflowStrategy.Backpressure)
+                .Via(DownloadFlow.ProcessHtmlDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()));
+
+            _downloadImageFlow = Flow.Create<CrawlDocument>()
+                .Via(DownloadFlow.SelectDocType())
+                .Buffer(10, OverflowStrategy.Backpressure)
+                .Via(DownloadFlow.ProcessImageDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()))
+                .Via(DownloadFlow.ProcessCompletedDownload());
+
             Receiving();
         }
 
@@ -132,7 +114,7 @@ namespace WebCrawler.Shared.IO
 
             // Schedule regular stats updates
             _publishStatsTask = new Cancelable(Context.System.Scheduler);
-           Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self, PublishStatsTick.Instance, Self, _publishStatsTask);
+            Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self, PublishStatsTick.Instance, Self, _publishStatsTask);
         }
 
         protected override void PreRestart(Exception reason, object message)
@@ -170,7 +152,7 @@ namespace WebCrawler.Shared.IO
             Receive<CheckDocuments>(documents =>
             {
                 //forward this onto the downloads tracker, but have it reply back to us
-                ((ICanTell) DownloadsTracker).Tell(documents, Self);
+                ((ICanTell)DownloadsTracker).Tell(documents, Self);
             });
 
             //Update our local stats
@@ -182,18 +164,10 @@ namespace WebCrawler.Shared.IO
             //Received word from the DownloadTracker that we need to process some docs
             Receive<ProcessDocuments>(process =>
             {
-                foreach (var doc in process.Documents)
-                {
-                    // Context.Parent is the router between the coordinators and the Commander
-                    if (doc.IsImage)
-                    {
-                        Context.Parent.Tell(new DownloadImage(doc));
-                    }
-                    else
-                    {
-                        Context.Parent.Tell(new DownloadHtmlDocument(doc));
-                    }
-                }
+                var s = Source.From(process.Documents);
+
+                _downloadHtmlFlow.RunWith(s, _selfHtmlSink, Context.Materializer());
+                _downloadImageFlow.RunWith(s, _selfDocSink, Context.Materializer());
             });
 
             //hand the work off to the downloaders

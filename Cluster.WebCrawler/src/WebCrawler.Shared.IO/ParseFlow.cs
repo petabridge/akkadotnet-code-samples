@@ -37,7 +37,7 @@ namespace WebCrawler.Shared.IO
                         var validImgUris =
                             imgs.Select(x => x.Attributes["src"].Value)
                                 .Where(x => CanMakeAbsoluteUri(jobRoot, x))
-                                .Select(ToAsboluteUri)
+                                .Select(x => ToAsboluteUri(jobRoot, x))
                                 .Where(x => AbsoluteUriIsInDomain(jobRoot, x))
                                 .Select(y => new CrawlDocument(y, true));
 
@@ -50,7 +50,7 @@ namespace WebCrawler.Shared.IO
                         var validLinkUris =
                             links.Select(x => x.Attributes["href"].Value)
                                 .Where(x => CanMakeAbsoluteUri(jobRoot, x))
-                                .Select(ToAsboluteUri)
+                                .Select(x => ToAsboluteUri(jobRoot, x))
                                 .Where(x => AbsoluteUriIsInDomain(jobRoot, x))
                                 .Select(y => new CrawlDocument(y, false));
 
@@ -82,9 +82,9 @@ namespace WebCrawler.Shared.IO
             return jobRoot.Domain == otherUri.Host;
         }
 
-        public static Uri ToAsboluteUri(string rawUri)
+        public static Uri ToAsboluteUri(CrawlJob jobRoot, string rawUri)
         {
-            return Uri.IsWellFormedUriString(rawUri, UriKind.Absolute) ? new Uri(rawUri, UriKind.Absolute) : new Uri(JobRoot.Root, rawUri);
+            return Uri.IsWellFormedUriString(rawUri, UriKind.Absolute) ? new Uri(rawUri, UriKind.Absolute) : new Uri(jobRoot.Root, rawUri);
         }
     }
 }
