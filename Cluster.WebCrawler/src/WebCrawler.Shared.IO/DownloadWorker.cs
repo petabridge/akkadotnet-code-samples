@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Akka.Actor;
 using WebCrawler.Messages.State;
 using WebCrawler.TrackingService.State;
@@ -15,109 +16,6 @@ namespace WebCrawler.Shared.IO
     public class DownloadWorker : ReceiveActor, IWithUnboundedStash
     {
         #region Messages
-
-        public interface IDownloadDocument
-        {
-            CrawlDocument Document { get; }
-        }
-
-        public class DownloadHtmlDocument : IDownloadDocument, IEquatable<DownloadHtmlDocument>
-        {
-            public DownloadHtmlDocument(CrawlDocument document)
-            {
-                Document = document;
-            }
-
-            public CrawlDocument Document { get; private set; }
-
-            public bool Equals(DownloadHtmlDocument other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return Equals(Document, other.Document);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((DownloadHtmlDocument)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return (Document != null ? Document.GetHashCode() : 0);
-            }
-        }
-
-        public class DownloadImage : IDownloadDocument, IEquatable<DownloadImage>
-        {
-            public DownloadImage(CrawlDocument document)
-            {
-                Document = document;
-            }
-
-            public CrawlDocument Document { get; private set; }
-
-            public bool Equals(DownloadImage other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return Equals(Document, other.Document);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((DownloadImage)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                return (Document != null ? Document.GetHashCode() : 0);
-            }
-        }
-
-        /// <summary>
-        /// Results from a <see cref="DownloadImage"/> operation
-        /// </summary>
-        public class DownloadImageResult
-        {
-            public DownloadImageResult(DownloadImage command, byte[] bytes, HttpStatusCode status)
-            {
-                Status = status;
-                Bytes = bytes;
-                Command = command;
-            }
-
-            public DownloadImage Command { get; private set; }
-
-            public byte[] Bytes { get; private set; }
-
-            public HttpStatusCode Status { get; private set; }
-        }
-
-        /// <summary>
-        /// Results form a <see cref="DownloadHtmlDocument"/> operation
-        /// </summary>
-        public class DownloadHtmlResult
-        {
-            public DownloadHtmlResult(DownloadHtmlDocument command, string content, HttpStatusCode status)
-            {
-                Status = status;
-                Content = content;
-                Command = command;
-            }
-
-            public DownloadHtmlDocument Command { get; private set; }
-
-            public string Content { get; private set; }
-
-            public HttpStatusCode Status { get; private set; }
-        }
 
         /// <summary>
         /// Allows us to change the <see cref="ParseActor"/> for this <see cref="DownloadWorker"/>.
@@ -238,35 +136,13 @@ namespace WebCrawler.Shared.IO
                     return;
 
                  _currentDownloads.Add(html);
-                PipeToSupport.PipeTo<DownloadHtmlResult>(_httpClient.GetStringAsync(html.Document.DocumentUri).ContinueWith(tr =>
-                {
-                    // bad request, server error, or timeout
-                    if (tr.IsFaulted || tr.IsCanceled)
-                        return new DownloadHtmlResult(html, string.Empty, HttpStatusCode.BadRequest);
-
-                    // 404
-                    if (string.IsNullOrEmpty(tr.Result))
-                        return new DownloadHtmlResult(html, string.Empty, HttpStatusCode.NotFound);
-
-                    return new DownloadHtmlResult(html, tr.Result, HttpStatusCode.OK);
-                }), Self);
+                PipeToSupport.PipeTo<DownloadHtmlResult>(_httpClient.GetStringAsync(html.Document.DocumentUri).ContinueWith(ContinuationFunction(html)), Self);
             });
 
             Receive<DownloadImage>(i => CanDoDownload, image =>
             {
                 _currentDownloads.Add(image);
-                PipeToSupport.PipeTo<DownloadImageResult>(_httpClient.GetByteArrayAsync(image.Document.DocumentUri).ContinueWith(tr =>
-                {
-                    // bad request, server error, or timeout
-                    if (tr.IsFaulted || tr.IsCanceled)
-                        return new DownloadImageResult(image, new byte[0], HttpStatusCode.BadRequest);
-
-                    // 404
-                    if (tr.Result == null || tr.Result.Length == 0)
-                        return new DownloadImageResult(image, new byte[0], HttpStatusCode.NotFound);
-
-                    return new DownloadImageResult(image, tr.Result, HttpStatusCode.OK);
-                }), Self);
+                PipeToSupport.PipeTo<DownloadImageResult>(_httpClient.GetByteArrayAsync(image.Document.DocumentUri).ContinueWith(DownloadImageContinuationFunction(image)), Self);
             });
 
             // When we've hit maximum # of concurrent downloads
@@ -285,6 +161,38 @@ namespace WebCrawler.Shared.IO
             {
                 ParseActor = parse.Parser;
             });
+        }
+
+        private static Func<Task<byte[]>, DownloadImageResult> DownloadImageContinuationFunction(DownloadImage image)
+        {
+            return tr =>
+            {
+                // bad request, server error, or timeout
+                if (tr.IsFaulted || tr.IsCanceled)
+                    return new DownloadImageResult(image, new byte[0], HttpStatusCode.BadRequest);
+
+                // 404
+                if (tr.Result == null || tr.Result.Length == 0)
+                    return new DownloadImageResult(image, new byte[0], HttpStatusCode.NotFound);
+
+                return new DownloadImageResult(image, tr.Result, HttpStatusCode.OK);
+            };
+        }
+
+        private static Func<Task<string>, DownloadHtmlResult> ContinuationFunction(DownloadHtmlDocument html)
+        {
+            return tr =>
+            {
+                // bad request, server error, or timeout
+                if (tr.IsFaulted || tr.IsCanceled)
+                    return new DownloadHtmlResult(html, string.Empty, HttpStatusCode.BadRequest);
+
+                // 404
+                if (string.IsNullOrEmpty(tr.Result))
+                    return new DownloadHtmlResult(html, string.Empty, HttpStatusCode.NotFound);
+
+                return new DownloadHtmlResult(html, tr.Result, HttpStatusCode.OK);
+            };
         }
 
         private void WaitingForDownloads()

@@ -1,13 +1,53 @@
 ﻿using System;
+using System.Net.Http;
+using Akka;
 using Akka.Actor;
 using Akka.Event;
 using Akka.Routing;
+using Akka.Streams.Actors;
+using Akka.Streams.Dsl;
+using Akka.Streams.Implementation;
 using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
+using WebCrawler.TrackingService.State;
 using ActorRefImplicitSenderExtensions = Akka.Actor.ActorRefImplicitSenderExtensions;
 
 namespace WebCrawler.Shared.IO
 {
+    public class ActorDownloadRunner : ActorSubscriber
+    {
+        private readonly Func<HttpClient> _httpClientFactory;
+        private readonly CrawlJob _crawlJob;
+
+        public ActorDownloadRunner(CrawlJob crawlJob, Func<HttpClient> httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+            _crawlJob = crawlJob;
+        }
+
+        /// <summary>
+        /// Default number of maximum current operations per <see cref="DownloadWorker"/>
+        /// </summary>
+        public const int DefaultMaxConcurrentDownloads = 50;
+
+        protected override bool Receive(object message)
+        {
+            var next = message as OnNext;
+            var msg = next?.Element as ProcessDocuments;
+            if (msg != null)
+            {
+                var s = Source.From(msg.Documents);
+
+                var htmlProcessing = s
+                   
+                    .ToMaterialized();
+                return true;
+            }
+        }
+
+        public override IRequestStrategy RequestStrategy => new WatermarkRequestStrategy(100);
+    }
+
     /// <summary>
     /// Actor responsible for managing pool of <see cref="DownloadWorker"/> and <see cref="ParseWorker"/> actors.
     /// 
@@ -57,6 +97,9 @@ namespace WebCrawler.Shared.IO
 
         private ILoggingAdapter _logger = Context.GetLogger();
 
+        private Sink<CheckDocuments, NotUsed> _selfSink;
+        private Flow<>
+
         public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
         {
             Job = job;
@@ -64,6 +107,7 @@ namespace WebCrawler.Shared.IO
             MaxConcurrentDownloads = maxConcurrentDownloads;
             Commander = commander;
             Stats = new CrawlJobStats(Job);
+            _selfSink = Sink.ActorRef<CheckDocuments>(Self, PublishStatsTick.Instance);
             Receiving();
         }
 
@@ -143,17 +187,17 @@ namespace WebCrawler.Shared.IO
                     // Context.Parent is the router between the coordinators and the Commander
                     if (doc.IsImage)
                     {
-                        Context.Parent.Tell(new DownloadWorker.DownloadImage(doc));
+                        Context.Parent.Tell(new DownloadImage(doc));
                     }
                     else
                     {
-                        Context.Parent.Tell(new DownloadWorker.DownloadHtmlDocument(doc));
+                        Context.Parent.Tell(new DownloadHtmlDocument(doc));
                     }
                 }
             });
 
             //hand the work off to the downloaders
-            Receive<DownloadWorker.IDownloadDocument>(download =>
+            Receive<IDownloadDocument>(download =>
             {
                 DownloaderRouter.Tell(download);
             });

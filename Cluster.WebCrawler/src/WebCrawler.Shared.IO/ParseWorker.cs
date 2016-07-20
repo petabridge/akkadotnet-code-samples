@@ -86,7 +86,7 @@ namespace WebCrawler.Shared.IO
 
         private void Parsing()
         {
-            Receive<DownloadWorker.DownloadHtmlResult>(downloadHtmlResult =>
+            Receive<DownloadHtmlResult>(downloadHtmlResult =>
             {
                 var requestedUrls = new List<CrawlDocument>();
 

@@ -149,7 +149,7 @@ namespace WebCrawler.TrackingService.Actors.IO
 
             Receive<CrawlCanStart>(start => start.NodeCount > 0, start =>
             {
-                var downloadRootDocument = new DownloadWorker.DownloadHtmlDocument(new CrawlDocument(start.Job.Job.Root));
+                var downloadRootDocument = new DownloadHtmlDocument(new CrawlDocument(start.Job.Job.Root));
 
                 //should kick off the initial downloads and parsing
                 //var routees = CoordinatorRouter.Ask<Routees>(new GetRoutees()).Result;
