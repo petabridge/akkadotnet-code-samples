@@ -70,6 +70,7 @@ namespace WebCrawler.Shared.IO
         private Sink<CompletedDocument, NotUsed> _selfDocSink;
         private Flow<CrawlDocument, CompletedDocument, NotUsed> _downloadImageFlow;
         private Flow<CrawlDocument, DownloadHtmlResult, NotUsed> _downloadHtmlFlow;
+        private IGraph<SinkShape<CrawlDocument>, NotUsed> _downloadGraph;
 
         public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
         {
@@ -89,6 +90,28 @@ namespace WebCrawler.Shared.IO
                 .Buffer(10, OverflowStrategy.Backpressure)
                 .Via(DownloadFlow.ProcessImageDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()))
                 .Via(DownloadFlow.ProcessCompletedDownload());
+
+            _downloadGraph = Sink.FromGraph(GraphDsl.Create(builder =>
+            {
+                // html flows
+                var downloadHtmlFlow = builder.Add(_downloadHtmlFlow);
+                var downloadBroadcast = builder.Add(new Broadcast<DownloadHtmlResult>(2));
+                var completedDownload = builder.Add(DownloadFlow.ProcessCompletedHtmlDownload());
+                var parseCompletedDownload = builder.Add(ParseFlow.GetParseFlow(Job));
+                builder.From(downloadHtmlFlow.Outlet).To(downloadBroadcast.In);
+                builder.From(downloadBroadcast.Out(0)).To(completedDownload.Inlet);
+                builder.From(downloadBroadcast.Out(1)).To(parseCompletedDownload.Inlet);
+
+                // image flows
+                var downloadImageFlow = builder.Add(_downloadImageFlow);
+
+                var sourceBroadcast = builder.Add(new Broadcast<CrawlDocument>(2));
+                builder.From(sourceBroadcast.Out(0)).To(downloadImageFlow.Inlet);
+                builder.From(sourceBroadcast.Out(1)).To(downloadHtmlFlow.Inlet);
+                
+                var f = new SinkShape<CrawlDocument>(sourceBroadcast.In);
+                return f;
+            }));
 
             Receiving();
         }
@@ -165,9 +188,8 @@ namespace WebCrawler.Shared.IO
             Receive<ProcessDocuments>(process =>
             {
                 var s = Source.From(process.Documents);
-
-                _downloadHtmlFlow.RunWith(s, _selfHtmlSink, Context.Materializer());
-                _downloadImageFlow.RunWith(s, _selfDocSink, Context.Materializer());
+                s.RunWith(_downloadGraph, Context.Materializer());
+                
             });
 
             //hand the work off to the downloaders
