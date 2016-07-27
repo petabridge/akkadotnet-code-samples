@@ -15,7 +15,7 @@ namespace WebCrawler.Shared.IO
     {
         public static Flow<DownloadHtmlResult, CheckDocuments, NotUsed> GetParseFlow(CrawlJob jobRoot)
         {
-            return Flow.Create<DownloadHtmlResult>()
+            return Flow.Create<DownloadHtmlResult>().Async()
                 .Select(downloadHtmlResult =>
                 {
 

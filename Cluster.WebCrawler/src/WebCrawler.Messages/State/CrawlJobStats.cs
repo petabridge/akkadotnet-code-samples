@@ -12,23 +12,23 @@
 
         public CrawlJob Key { get; private set; }
 
-        public int TotalDocumentsDiscovered { get { return HtmlDocumentsDiscovered + ImagesDiscovered; } }
+        public long TotalDocumentsDiscovered => HtmlDocumentsDiscovered + ImagesDiscovered;
 
-        public int HtmlDocumentsDiscovered { get; private set; }
+        public long HtmlDocumentsDiscovered { get; private set; }
 
-        public int ImagesDiscovered { get; private set; }
+        public long ImagesDiscovered { get; private set; }
 
-        public int TotalDocumentsDownloaded { get { return HtmlDocumentsDownloaded + ImagesDownloaded; } }
+        public long TotalDocumentsDownloaded => HtmlDocumentsDownloaded + ImagesDownloaded;
 
-        public int HtmlDocumentsDownloaded { get; private set; }
+        public long HtmlDocumentsDownloaded { get; private set; }
 
-        public int ImagesDownloaded { get; private set; }
+        public long ImagesDownloaded { get; private set; }
 
-        public int TotalBytesDownloaded { get { return HtmlBytesDownloaded + ImageBytesDownloaded; } }
+        public long TotalBytesDownloaded => HtmlBytesDownloaded + ImageBytesDownloaded;
 
-        public int HtmlBytesDownloaded { get; private set; }
+        public long HtmlBytesDownloaded { get; private set; }
 
-        public int ImageBytesDownloaded { get; private set; }
+        public long ImageBytesDownloaded { get; private set; }
 
         public bool IsEmpty
         {
@@ -38,8 +38,8 @@
         /// <summary>
         /// Deep copy funtion
         /// </summary>
-        public CrawlJobStats Copy(int? htmlDiscovered = null, int? imgDiscovered = null, int? htmlDownloaded = null,
-            int? imgDownloaded = null, int? htmlBytesDownloaded = null, int? imgBytesDownloaded = null)
+        public CrawlJobStats Copy(long? htmlDiscovered = null, long? imgDiscovered = null, long? htmlDownloaded = null,
+            long? imgDownloaded = null, long? htmlBytesDownloaded = null, long? imgBytesDownloaded = null)
         {
             return new CrawlJobStats(Key)
             {

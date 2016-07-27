@@ -48,6 +48,12 @@ namespace WebCrawler.Shared.IO
             }
         }
 
+        public class StreamCompleteTick
+        {
+            private StreamCompleteTick() { }
+            public static readonly StreamCompleteTick Instance = new StreamCompleteTick();
+        }
+
         #endregion
 
         const int DefaultMaxConcurrentDownloads = 50;
@@ -79,8 +85,8 @@ namespace WebCrawler.Shared.IO
             MaxConcurrentDownloads = maxConcurrentDownloads;
             Commander = commander;
             Stats = new CrawlJobStats(Job);
-            _selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, PublishStatsTick.Instance);
-            _selfDocSink = Sink.ActorRef<CompletedDocument>(Self, PublishStatsTick.Instance);
+            _selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, StreamCompleteTick.Instance);
+            _selfDocSink = Sink.ActorRef<CompletedDocument>(Self, StreamCompleteTick.Instance);
             _downloadHtmlFlow = Flow.Create<CrawlDocument>().Via(DownloadFlow.SelectDocType())
                 .Buffer(10, OverflowStrategy.Backpressure)
                 .Via(DownloadFlow.ProcessHtmlDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()));
@@ -98,19 +104,22 @@ namespace WebCrawler.Shared.IO
                 var downloadBroadcast = builder.Add(new Broadcast<DownloadHtmlResult>(2));
                 var completedDownload = builder.Add(DownloadFlow.ProcessCompletedHtmlDownload());
                 var parseCompletedDownload = builder.Add(ParseFlow.GetParseFlow(Job));
-                builder.From(downloadHtmlFlow.Outlet).To(downloadBroadcast.In);
+                builder.From(downloadHtmlFlow).To(downloadBroadcast);
                 builder.From(downloadBroadcast.Out(0)).To(completedDownload.Inlet);
                 builder.From(downloadBroadcast.Out(1)).To(parseCompletedDownload.Inlet);
+                builder.From(parseCompletedDownload).To(_selfHtmlSink);
+                builder.From(completedDownload).To(_selfDocSink);
 
                 // image flows
                 var downloadImageFlow = builder.Add(_downloadImageFlow);
+                builder.From(downloadImageFlow).To(_selfDocSink);
 
                 var sourceBroadcast = builder.Add(new Broadcast<CrawlDocument>(2));
                 builder.From(sourceBroadcast.Out(0)).To(downloadImageFlow.Inlet);
                 builder.From(sourceBroadcast.Out(1)).To(downloadHtmlFlow.Inlet);
                 
-                var f = new SinkShape<CrawlDocument>(sourceBroadcast.In);
-                return f;
+                
+                return new SinkShape<CrawlDocument>(sourceBroadcast.In);
             }));
 
             Receiving();
@@ -174,8 +183,8 @@ namespace WebCrawler.Shared.IO
             //Received word from a ParseWorker that we need to check for new documents
             Receive<CheckDocuments>(documents =>
             {
-                //forward this onto the downloads tracker, but have it reply back to us
-                ((ICanTell)DownloadsTracker).Tell(documents, Self);
+                //forward this onto the downloads tracker, but have it reply back to our parent router so the work might get distributed more evenly
+                DownloadsTracker.Tell(documents, Context.Parent);
             });
 
             //Update our local stats
@@ -215,6 +224,8 @@ namespace WebCrawler.Shared.IO
             {
                 Sender.Tell(new ParseWorker.SetDownloadActor(DownloaderRouter));
             });
+
+            Receive<StreamCompleteTick>(_ => { });
         }
     }
 }
