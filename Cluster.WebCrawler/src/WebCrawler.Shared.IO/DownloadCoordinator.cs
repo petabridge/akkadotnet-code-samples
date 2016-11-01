@@ -88,12 +88,12 @@ namespace WebCrawler.Shared.IO
             _selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, StreamCompleteTick.Instance);
             _selfDocSink = Sink.ActorRef<CompletedDocument>(Self, StreamCompleteTick.Instance);
             _downloadHtmlFlow = Flow.Create<CrawlDocument>().Via(DownloadFlow.SelectDocType())
-                .Buffer(10, OverflowStrategy.Backpressure)
+                .Throttle(30, TimeSpan.FromSeconds(1), 100, ThrottleMode.Shaping)
                 .Via(DownloadFlow.ProcessHtmlDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()));
 
             _downloadImageFlow = Flow.Create<CrawlDocument>()
                 .Via(DownloadFlow.SelectDocType())
-                .Buffer(10, OverflowStrategy.Backpressure)
+                .Throttle(30, TimeSpan.FromSeconds(1), 100, ThrottleMode.Shaping)
                 .Via(DownloadFlow.ProcessImageDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()))
                 .Via(DownloadFlow.ProcessCompletedDownload());
 
