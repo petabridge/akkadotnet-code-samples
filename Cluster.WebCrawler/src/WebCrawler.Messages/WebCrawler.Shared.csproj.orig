@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{085D6A95-BBC2-44D4-AA4F-3E1F91E658DF}</ProjectGuid>
+    <ProjectGuid>{8A2A881E-63AC-4292-89B7-473FFBFD0F99}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebCrawler.Shared.IO</RootNamespace>
-    <AssemblyName>WebCrawler.Shared.IO</AssemblyName>
+    <RootNamespace>WebCrawler.Messages</RootNamespace>
+    <AssemblyName>WebCrawler.Messages</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -31,27 +29,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Reference Include="Akka, Version=1.1.3.31, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Akka.1.1.3\lib\net45\Akka.dll</HintPath>
+=======
+    <Reference Include="Akka, Version=1.1.1.27, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.1.1.1\lib\net45\Akka.dll</HintPath>
+>>>>>>> upgraded from 1.1 to 1.1.1
       <Private>True</Private>
-    </Reference>
-    <Reference Include="Akka.Streams, Version=1.1.3.32, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Streams.1.1.3.32-beta\lib\net45\Akka.Streams.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="HtmlAgilityPack">
-      <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Reactive.Streams, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Reactive.Streams.1.0.0-RC1\lib\portable-net45+netcore45\Reactive.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -60,7 +49,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -68,23 +56,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DownloadCommands.cs" />
-    <Compile Include="DownloadCoordinator.cs" />
-    <Compile Include="DownloadFlow.cs" />
-    <Compile Include="HttpClientFactory.cs" />
-    <Compile Include="Messages\CheckDocuments.cs" />
-    <Compile Include="Messages\ProcessDocuments.cs" />
-    <Compile Include="ParseFlow.cs" />
+    <Compile Include="Commands\V1\IStartJobV1.cs" />
+    <Compile Include="Commands\V1\IStatusUpdateV1.cs" />
+    <Compile Include="Commands\V1\ISubscribeToJobV1.cs" />
+    <Compile Include="Commands\V1\IUnsubscribeFromJobV1.cs" />
+    <Compile Include="Commands\V1\JobStatusUpdate.cs" />
+    <Compile Include="Commands\V1\StartJob.cs" />
+    <Compile Include="Commands\V1\SubscribeToJob.cs" />
+    <Compile Include="Commands\V1\UnsubscribeFromJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="State\CompletedDocument.cs" />
+    <Compile Include="State\CrawlDocument.cs" />
+    <Compile Include="State\CrawlJob.cs" />
+    <Compile Include="State\CrawlJobStats.cs" />
+    <Compile Include="State\JobStatusMessage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Actors\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WebCrawler.Messages\WebCrawler.Shared.csproj">
-      <Project>{8a2a881e-63ac-4292-89b7-473ffbfd0f99}</Project>
-      <Name>WebCrawler.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,34 +12,34 @@
 
         public CrawlJob Key { get; private set; }
 
-        public int TotalDocumentsDiscovered { get { return HtmlDocumentsDiscovered + ImagesDiscovered; } }
+        public long TotalDocumentsDiscovered => HtmlDocumentsDiscovered + ImagesDiscovered;
 
-        public int HtmlDocumentsDiscovered { get; private set; }
+        public long HtmlDocumentsDiscovered { get; private set; }
 
-        public int ImagesDiscovered { get; private set; }
+        public long ImagesDiscovered { get; private set; }
 
-        public int TotalDocumentsDownloaded { get { return HtmlDocumentsDownloaded + ImagesDownloaded; } }
+        public long TotalDocumentsDownloaded => HtmlDocumentsDownloaded + ImagesDownloaded;
 
-        public int HtmlDocumentsDownloaded { get; private set; }
+        public long HtmlDocumentsDownloaded { get; private set; }
 
-        public int ImagesDownloaded { get; private set; }
+        public long ImagesDownloaded { get; private set; }
 
-        public int TotalBytesDownloaded { get { return HtmlBytesDownloaded + ImageBytesDownloaded; } }
+        public long TotalBytesDownloaded => HtmlBytesDownloaded + ImageBytesDownloaded;
 
-        public int HtmlBytesDownloaded { get; private set; }
+        public long HtmlBytesDownloaded { get; private set; }
 
-        public int ImageBytesDownloaded { get; private set; }
+        public long ImageBytesDownloaded { get; private set; }
 
         public bool IsEmpty
         {
-            get { return TotalDocumentsDiscovered == 0; }
+            get { return TotalDocumentsDiscovered == 0 && TotalBytesDownloaded == 0; }
         }
 
         /// <summary>
         /// Deep copy funtion
         /// </summary>
-        public CrawlJobStats Copy(int? htmlDiscovered = null, int? imgDiscovered = null, int? htmlDownloaded = null,
-            int? imgDownloaded = null, int? htmlBytesDownloaded = null, int? imgBytesDownloaded = null)
+        public CrawlJobStats Copy(long? htmlDiscovered = null, long? imgDiscovered = null, long? htmlDownloaded = null,
+            long? imgDownloaded = null, long? htmlBytesDownloaded = null, long? imgBytesDownloaded = null)
         {
             return new CrawlJobStats(Key)
             {
@@ -47,7 +47,7 @@
                 HtmlDocumentsDownloaded = htmlDownloaded ?? HtmlDocumentsDownloaded,
                 ImagesDiscovered = imgDiscovered ?? ImagesDiscovered,
                 ImagesDownloaded = imgDownloaded ?? ImagesDownloaded,
-                HtmlBytesDownloaded = htmlBytesDownloaded ?? TotalBytesDownloaded,
+                HtmlBytesDownloaded = htmlBytesDownloaded ?? HtmlBytesDownloaded,
                 ImageBytesDownloaded = imgBytesDownloaded ?? ImageBytesDownloaded
             };
         }
@@ -111,7 +111,7 @@
         {
             return
                 string.Format(
-                    "Discovered: {0} (HTML: {1}, IMG: {2}) -- Downloaded {3} (HTML: {4}, IMG: {5}) -- Bytes {6} (HTML: {7}, IMG: {8})",
+                    "Discovered: {0:N0} (HTML: {1:N0}, IMG: {2:N0}) -- Downloaded {3:N0} (HTML: {4:N0}, IMG: {5:N0}) -- Bytes {6:N0} (HTML: {7:N0}, IMG: {8:N0})",
                     TotalDocumentsDiscovered,
                     HtmlDocumentsDiscovered, ImagesDiscovered, TotalDocumentsDownloaded, HtmlDocumentsDownloaded,
                     ImagesDownloaded, TotalBytesDownloaded, HtmlBytesDownloaded, ImageBytesDownloaded);
