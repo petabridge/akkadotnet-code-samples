@@ -39,8 +39,8 @@
       <HintPath>..\..\packages\Akka.1.1.3\lib\net45\Akka.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Akka.Streams, Version=1.1.1.28, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Streams.1.1.1.28-beta\lib\net45\Akka.Streams.dll</HintPath>
+    <Reference Include="Akka.Streams, Version=1.1.3.32, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Streams.1.1.3.32-beta\lib\net45\Akka.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="HtmlAgilityPack">

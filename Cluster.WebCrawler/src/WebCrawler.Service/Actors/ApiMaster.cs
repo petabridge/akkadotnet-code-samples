@@ -150,7 +150,10 @@ namespace WebCrawler.TrackingService.Actors
             if (!haveChild.Equals(ActorRefs.Nobody))
             {
                 ApiBroadcaster.Tell(new JobFound(job.Key, haveChild));
+                return;
             }
+
+            ApiBroadcaster.Tell(new JobNotFound(job.Key));
         }
     }
 }

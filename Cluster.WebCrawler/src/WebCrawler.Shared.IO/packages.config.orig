@@ -1,15 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <packages>
-<<<<<<< HEAD
   <package id="Akka" version="1.1.3" targetFramework="net45" />
+<<<<<<< HEAD
+  <package id="Akka.Streams" version="1.1.1.28-beta" targetFramework="net45" />
+=======
+  <package id="Akka.Streams" version="1.1.3.32-beta" targetFramework="net45" />
+>>>>>>> upgraded to 1.1.3
   <package id="HtmlAgilityPack" version="1.4.9" targetFramework="net45" />
   <package id="Newtonsoft.Json" version="9.0.1" targetFramework="net45" />
-=======
-  <package id="Akka" version="1.1.1" targetFramework="net45" />
-  <package id="Akka.Streams" version="1.1.1.28-beta" targetFramework="net45" />
-  <package id="HtmlAgilityPack" version="1.4.9" targetFramework="net45" />
-  <package id="Newtonsoft.Json" version="7.0.1" targetFramework="net45" />
   <package id="Reactive.Streams" version="1.0.0-RC1" targetFramework="net45" />
->>>>>>> getting started
   <package id="System.Collections.Immutable" version="1.1.36" targetFramework="net45" />
 </packages>
