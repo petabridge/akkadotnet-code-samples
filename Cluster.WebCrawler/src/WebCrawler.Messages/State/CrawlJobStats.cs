@@ -32,7 +32,7 @@
 
         public bool IsEmpty
         {
-            get { return TotalDocumentsDiscovered == 0; }
+            get { return TotalDocumentsDiscovered == 0 && TotalBytesDownloaded == 0; }
         }
 
         /// <summary>
@@ -47,7 +47,7 @@
                 HtmlDocumentsDownloaded = htmlDownloaded ?? HtmlDocumentsDownloaded,
                 ImagesDiscovered = imgDiscovered ?? ImagesDiscovered,
                 ImagesDownloaded = imgDownloaded ?? ImagesDownloaded,
-                HtmlBytesDownloaded = htmlBytesDownloaded ?? TotalBytesDownloaded,
+                HtmlBytesDownloaded = htmlBytesDownloaded ?? HtmlBytesDownloaded,
                 ImageBytesDownloaded = imgBytesDownloaded ?? ImageBytesDownloaded
             };
         }
@@ -111,7 +111,7 @@
         {
             return
                 string.Format(
-                    "Discovered: {0} (HTML: {1}, IMG: {2}) -- Downloaded {3} (HTML: {4}, IMG: {5}) -- Bytes {6} (HTML: {7}, IMG: {8})",
+                    "Discovered: {0:N0} (HTML: {1:N0}, IMG: {2:N0}) -- Downloaded {3:N0} (HTML: {4:N0}, IMG: {5:N0}) -- Bytes {6:N0} (HTML: {7:N0}, IMG: {8:N0})",
                     TotalDocumentsDiscovered,
                     HtmlDocumentsDiscovered, ImagesDiscovered, TotalDocumentsDownloaded, HtmlDocumentsDownloaded,
                     ImagesDownloaded, TotalBytesDownloaded, HtmlBytesDownloaded, ImageBytesDownloaded);

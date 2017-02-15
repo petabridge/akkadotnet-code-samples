@@ -12,12 +12,11 @@ using Akka.Streams.Implementation;
 using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
 using WebCrawler.TrackingService.State;
-using ActorRefImplicitSenderExtensions = Akka.Actor.ActorRefImplicitSenderExtensions;
 
 namespace WebCrawler.Shared.IO
 {
     /// <summary>
-    /// Actor responsible for managing pool of <see cref="DownloadWorker"/> and <see cref="ParseWorker"/> actors.
+    /// Actor responsible for using Akka.Streams to execute download and parsing of all content.
     /// 
     /// Can be remote-deployed to other systems.
     /// 
@@ -62,6 +61,7 @@ namespace WebCrawler.Shared.IO
 
         protected IActorRef DownloaderRouter;
         protected IActorRef ParserRouter;
+        protected IActorRef SourceActor;
 
         protected CrawlJob Job;
         protected CrawlJobStats Stats;
@@ -72,12 +72,6 @@ namespace WebCrawler.Shared.IO
 
         private ILoggingAdapter _logger = Context.GetLogger();
 
-        private Sink<CheckDocuments, NotUsed> _selfHtmlSink;
-        private Sink<CompletedDocument, NotUsed> _selfDocSink;
-        private Flow<CrawlDocument, CompletedDocument, NotUsed> _downloadImageFlow;
-        private Flow<CrawlDocument, DownloadHtmlResult, NotUsed> _downloadHtmlFlow;
-        private IGraph<SinkShape<CrawlDocument>, NotUsed> _downloadGraph;
-
         public DownloadCoordinator(CrawlJob job, IActorRef commander, IActorRef downloadsTracker, long maxConcurrentDownloads)
         {
             Job = job;
@@ -85,65 +79,57 @@ namespace WebCrawler.Shared.IO
             MaxConcurrentDownloads = maxConcurrentDownloads;
             Commander = commander;
             Stats = new CrawlJobStats(Job);
-            _selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, StreamCompleteTick.Instance);
-            _selfDocSink = Sink.ActorRef<CompletedDocument>(Self, StreamCompleteTick.Instance);
-            _downloadHtmlFlow = Flow.Create<CrawlDocument>().Via(DownloadFlow.SelectDocType())
+            var selfHtmlSink = Sink.ActorRef<CheckDocuments>(Self, StreamCompleteTick.Instance);
+            var selfDocSink = Sink.ActorRef<CompletedDocument>(Self, StreamCompleteTick.Instance);
+            var selfImgSink = Sink.ActorRef<CompletedDocument>(Self, StreamCompleteTick.Instance);
+            var htmlFlow = Flow.Create<CrawlDocument>().Via(DownloadFlow.SelectDocType())
                 .Throttle(30, TimeSpan.FromSeconds(1), 100, ThrottleMode.Shaping)
                 .Via(DownloadFlow.ProcessHtmlDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()));
 
-            _downloadImageFlow = Flow.Create<CrawlDocument>()
+            var imageFlow = Flow.Create<CrawlDocument>()
                 .Via(DownloadFlow.SelectDocType())
                 .Throttle(30, TimeSpan.FromSeconds(1), 100, ThrottleMode.Shaping)
                 .Via(DownloadFlow.ProcessImageDownloadFor(DefaultMaxConcurrentDownloads, HttpClientFactory.GetClient()))
                 .Via(DownloadFlow.ProcessCompletedDownload());
 
-            _downloadGraph = Sink.FromGraph(GraphDsl.Create(builder =>
+            var source = Source.ActorRef<CrawlDocument>(5000, OverflowStrategy.DropTail);
+
+           var graph = GraphDsl.Create(source, (builder, s) =>
             {
                 // html flows
-                var downloadHtmlFlow = builder.Add(_downloadHtmlFlow);
+                var downloadHtmlFlow = builder.Add(htmlFlow);
                 var downloadBroadcast = builder.Add(new Broadcast<DownloadHtmlResult>(2));
                 var completedDownload = builder.Add(DownloadFlow.ProcessCompletedHtmlDownload());
                 var parseCompletedDownload = builder.Add(ParseFlow.GetParseFlow(Job));
+                var htmlSink = builder.Add(selfHtmlSink);
+                var docSink = builder.Add(selfDocSink);
                 builder.From(downloadHtmlFlow).To(downloadBroadcast);
                 builder.From(downloadBroadcast.Out(0)).To(completedDownload.Inlet);
                 builder.From(downloadBroadcast.Out(1)).To(parseCompletedDownload.Inlet);
-                builder.From(parseCompletedDownload).To(_selfHtmlSink);
-                builder.From(completedDownload).To(_selfDocSink);
+                builder.From(parseCompletedDownload).To(htmlSink);
+                builder.From(completedDownload).To(docSink);
 
                 // image flows
-                var downloadImageFlow = builder.Add(_downloadImageFlow);
-                builder.From(downloadImageFlow).To(_selfDocSink);
+                var imgSink = builder.Add(selfImgSink);
+                var downloadImageFlow = builder.Add(imageFlow);
+                builder.From(downloadImageFlow).To(imgSink);
 
                 var sourceBroadcast = builder.Add(new Broadcast<CrawlDocument>(2));
                 builder.From(sourceBroadcast.Out(0)).To(downloadImageFlow.Inlet);
                 builder.From(sourceBroadcast.Out(1)).To(downloadHtmlFlow.Inlet);
-                
-                
-                return new SinkShape<CrawlDocument>(sourceBroadcast.In);
-            }));
+
+                builder.From(s.Outlet).To(sourceBroadcast.In);
+
+                return ClosedShape.Instance;
+            });
+
+            SourceActor = Context.Materializer().Materialize(graph);
 
             Receiving();
         }
 
         protected override void PreStart()
         {
-
-            // Create our downloader pool
-            if (Context.Child(Downloader).Equals(ActorRefs.Nobody))
-            {
-                DownloaderRouter = Context.ActorOf(
-                    Props.Create(() => new DownloadWorker(HttpClientFactory.GetClient, Self, (int)MaxConcurrentDownloads)).WithRouter(new RoundRobinPool(10)),
-                    Downloader);
-            }
-
-            // Create our parser pool
-            if (Context.Child(Parser).Equals(ActorRefs.Nobody))
-            {
-                ParserRouter = Context.ActorOf(
-                    Props.Create(() => new ParseWorker(Job, Self)).WithRouter(new RoundRobinPool(10)),
-                    Parser);
-            }
-
             // Schedule regular stats updates
             _publishStatsTask = new Cancelable(Context.System.Scheduler);
             Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self, PublishStatsTick.Instance, Self, _publishStatsTask);
@@ -196,36 +182,29 @@ namespace WebCrawler.Shared.IO
             //Received word from the DownloadTracker that we need to process some docs
             Receive<ProcessDocuments>(process =>
             {
-                var s = Source.From(process.Documents);
-                s.RunWith(_downloadGraph, Context.Materializer());
-                
+                foreach (var doc in process.Documents)
+                {
+                    SourceActor.Tell(doc);
+                }
             });
 
             //hand the work off to the downloaders
             Receive<IDownloadDocument>(download =>
             {
-                DownloaderRouter.Tell(download);
+                SourceActor.Tell(download.Document);
             });
 
             Receive<CompletedDocument>(completed =>
             {
-                //TODO: send verbose status messages to commander here?
+                _logger.Info("Logging completed download {0} bytes {1}", completed.Document.DocumentUri,completed.NumBytes);
                 Stats = Stats.WithCompleted(completed);
+                _logger.Info("Total stats {0}", Stats);
             });
 
-            /* Set all of our local downloaders to message our local parsers */
-            Receive<DownloadWorker.RequestParseActor>(request =>
+            Receive<StreamCompleteTick>(_ =>
             {
-                Sender.Tell(new DownloadWorker.SetParseActor(ParserRouter));
+                _logger.Info("Stream has completed. No more messages to process.");
             });
-
-            /* Set all of our local parsers to message our local downloaders */
-            Receive<ParseWorker.RequestDownloadActor>(request =>
-            {
-                Sender.Tell(new ParseWorker.SetDownloadActor(DownloaderRouter));
-            });
-
-            Receive<StreamCompleteTick>(_ => { });
         }
     }
 }
