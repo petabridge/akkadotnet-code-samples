@@ -15,7 +15,7 @@ namespace WebCrawler.CrawlService
 
         public bool Stop(HostControl hostControl)
         {
-            ClusterSystem.Shutdown();
+            ClusterSystem.Terminate();
             return true;
         }
     }
