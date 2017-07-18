@@ -25,5 +25,10 @@ namespace WebCrawler.Web
                 "commands");
             SystemActors.SignalRActor = ActorSystem.ActorOf(Props.Create(() => new SignalRActor()), "signalr");
         }
+
+        protected void Application_End()
+        {
+            CoordinatedShutdown.Get(ActorSystem).Run();
+        }
     }
 }

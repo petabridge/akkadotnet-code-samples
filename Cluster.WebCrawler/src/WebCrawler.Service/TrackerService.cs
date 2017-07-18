@@ -23,7 +23,7 @@ namespace WebCrawler.TrackingService
 
         public bool Stop(HostControl hostControl)
         {
-            ClusterSystem.Terminate();
+            CoordinatedShutdown.Get(ClusterSystem).Run();
             return true;
         }
     }
