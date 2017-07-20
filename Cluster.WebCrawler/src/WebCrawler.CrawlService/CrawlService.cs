@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using System;
 using Topshelf;
 
 namespace WebCrawler.CrawlService
@@ -15,7 +16,7 @@ namespace WebCrawler.CrawlService
 
         public bool Stop(HostControl hostControl)
         {
-            CoordinatedShutdown.Get(ClusterSystem).Run();
+            CoordinatedShutdown.Get(ClusterSystem).Run().Wait(TimeSpan.FromSeconds(5));
             return true;
         }
     }

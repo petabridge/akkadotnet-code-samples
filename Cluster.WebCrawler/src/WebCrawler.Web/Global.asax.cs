@@ -5,6 +5,7 @@ using System.Web.Routing;
 using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Web.Actors;
+using System;
 
 namespace WebCrawler.Web
 {
@@ -28,7 +29,7 @@ namespace WebCrawler.Web
 
         protected void Application_End()
         {
-            CoordinatedShutdown.Get(ActorSystem).Run();
+            CoordinatedShutdown.Get(ActorSystem).Run().Wait(TimeSpan.FromSeconds(5));
         }
     }
 }

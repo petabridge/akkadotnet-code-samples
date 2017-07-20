@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using System;
 using Topshelf;
 using WebCrawler.TrackingService.Actors;
 using WebCrawler.TrackingService.Actors.Downloads;
@@ -23,7 +24,7 @@ namespace WebCrawler.TrackingService
 
         public bool Stop(HostControl hostControl)
         {
-            CoordinatedShutdown.Get(ClusterSystem).Run();
+            CoordinatedShutdown.Get(ClusterSystem).Run().Wait(TimeSpan.FromSeconds(5));
             return true;
         }
     }
