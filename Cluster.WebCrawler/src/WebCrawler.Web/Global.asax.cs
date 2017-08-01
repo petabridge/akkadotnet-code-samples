@@ -5,6 +5,7 @@ using System.Web.Routing;
 using Akka.Actor;
 using Akka.Routing;
 using WebCrawler.Web.Actors;
+using System;
 
 namespace WebCrawler.Web
 {
@@ -24,6 +25,11 @@ namespace WebCrawler.Web
             SystemActors.CommandProcessor = ActorSystem.ActorOf(Props.Create(() => new CommandProcessor(router)),
                 "commands");
             SystemActors.SignalRActor = ActorSystem.ActorOf(Props.Create(() => new SignalRActor()), "signalr");
+        }
+
+        protected void Application_End()
+        {
+            CoordinatedShutdown.Get(ActorSystem).Run().Wait(TimeSpan.FromSeconds(5));
         }
     }
 }
