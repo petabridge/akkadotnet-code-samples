@@ -32,14 +32,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Akka, Version=1.2.2.39, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.1.2.2\lib\net45\Akka.dll</HintPath>
+    <Reference Include="Akka, Version=1.2.3.41, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.1.2.3\lib\net45\Akka.dll</HintPath>
     </Reference>
-    <Reference Include="Akka.Cluster, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Cluster.1.2.2\lib\net45\Akka.Cluster.dll</HintPath>
+    <Reference Include="Akka.Cluster, Version=1.2.3.41, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Cluster.1.2.3\lib\net45\Akka.Cluster.dll</HintPath>
     </Reference>
-    <Reference Include="Akka.Remote, Version=1.2.2.40, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Akka.Remote.1.2.2\lib\net45\Akka.Remote.dll</HintPath>
+    <Reference Include="Akka.Remote, Version=1.2.3.41, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Akka.Remote.1.2.3\lib\net45\Akka.Remote.dll</HintPath>
     </Reference>
     <Reference Include="DotNetty.Buffers, Version=0.0.0.0, Culture=neutral, PublicKeyToken=bc13ca065fa06c29, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DotNetty.Buffers.0.4.3\lib\net45\DotNetty.Buffers.dll</HintPath>
