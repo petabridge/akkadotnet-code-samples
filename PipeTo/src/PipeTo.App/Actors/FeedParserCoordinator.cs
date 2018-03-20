@@ -192,8 +192,6 @@ namespace PipeTo.App.Actors
                 feed => SignalFeedProcessingFailure(string.Format("Error parsing feed {0}", _feedUri), _feedUri.ToString()));
         }
 
-     
-
         protected override void PreStart()
         {
             //create the HttpDownloaderActor first, since the FeedParserActor depends on it
