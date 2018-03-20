@@ -1,5 +1,6 @@
 ﻿@{
-    ViewBag.Title = "Crawler Status";
+    ViewBag.Title = "title";
+    Layout = "_Layout";
 }
 
 <div class="jumbotron">
@@ -24,8 +25,9 @@
 </div>
 
 @section Scripts{
-    @Scripts.Render("~/bundles/signalr")
-    <script src="~/signalr/hubs"></script>
+    <script src="/lib/signalr/signalr.js"></script>
+    <script src="/lib/date.format.js"></script>
+    <script src="/lib/knockoutjs/knockout-3.3.0.js"></script>
     <script>
         function StreamViewModel() {
             var self = this;
@@ -42,17 +44,17 @@
 
         $(function() {
             // Reference the auto-generated proxy for the hub.
-            var chat = $.connection.crawlHub;
+            var chat = new signalR.HubConnection("/hubs/crawlHub");
             // Create a function that the hub can call back to display messages.
-            chat.client.writeStatus = function(message) {
+            chat.on("writeStatus", function(message) {
                 stream.addMessage(message);
-            };
+            });
 
 
-            $.connection.hub.start().done(function() {
+            chat.start().then(function() {
                 $('#btnQuery').click(function() {
                     //call the StartCrawl method on the hub
-                    chat.server.startCrawl($('#crawlDomain').val());
+                    chat.send("StartCrawl", $('#crawlDomain').val());
 
                     $('#crawlDomain').val('').focus();
                 });

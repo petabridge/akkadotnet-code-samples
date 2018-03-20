@@ -2,9 +2,8 @@
 using System.Linq;
 using Akka.Actor;
 using Akka.Routing;
-using WebCrawler.Messages.Commands;
-using WebCrawler.Messages.Commands.V1;
-using WebCrawler.Messages.State;
+using WebCrawler.Shared.Commands.V1;
+using WebCrawler.Shared.State;
 
 namespace WebCrawler.Web.Actors
 {

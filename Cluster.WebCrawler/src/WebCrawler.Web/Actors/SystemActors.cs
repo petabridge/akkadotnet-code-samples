@@ -9,6 +9,8 @@ namespace WebCrawler.Web.Actors
     /// </summary>
     public static class SystemActors
     {
+        public static ActorSystem ActorSystem;
+
         public static IActorRef SignalRActor = ActorRefs.Nobody;
 
         public static IActorRef CommandProcessor = ActorRefs.Nobody;

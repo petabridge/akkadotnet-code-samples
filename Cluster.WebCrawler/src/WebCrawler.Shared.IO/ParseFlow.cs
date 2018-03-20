@@ -5,9 +5,8 @@ using Akka;
 using Akka.Actor;
 using Akka.Streams.Dsl;
 using HtmlAgilityPack;
-using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
-using WebCrawler.TrackingService.State;
+using WebCrawler.Shared.State;
 
 namespace WebCrawler.Shared.IO
 {

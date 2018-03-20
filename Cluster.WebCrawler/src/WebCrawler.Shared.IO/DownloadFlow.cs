@@ -10,9 +10,8 @@ using Akka.Actor;
 using Akka.Streams.Actors;
 using Akka.Streams.Dsl;
 using Akka.Util.Internal;
-using WebCrawler.Messages.State;
 using WebCrawler.Shared.IO.Messages;
-using WebCrawler.TrackingService.State;
+using WebCrawler.Shared.State;
 
 namespace WebCrawler.Shared.IO
 {
