@@ -70,7 +70,7 @@ namespace WebCrawler.TrackerService.Actors.IO
         {
             Job = job;
             RunningStatus = new JobStatusUpdate(Job);
-            TotalStats = new CrawlJobStats(Job);
+            TotalStats = new CrawlJobStats(Job).Copy(1); // count the index page as "discovered"
             Context.SetReceiveTimeout(TimeSpan.FromSeconds(5));
             WaitingForTracker();
         }
