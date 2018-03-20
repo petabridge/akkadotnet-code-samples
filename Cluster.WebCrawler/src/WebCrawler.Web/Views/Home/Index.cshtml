@@ -36,6 +36,9 @@
 
             self.addMessage = function(message) {
                 self.messages.unshift({ message: message });
+                if (self.messages().length > 20) {
+                    self.messages.pop(); // create circular-buffer-like behavior
+                }
             };
         }
 
