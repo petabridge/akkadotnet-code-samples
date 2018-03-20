@@ -1,0 +1,30 @@
+﻿akka {
+	actor {
+		provider = cluster
+		deployment {
+			/tasker {
+				router = consistent-hashing-group
+				routees.paths = ["/user/api"]
+				virtual-nodes-factor = 8
+				cluster {
+						enabled = on
+						max-nr-of-instances-per-node = 2
+						allow-local-routees = off
+						use-role = tracker
+				}
+			}                
+		}
+	}
+						
+	remote {				
+		dot-netty.tcp {
+			hostname = "localhost"
+			port = 16666
+		}
+	}            
+
+	cluster {
+		seed-nodes = ["akka.tcp://webcrawler@localhost:4053"] 
+		roles = [web]
+	}
+}

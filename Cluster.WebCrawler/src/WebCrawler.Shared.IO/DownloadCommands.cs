@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using WebCrawler.TrackingService.State;
+using WebCrawler.Shared.State;
 
 namespace WebCrawler.Shared.IO
 {
