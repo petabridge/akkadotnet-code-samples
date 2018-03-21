@@ -19,12 +19,14 @@ services:
       context: .
       dockerfile: src/WebCrawler.Web/Dockerfile
     ports:
-      - '80:80'
+      - '8080:80'
       - '16666:16666'
     environment:
       CLUSTER_SEEDS: "akka.tcp://webcrawler@lighthouse:4053"
       CLUSTER_IP: webcrawler.web
       CLUSTER_PORT: 16666
+    depends_on:
+      - "lighthouse"
 
   webcrawler.crawlservice:
     image: webcrawler.crawlservice
@@ -37,6 +39,8 @@ services:
       CLUSTER_SEEDS: "akka.tcp://webcrawler@lighthouse:4053"
       CLUSTER_IP: webcrawler.crawlservice
       CLUSTER_PORT: 5213
+    depends_on:
+      - "lighthouse"
 
   webcrawler.trackerservice:
     image: webcrawler.trackerservice
@@ -49,3 +53,5 @@ services:
       CLUSTER_SEEDS: "akka.tcp://webcrawler@lighthouse:4053"
       CLUSTER_IP: webcrawler.trackerservice
       CLUSTER_PORT: 5212
+    depends_on:
+      - "lighthouse"

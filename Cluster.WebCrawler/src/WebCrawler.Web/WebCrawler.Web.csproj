@@ -4,6 +4,14 @@
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="web.hocon" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="web.hocon">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Akka.Bootstrap.Docker" Version="0.1.0" />
     <PackageReference Include="Akka.Cluster" Version="1.3.5" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
