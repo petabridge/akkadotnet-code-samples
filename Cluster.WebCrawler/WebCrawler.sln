@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebCrawler.CrawlService", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebCrawler.Web", "src\WebCrawler.Web\WebCrawler.Web.csproj", "{297D37F3-5CAA-4B4F-A6EA-0A76AFDDE80C}"
 EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{188B87E9-7FF0-4488-A340-FE8A62688B27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{297D37F3-5CAA-4B4F-A6EA-0A76AFDDE80C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{297D37F3-5CAA-4B4F-A6EA-0A76AFDDE80C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{297D37F3-5CAA-4B4F-A6EA-0A76AFDDE80C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{188B87E9-7FF0-4488-A340-FE8A62688B27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{188B87E9-7FF0-4488-A340-FE8A62688B27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{188B87E9-7FF0-4488-A340-FE8A62688B27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{188B87E9-7FF0-4488-A340-FE8A62688B27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
