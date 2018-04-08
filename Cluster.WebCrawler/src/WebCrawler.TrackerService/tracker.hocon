@@ -1,15 +1,17 @@
 ﻿akka {
-    actor {
-    provider = cluster
-    deployment {
-    /api/broadcaster {
-    router = broadcast-group
-    routees.paths = ["/user/api"]
-    cluster {
-    enabled = on
-    allow-local-routees = on
-    use-role = tracker
-    }}
+	actor {
+		provider = cluster
+		deployment {
+            
+			/api/broadcaster {
+				router = broadcast-group
+				routees.paths = ["/user/api"]
+				cluster {
+					enabled = on
+					allow-local-routees = on
+					use-role = tracker
+				}
+			}
 								
 			/downloads/broadcaster {
 				router = broadcast-group
@@ -31,7 +33,7 @@
 					allow-local-routees = off
 					use-role = crawler
 				}
-			}             
+			}			 
 		}
 	}
 						
@@ -41,7 +43,7 @@
 				port = 0
 				maximum-frame-size = 256000b
 			}
-	}            
+	}			
 
 	cluster {
 		#will inject this node as a self-seed node at run-time
