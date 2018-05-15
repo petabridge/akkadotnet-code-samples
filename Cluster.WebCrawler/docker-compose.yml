@@ -2,7 +2,7 @@ version: '3'
 
 services:
   lighthouse:
-    image: petabridge/lighthouse:0.9.1
+    image: petabridge/lighthouse:v0.9.2
     ports:
       - '9110:9110'
       - '4053:4053'
