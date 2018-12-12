@@ -47,7 +47,7 @@
 
         $(function() {
             // Reference the auto-generated proxy for the hub.
-            var chat = new signalR.HubConnection("/hubs/crawlHub");
+            var chat = new signalR.HubConnectionBuilder().withUrl("/hubs/crawlHub").build();
             // Create a function that the hub can call back to display messages.
             chat.on("writeStatus", function(message) {
                 stream.addMessage(message);
