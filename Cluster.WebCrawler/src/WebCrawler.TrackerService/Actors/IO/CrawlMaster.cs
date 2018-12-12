@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
+using Akka.Cluster.Routing;
 using Akka.Event;
 using Akka.Routing;
 using WebCrawler.Shared.Commands.V1;
@@ -152,6 +153,7 @@ namespace WebCrawler.TrackerService.Actors.IO
                 //should kick off the initial downloads and parsing
                 //var routees = CoordinatorRouter.Ask<Routees>(new GetRoutees()).Result;
                 CoordinatorRouter.Tell(downloadRootDocument);
+
                 JobStarter.Cancel();
 
                 Become(Started);
@@ -213,7 +215,6 @@ namespace WebCrawler.TrackerService.Actors.IO
         {
             foreach (var sub in Subscribers)
                 sub.Tell(RunningStatus);
-            Context.System.EventStream.Publish(1.0d);
         }
     }
 }
