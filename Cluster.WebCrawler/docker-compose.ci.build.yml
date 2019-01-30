@@ -1,8 +1,8 @@
-version: '3'
+version: '3.4'
 
 services:
   ci-build:
-    image: microsoft/aspnetcore-build:1.0-2.0
+    image: microsoft/aspnetcore-build:1.0-2.2
     volumes:
       - .:/src
     working_dir: /src

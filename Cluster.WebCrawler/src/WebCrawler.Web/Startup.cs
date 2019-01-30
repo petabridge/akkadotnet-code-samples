@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebCrawler.Web.Hubs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebCrawler.Web
 {
@@ -27,7 +28,7 @@ namespace WebCrawler.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2); ;
             services.AddSignalR();
             services.AddSingleton<CrawlHubHelper, CrawlHubHelper>();
         }

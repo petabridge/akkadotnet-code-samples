@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore:2.0 AS base
+FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
 
 # should be a comma-delimited list
@@ -12,14 +12,11 @@ EXPOSE 80
 EXPOSE 16666 
 
 
-FROM microsoft/aspnetcore-build:2.0 AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
-COPY *.sln ./
-COPY ./get-dockerip.sh ./get-dockerip.sh
-COPY src/WebCrawler.Web/WebCrawler.Web.csproj src/WebCrawler.Web/
-COPY src/WebCrawler.Shared/WebCrawler.Shared.csproj src/WebCrawler.Shared/
-RUN dotnet restore
 COPY . .
+RUN dotnet restore WebCrawler.sln
+
 WORKDIR /src/src/WebCrawler.Web
 RUN dotnet build -c Release -o /app
 
