@@ -12,7 +12,6 @@ services:
       CLUSTER_PORT: 4053
       CLUSTER_SEEDS: "akka.tcp://webcrawler@lighthouse:4053"
 
-
   webcrawler.web:
     image: webcrawler.web
     build:

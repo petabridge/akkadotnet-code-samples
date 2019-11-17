@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Akka.Actor;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebCrawler.Web.Actors;
 
@@ -16,24 +15,24 @@ namespace WebCrawler.Web
     {
         public static void Main(string[] args)
         {
-            var host = BuildWebHost(args);
+            var host = CreateHostBuilder(args).Build();
 
             Console.CancelKeyPress += async (sender, eventArgs) =>
             {
-                var wait = CoordinatedShutdown.Get(SystemActors.ActorSystem).Run();
+                var wait = CoordinatedShutdown.Get(SystemActors.ActorSystem).Run(CoordinatedShutdown.ClrExitReason.Instance);
                 await host.StopAsync(TimeSpan.FromSeconds(10));
                 await wait;
+
             };
 
-           
-            host.Run();
-            SystemActors.ActorSystem?.WhenTerminated.Wait();
+                host.Run();
+                SystemActors.ActorSystem?.WhenTerminated.Wait();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseKestrel()
-                .UseStartup<Startup>()
-                .Build();
-    }
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+    };
+
+
 }

@@ -24,7 +24,7 @@
 	}            
 
 	cluster {
-		seed-nodes = ["akka.tcp://webcrawler@localhost:4053"] 
+		seed-nodes = ["akka.tcp://webcrawler@lighthouse1:4053"] 
 		roles = [web]
 	}
 }

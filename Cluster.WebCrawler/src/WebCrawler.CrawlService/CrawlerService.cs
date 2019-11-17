@@ -24,7 +24,7 @@ namespace WebCrawler.CrawlService
 
         public Task Stop()
         {
-            return CoordinatedShutdown.Get(ClusterSystem).Run();
+            return CoordinatedShutdown.Get(ClusterSystem).Run(CoordinatedShutdown.ClrExitReason.Instance);
         }
     }
 }
