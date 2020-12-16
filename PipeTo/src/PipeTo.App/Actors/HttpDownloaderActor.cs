@@ -102,10 +102,7 @@ namespace PipeTo.App.Actors
                     //successful img download - which happened in a DIFFERENT THREAD
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        // async call, inside an async call
-                        // and we wait on it...
-                        // BUT THIS IS STILL ASYNCHRONOUS?!?!
-                        // INSERT INCEPTION HORN SOUND EFFECT HERE https://www.youtube.com/watch?v=ZKGJZt83_JE
+                        // TODO: refactor this to use an await state machine inside the task
                         var contentStream = response.Content.ReadAsStreamAsync();
                         try
                         {
@@ -119,7 +116,7 @@ namespace PipeTo.App.Actors
                     }
 
                     return new ImageDownloadResult(image, response.StatusCode);
-                }, TaskContinuationOptions.AttachedToParent & TaskContinuationOptions.ExecuteSynchronously).PipeTo(Self);
+                }, TaskContinuationOptions.ExecuteSynchronously).PipeTo(Self);
             });
 
             //Process the results of our asynchronous download
