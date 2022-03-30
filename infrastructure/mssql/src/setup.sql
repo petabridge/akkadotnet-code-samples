@@ -1,7 +1,4 @@
-CREATE DATABASE Akka;
-GO
-
-# from https://stackoverflow.com/questions/679000/how-to-check-if-a-database-exists-in-sql-server
+-- from https://stackoverflow.com/questions/679000/how-to-check-if-a-database-exists-in-sql-server
 
 CREATE FUNCTION dbo.DatabaseExists(@dbname nvarchar(128))
 RETURNS bit
@@ -15,4 +12,7 @@ BEGIN
     AS BIT)
     return @result
 END
+GO
+
+CREATE DATABASE Akka;
 GO
