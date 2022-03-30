@@ -11,4 +11,4 @@ else
 	echo "Building [${imageName}] with tag [${version}]"
 fi
 
-docker build . -t "${imageName}:${version}"
+docker build src/. -t "${imageName}:${version}"

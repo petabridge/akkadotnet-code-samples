@@ -34,8 +34,6 @@ spec:
         env:
           - name: ACCEPT_EULA
             value: "Y"
-          - name: MSSQL_PID
-            value: "Express"
           - name: SA_PASSWORD
             value: "yourStrong(!)Password"
         ports:
