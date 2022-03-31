@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds docker images
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
 
 version="0.1.0"
 imageName="akkadotnet.sqlserver"
@@ -12,4 +13,4 @@ else
 	echo "Building [${imageName}] with tag [${version}]"
 fi
 
-docker build src/. -t "${imageName}:${version}"
+docker build ./src/. -t "${imageName}:${version}"
