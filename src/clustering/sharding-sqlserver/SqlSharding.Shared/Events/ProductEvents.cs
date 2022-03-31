@@ -1,25 +1,44 @@
 ﻿namespace SqlSharding.Shared.Events;
 
-public record ProductCreated(string ProductId, string ProductName, decimal Price) : IWithProductId;
+/// <summary>
+/// Used to distinguish product events from commands
+/// </summary>
+public interface IProductEvent : IWithProductId
+{
+}
 
-public record ProductSold(ProductOrder Order, decimal TotalCharged, bool BackOrdered = false) : IWithProductId, IWithOrderId
+public record ProductCreated(string ProductId, string ProductName, decimal Price) : IProductEvent;
+
+public record ProductSold(ProductOrder Order, decimal UnitPrice, bool BackOrdered = false) : IProductEvent,
+    IWithOrderId, IComparable<ProductSold>
 {
     public string ProductId => Order.ProductId;
 
     public string OrderId => Order.OrderId;
+
+    public decimal TotalPrice => Order.Quantity * UnitPrice;
+
+    public int CompareTo(ProductSold? other)
+    {
+        if (other == null) return 1;
+
+        return Order.Timestamp.CompareTo(other.Order);
+    }
 }
 
 public enum InventoryChangeReason
 {
     Fulfillment,
     SupplyIncrease,
+
     /// <summary>
     /// i.e. Theft or spoilage
     /// </summary>
     Lost
 }
 
-public record ProductInventoryChanged(string ProductId, int Quantity, InventoryChangeReason Reason = InventoryChangeReason.Fulfillment) : IWithProductId;
+public record ProductInventoryChanged(string ProductId, int Quantity,
+    InventoryChangeReason Reason = InventoryChangeReason.Fulfillment) : IProductEvent;
 
 public enum ProductWarningReason
 {
@@ -30,4 +49,12 @@ public enum ProductWarningReason
     NoSupply
 }
 
-public record ProductInventoryWarningEvent(string ProductId, ProductWarningReason Reason, DateTime Timestamp) : IWithProductId;
+public record ProductInventoryWarningEvent(string ProductId, ProductWarningReason Reason, DateTime Timestamp,
+    string Message) : IProductEvent, IComparable<ProductInventoryWarningEvent>
+{
+    public int CompareTo(ProductInventoryWarningEvent? other)
+    {
+        if (ReferenceEquals(this, other)) return 0;
+        return ReferenceEquals(null, other) ? 1 : Timestamp.CompareTo(other.Timestamp);
+    }
+}

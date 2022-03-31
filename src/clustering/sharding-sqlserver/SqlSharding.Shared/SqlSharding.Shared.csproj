@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
+    </ItemGroup>
+
 </Project>

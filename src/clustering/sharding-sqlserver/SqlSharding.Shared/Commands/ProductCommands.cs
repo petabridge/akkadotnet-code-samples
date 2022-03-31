@@ -1,13 +1,20 @@
-﻿namespace SqlSharding.Shared.Commands;
+﻿using SqlSharding.Shared.Events;
 
-public record CreateProduct(string ProductId, string ProductName, decimal Price, int InitialQuantity) : IWithProductId;
+namespace SqlSharding.Shared.Commands;
 
-public record SupplyProduct(string ProductId, int AdditionalQuantity) : IWithProductId;
+/// <summary>
+/// Used to distinguish product events from commands
+/// </summary>
+public interface IProductCommand : IWithProductId{}
 
-public record PurchaseProduct(ProductOrder NewOrder) : IWithProductId, IWithOrderId
+public record CreateProduct(string ProductId, string ProductName, decimal Price, int InitialQuantity) : IProductCommand;
+
+public record SupplyProduct(string ProductId, int AdditionalQuantity) : IProductCommand;
+
+public record PurchaseProduct(ProductOrder NewOrder) : IProductCommand, IWithOrderId
 {
     public string ProductId => NewOrder.ProductId;
     public string OrderId => NewOrder.OrderId;
 }
 
-public record ProductCommandResponse(string ProductId, IEnumerable<IWithProductId> ResponseEvents, bool Success = true) : IWithProductId;
+public record ProductCommandResponse(string ProductId, IReadOnlyCollection<IProductEvent> ResponseEvents, bool Success = true, string Message = "") : IWithProductId;
