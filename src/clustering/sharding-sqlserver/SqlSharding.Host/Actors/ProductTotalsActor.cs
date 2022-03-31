@@ -15,6 +15,11 @@ namespace SqlSharding.Host.Actors;
 /// </summary>
 public sealed class ProductTotalsActor : ReceivePersistentActor
 {
+    public static Props GetProps(string persistenceId)
+    {
+        return Props.Create(() => new ProductTotalsActor(persistenceId));
+    }
+    
     /// <summary>
     /// Used to help differentiate what type of entity this is inside Akka.Persistence's database
     /// </summary>
