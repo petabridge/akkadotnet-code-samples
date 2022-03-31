@@ -12,4 +12,4 @@ if "%~1"=="" (
 	echo Building [%imageName%] with tag [%version%]
 )
 
-docker build src/. -t "%imageName%:%version%"
+docker build %~dp0/src/. -t "%imageName%:%version%"

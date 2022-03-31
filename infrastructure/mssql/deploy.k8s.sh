@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Deploys container instance into Kubernetes namespace
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 
 namespace="akkasample"
 

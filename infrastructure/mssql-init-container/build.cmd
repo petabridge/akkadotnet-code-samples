@@ -12,6 +12,6 @@ if "%~1"=="" (
 	echo Building [%imageName%] with tag [%version%]
 )
 
-dotnet publish src/Akka.SqlInitContainer/Akka.SqlInitContainer.csproj -c Release -p:Version=%version%
+dotnet publish %~dp0/src/Akka.SqlInitContainer/Akka.SqlInitContainer.csproj -c Release -p:Version=%version%
 
-docker build src/Akka.SqlInitContainer/. -t "%imageName%:%version%"
+docker build %~dp0/src/Akka.SqlInitContainer/. -t "%imageName%:%version%"

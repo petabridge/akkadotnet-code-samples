@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Builds docker images
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 version="0.1.0"
 imageName="akkadotnet.sqlserver"
