@@ -1,35 +1,29 @@
-# Akka.NET Professional Code Samples
+# Akka.NET Code Samples
 
-[Akka.NET](http://getakka.net/ "Akka.NET - .NET distributed actor framework") is a radically different way of developing concurrent and networked applications in .NET, and so it's important to have a number of high quality reference applications developers can explore in order to better understand how to design and model software using Actors and Akka.NET.
+[Akka.NET](https://getakka.net/ "Akka.NET - .NET distributed actor framework") is a radically different way of developing concurrent and networked applications in .NET, and so it's important to have a number of high quality reference applications developers can explore in order to better understand how to design and model software using Actors and Akka.NET.
 
-That's the goal of this repository - to provide a small number of *exceptionally* well-explained and documented examples .NET architects and developers can use to better understand how to take advantage of Akka.NET's full potential.
+The goals of this repository are to provide users with shovel-ready Akka.NET samples that follow "[Pit of Success](https://blog.codinghorror.com/falling-into-the-pit-of-success/)" paradigms for the following areas:
 
-## Current Samples
+* Akka.NET features: Persistence, Clustering, and Streams;
+* Integrating Akka.NET with other popular technologies: RabbitMQ, Apache Kafka, and more; and
+* Deploying Akka.NET into popular and common deployment environments: Kubernetes, Azure, AWS, and more.
 
-**[Doing Asynchronous Operations inside Actors with PipeTo](/PipeTo/)** - how to use `Task<T>` and `async` operations inside your actors using the `PipeTo` pattern in Akka.NET.
-
-**[Testing actors with`Akka.TestKit`](/TestKit/)** — how to test your `ActorSystem`s, explanation of the core & advanced features of the testing framework, as well as addressing common testing FAQs and situations.
-
-**[ASP.NET and Windows Service Microservices with Akka.Cluster](Cluster.WebCrawler)** - build an elastically scalable web-crawler using Akka.Cluster in Windows Services and ASP.NET MVC.
-
-**[Remote Deployment of Actors with Akka.Remote](RemoteDeploy/)** - how to deploy actors over the network using the Akka.Remote module.
-
-**[AtLeastOnceDelivery Actors and Guaranteed Message Delivery](AtLeastOnceDelivery/)** - how to use the `AtLeastOnceDeliveryActor` base class in Akka.Persistence to deliver messages multiple times until they're acknowledged by the recipient.
+These samples aren't designed to teach how to model complex domains using actors - you can 
 
 ## Contributing
 
-We accept pull requests for new samples or changes to existing ones, but we maintain a very high standard of quality.
+We accept pull requests for new samples or changes to existing ones, but we maintain a strict quality standard;
 
-Please see our [PipeTo Sample](/PipeTo/) for an example.
+1. All samples should be framed as self-hosted services and should rely on https://github.com/akkadotnet/Akka.Hosting for management of the `ActorSystem`;
+2. Samples that require multiple nodes to operate should, ideally, be run inside of Kubernetes or `docker compose` ;
+3. Each sample needs a complete `README.md` that explains what the sample does, what a user needs to run it, and a what types of steps they need to execute it;
+4. If a sample requires Kubernetes or `docker compose` then a `.cmd` and `.sh` script must be provided to setup the infrastructure and another to tear it down;
+5. Samples should not ship with a full blown `nuke` build system - that's overkill;
+6. All samples should reference a single `Directory.Build.props` file (it's already in this repository, don't add a new one) which will determine the version of Akka.NET, Akka.Hosting, ASP.NET, .NET Runtime, and Microsoft.Extensions.* used;
+7. The samples should be contained in their own solution files, rather than one giant one; and
+8. Samples should be coherently organized by folder.
 
-Any samples you want to submit must:
-
-* Contain detailed comments in the source code;
-* Have a detailed `README` explaining your architectural choices and data flows;
-* Be markedly distinct from any other sample in this repository;
-* Be concise enough that a single developer can review it easily.
-
-### Questions about Samples?
+### Questions?
 
 Please [create a Github issue](https://github.com/petabridge/akkadotnet-code-samples/issues) for any questions you might have.
 
@@ -45,20 +39,14 @@ All of the visuals used to explain our samples are licensed under [Creative Comm
 
 You are free to modify and use these diagrams in your own derivative works as long as you comply with the text of the [Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/) license.
 
-All original diagram files are in `.sdr` format, which means they were made with [SmartDraw](http://www.smartdraw.com/ "SmartDraw - communicate visually with great diagrams for Windows").
-
-![SmartDraw logo](images/smartdraw-logo.jpg)
-
-You can [download a free trial of SmartDraw from their site](http://www.smartdraw.com/downloads/).
-
 ## About Petabridge
 
 ![Petabridge logo](images/petabridge_logo.png)
 
-[Petabridge](http://petabridge.com/) is a company dedicated to making it easier for .NET developers to build distributed applications.
+[Petabridge](https://petabridge.com/) is a company dedicated to making it easier for .NET developers to build distributed applications.
 
 Petabridge provides Akka.NET consulting and training, including advanced training in [Akka.Remote](https://petabridge.com/training/akka-remoting/), [Akka.Cluster](https://petabridge.com/training/akka-clustering/), and [Akka.NET Design Patterns](https://petabridge.com/training/akka-design-patterns/)!
 
 ---
-Copyright 2015 - 2017 Petabridge, LLC
+Copyright 2015 - 2022 Petabridge, LLC
 

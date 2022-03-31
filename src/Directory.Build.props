@@ -1,0 +1,35 @@
+﻿<Project>
+  <PropertyGroup>
+   <Copyright>Copyright © 2015-2022 Petabridge, LLC</Copyright>
+    <Authors>Petabridge</Authors>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <PackageReleaseNotes>• Initial rewrite of repository</PackageReleaseNotes>
+    <PackageIconUrl>
+    </PackageIconUrl>
+    <PackageProjectUrl>
+    </PackageProjectUrl>
+    <PackageLicenseUrl>
+    </PackageLicenseUrl>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NetRuntime>net6.0</NetRuntime>
+    <XunitVersion>2.4.1</XunitVersion>
+    <TestSdkVersion>17.1.0</TestSdkVersion>
+    <AkkaVersion>1.4.35</AkkaVersion>
+    <AkkaHostingVersion>0.1.1</AkkaHostingVersion>
+    <MicrosoftExtensionsVersion>[6.0.0,)</MicrosoftExtensionsVersion>
+  </PropertyGroup>
+  <!-- SourceLink support for all Akka.NET projects -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+  </ItemGroup>
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+</Project>
