@@ -2,7 +2,7 @@
 REM builds all docker images
 
 set version="0.1.0"
-set imageName="akkadotnet.sqlserver"
+set imageName="akkadotnet.sqlchecker"
 
 if "%~1"=="" (
 	REM No version tag specified
@@ -12,4 +12,6 @@ if "%~1"=="" (
 	echo Building [%imageName%] with tag [%version%]
 )
 
-docker build src/. -t "%imageName%:%version%"
+dotnet publish src/Akka.SqlInitContainer/Akka.SqlInitContainer.csproj -c Release -p:Version=%version%
+
+docker build src/Akka.SqlInitContainer/. -t "%imageName%:%version%"

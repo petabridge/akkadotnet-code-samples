@@ -14,9 +14,9 @@ build.sh [-t {tag}]
 build.cmd [-t {tag}]
 ```
 
-This will produce an image named `akka.sqlserver:{tag}`.
+This will produce an image named `akkadotnet.sqlserver:{tag}`.
 
-If you leave out the `{tag}` parameter the image name will default to `akka.sqlserver:0.1.0`.
+If you leave out the `{tag}` parameter the image name will default to `akkadotnet.sqlserver:0.1.0`.
 
 ### Adding Additional Schema
 
@@ -27,5 +27,5 @@ If you need additional tables or any other DDLs added to this sample, modify the
 To run this image you will still need to provide the default environment variable arguments required by the [SQL Server 2019 public Docker image](https://hub.docker.com/_/microsoft-mssql-server):
 
 ```shell
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -e "MSSQL_PID=Express" -p 1433:1433 -d akka.sqlserver:0.1.0
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d akkadotnet.sqlserver:0.1.0
 ```

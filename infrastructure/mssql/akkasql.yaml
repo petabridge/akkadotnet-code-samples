@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: sqlserver
-        image: akka.sqlserver:0.1.0
+        image: akkadotnet.sqlserver:0.1.0
         env:
           - name: ACCEPT_EULA
             value: "Y"

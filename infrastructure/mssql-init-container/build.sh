@@ -2,7 +2,7 @@
 # Builds docker images
 
 version="0.1.0"
-imageName="akkadotnet.sqlserver"
+imageName="akkadotnet.sqlchecker"
 
 if [ -z $1 ]; then
 	echo "No tag for [${imageName}] specified. Defaulting to [${version}]"
@@ -11,4 +11,6 @@ else
 	echo "Building [${imageName}] with tag [${version}]"
 fi
 
-docker build src/. -t "${imageName}:${version}"
+dotnet publish src/Akka.SqlInitContainer/Akka.SqlInitContainer.csproj -c Release -p:Version=${version}
+
+docker build src/Akka.SqlInitContainer/. -t "${imageName}:${version}"
