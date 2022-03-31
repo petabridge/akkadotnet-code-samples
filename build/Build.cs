@@ -62,7 +62,7 @@ partial class Build : NukeBuild
     public AbsolutePath DocFxDir => RootDirectory / "docs";
     public AbsolutePath DocFxDirJson => DocFxDir / "docfx.json";
 
-    readonly Solution[] Solutions = RootDirectory.GlobFiles("*.sln").Select(sln => ProjectModelTasks.ParseSolution(sln)).ToArray();
+    readonly Solution[] Solutions = RootDirectory.GlobFiles("**/*.sln").Select(sln => ProjectModelTasks.ParseSolution(sln)).ToArray();
 
     static readonly JsonElement? _githubContext = string.IsNullOrWhiteSpace(EnvironmentInfo.GetVariable<string>("GITHUB_CONTEXT")) ?
         null
