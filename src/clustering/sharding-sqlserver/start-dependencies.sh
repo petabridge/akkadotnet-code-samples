@@ -12,15 +12,12 @@ else
 	echo "Building [${imageName}] with tag [${version}]"
 fi
 
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1533:1433 --name "sqlsharding-sql" -d "${imageName}:${version}"
-
-if errorlevel 1 (
+if docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1533:1433 --name "sqlsharding-sql" -d "${imageName}:${version}" ; then
 	echo "failed to start akkadotnet.sqlserver - building image first then retrying"
-	call %~dp0../../../infrastructure/build.all.cmd
-	if errorlevel 1 (
+	
+	if ../../../infrastructure/build.all.sh $1 ; then
 		echo "failed to build akkadotnet.sqlserver - aborting"
-		exit -1
-	) else (
+		return -1
 		docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1533:1433 --name "sqlsharding-sql" -d "${imageName}:${version}"
-	)
-)
+	fi
+fi
