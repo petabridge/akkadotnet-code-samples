@@ -1,10 +1,22 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Available Products";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Available Products</h1>
+    @if (Model.ProductIds.Count == 0)
+    {
+        <strong>No products created yet.</strong>
+    }
+    else
+    {
+        <ol>
+            @foreach (var product in Model.ProductIds)
+            {
+                <li><a asp-page="/product" asp-route-productId="@product">@product</a></li>
+            }
+        </ol>
+    }
 </div>

@@ -1,0 +1,52 @@
+﻿@page "/product/{productId}"
+@model SqlSharding.WebApp.Pages.Product
+@{
+    ViewData["Title"] = $"Product - {Model.State.Data.ProductName} [{Model.State.Data.ProductName}]";
+}
+
+<div class="text-center">
+    <h1 class="display-4">@Model.State.Data.ProductName</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Price</th>
+            <th>Available</th>
+            <th>Units Sold</th>
+            <th>Total Revenue</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>@Model.State.Data.CurrentPrice.ToString("{0:C}")</td>
+            <td>
+                @if (Model.State.Totals.RemainingInventory < 0)
+                {
+                    <span>
+                        @(Model.State.Totals.RemainingInventory * -1) on backorder
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        @Model.State.Totals.RemainingInventory
+                    </span>
+                }
+            </td>
+            <td>@Model.State.Totals.SoldInventory</td>
+            <td>@Model.State.Totals.TotalRevenue.ToString("{0:C}")</td>
+        </tr>
+        </tbody>
+    </table>
+    
+    <div class="btn-toolbar" role="toolbar" aria-label="Product Management Buttons">
+        
+    </div>
+    
+    <h2>Recent Orders</h2>
+    <ol>
+        @foreach (var order in Model.State.Orders)
+        {
+            <li>@order.Order.Timestamp - @order.Order.Quantity units at @order.UnitPrice.ToString("{0:C}") - Total @order.TotalPrice.ToString("{0:C}")</li>
+        }
+    </ol>
+</div>

@@ -13,10 +13,10 @@ public sealed class FetchAllProducts
 
 public sealed class FetchAllProductsResponse
 {
-    public FetchAllProductsResponse(ImmutableHashSet<string> productIds)
+    public FetchAllProductsResponse(IReadOnlyList<string> productIds)
     {
         ProductIds = productIds;
     }
 
-    public ImmutableHashSet<string> ProductIds { get; }
+    public IReadOnlyList<string> ProductIds { get; }
 }

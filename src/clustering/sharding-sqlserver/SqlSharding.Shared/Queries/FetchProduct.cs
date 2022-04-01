@@ -20,5 +20,5 @@ public sealed class FetchResult
         State = state;
     }
 
-    private ProductState State { get; }
+    public ProductState State { get; }
 }
