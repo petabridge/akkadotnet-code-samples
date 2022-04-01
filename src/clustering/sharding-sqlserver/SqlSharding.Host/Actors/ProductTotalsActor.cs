@@ -70,7 +70,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
 
         Command<FetchProduct>(fetch =>
         {
-            Sender.Tell(State);
+            Sender.Tell(new FetchResult(State));
 
             if (State.IsEmpty)
             {
