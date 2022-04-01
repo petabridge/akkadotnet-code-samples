@@ -17,11 +17,13 @@ public record PurchasingTotals(int RemainingInventory, int SoldInventory, decima
 /// <summary>
 /// The state object responsible for all event and message processing
 /// </summary>
-public record ProductState
+public record ProductState : IWithProductId
 {
     public const int LowInventoryWarningThreshold = 3;
     
     public ProductData Data { get; init; } = ProductData.Empty;
+
+    public string ProductId => Data.ProductId;
 
     public PurchasingTotals Totals { get; init; } = PurchasingTotals.Empty;
 
