@@ -4,5 +4,5 @@ parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
 for file in ./**/build.sh; do
-	./${file}
+	./${file} $1
 done
