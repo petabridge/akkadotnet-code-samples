@@ -7,8 +7,22 @@
 <div class="text-center">
     <h1 class="display-4">Create New Product</h1>
     <form method="post">
-        <div class="form-group row">
-            
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Product.ProductName">Product Name</label>
+            <input asp-for="Product.ProductName" class="form-control"/>
+            <span asp-validation-for="Product.ProductName" class="text-danger"></span>
         </div>
+        <div class="form-group">
+            <label asp-for="Product.Price">Price ($)</label>
+            <input asp-for="Product.Price" class="form-control"/>
+            <span asp-validation-for="Product.Price" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Product.InitialQuantity">Initial Quantity</label>
+            <input asp-for="Product.InitialQuantity" class="form-control"/>
+            <span asp-validation-for="Product.InitialQuantity" class="text-danger"></span>
+        </div>
+         <button type="submit" class="btn btn-primary my-1">Submit</button>
     </form>
 </div>
