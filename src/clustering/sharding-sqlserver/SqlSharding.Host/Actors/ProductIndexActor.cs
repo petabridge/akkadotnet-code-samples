@@ -28,7 +28,7 @@ public sealed class ProductIndexActor : ReceiveActor
 
         Receive<FetchAllProducts>(f =>
         {
-            Sender.Tell(new FetchAllProductsResponse(_productIds));
+            Sender.Tell(new FetchAllProductsResponse(_productIds.ToList()));
         });
 
         Receive<Done>(_ =>
