@@ -27,7 +27,7 @@ var builder = new HostBuilder()
         // maps to environment variable Akka__ClusterPort
         var port = akkaSection.GetValue<int>("ClusterPort", 7919);
 
-        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds").Select(Address.Parse)
+        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7919" }).Select(Address.Parse)
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
