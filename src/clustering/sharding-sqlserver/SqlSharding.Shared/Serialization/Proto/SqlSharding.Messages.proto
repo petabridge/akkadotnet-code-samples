@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package SqlSharding.Shared.Serialization.Proto;
+
+import "google/protobuf/timestamp.proto";
+
+message DecimalValue {
+
+    // Whole units part of the amount
+    int64 units = 1;
+
+    // Nano units of the amount (10^-9)
+    // Must be same sign as units
+    sfixed32 nanos = 2;
+}
+
+enum ProductWarningReason {
+    LOW_SUPPLY = 0;
+    NO_SUPPLY = 1;
+}
+
+enum InventoryChangeReason{
+    FULFILLMENT = 0;
+    SUPPLY_INCREASE = 1;
+    LOST = 2;
+}
+
+/* Events */
+message ProductCreated{
+    ProductData Data = 1;
+}
+
+message ProductOrder{
+    string OrderId = 1;
+    string ProductId = 2;
+    int32 Quantity = 3;
+    google.protobuf.Timestamp Timestamp = 4;
+}
+
+message ProductSold{
+    ProductOrder Order = 1;
+    DecimalValue UnitPrice = 2;
+    bool Backordered = 3;
+}
+
+message InventoryChanged{
+    string ProductId = 1;
+    int32 QuantityChanged = 2;
+    InventoryChangeReason Reason = 3;
+}
+
+message InventoryWarning{
+    string ProductId = 1;
+    ProductWarningReason Reason = 2;
+    google.protobuf.Timestamp Timestamp = 3;
+}
+
+// Discriminated Union for passing around multiple events at once
+message ProductEvent{
+    ProductCreated ProductCreated = 1;
+    ProductSold ProductSold = 2;
+    InventoryChanged InventoryChanged = 3;
+    InventoryWarning InventoryWarning = 4;
+}
+
+/* Commands */
+message CreateProduct{
+    string ProductId = 1;
+    string ProductName = 2;
+    DecimalValue Price = 3;
+    int32 InitialQuantity = 4;
+}
+
+message SupplyProduct{
+    string ProductId = 1;
+    int32 AdditionalQuantity = 2;
+}
+
+message PurchaseProduct{
+    ProductOrder Order = 1;
+}
+
+message ProductCommandResponse{
+    string ProductId = 1;
+    repeated ProductEvent Events = 2;
+    bool Success = 3;
+    string Message = 4;
+}
+
+/* State */
+message ProductData{
+    string ProductId = 1;
+    string ProductName = 2;
+    DecimalValue Price = 3;
+}
+
+message ProductTotals{
+    int32 RemainingInventory = 1;
+    int32 UnitsSold = 2;
+    DecimalValue TotalRevenue = 3;
+}
+
+message ProductState{
+    ProductData Data = 1;
+    ProductTotals Totals = 2;
+    repeated ProductSold Orders = 3;
+    repeated InventoryWarning Warnings = 4;
+}

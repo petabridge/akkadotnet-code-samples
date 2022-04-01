@@ -49,7 +49,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
         {
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
-            PersistAll(response.ResponseEvents, productEvent =>
+            PersistAllAsync(response.ResponseEvents, productEvent =>
             {
                 _log.Info("Processed: {0}", productEvent);
                 

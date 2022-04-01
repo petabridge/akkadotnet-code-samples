@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>$(NetRuntime)</TargetFramework>
@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
+        <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.42.0" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Serialization\Proto\SqlSharding.Messages.proto" GrpcServices="None" />		
+    </ItemGroup>
+
 
 </Project>

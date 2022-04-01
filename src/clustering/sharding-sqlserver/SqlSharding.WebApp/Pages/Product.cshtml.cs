@@ -51,7 +51,7 @@ public class Product : PageModel
             return BadRequest();
         }
 
-        return StatusCode(200);
+        return Page();
     }
     
     public async Task<IActionResult> OnPostInventoryUpdateAsync()
@@ -64,6 +64,6 @@ public class Product : PageModel
             return BadRequest();
         }
 
-        return StatusCode(200);
+        return Page();
     }
 }
