@@ -11,7 +11,7 @@ public record ProductData(string ProductId, string ProductName, decimal CurrentP
 
 public record PurchasingTotals(int RemainingInventory, int SoldInventory, decimal TotalRevenue)
 {
-    public static readonly PurchasingTotals Empty = new(0, 0, Decimal.Zero);
+    public static readonly PurchasingTotals Empty = new(0, 0, decimal.Zero);
 }
 
 /// <summary>

@@ -53,6 +53,7 @@ message InventoryWarning{
     string ProductId = 1;
     ProductWarningReason Reason = 2;
     google.protobuf.Timestamp Timestamp = 3;
+    string Message = 4;
 }
 
 // Discriminated Union for passing around multiple events at once

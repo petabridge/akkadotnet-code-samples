@@ -1,10 +1,16 @@
-﻿using Akka.Actor;
+﻿using System.Collections.Immutable;
+using Akka.Actor;
 using Akka.Serialization;
+using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Serialization.Proto;
+using CreateProduct = SqlSharding.Shared.Commands.CreateProduct;
 using InventoryChangeReason = SqlSharding.Shared.Events.InventoryChangeReason;
 using ProductCreated = SqlSharding.Shared.Events.ProductCreated;
 using ProductSold = SqlSharding.Shared.Events.ProductSold;
+using ProductWarningReason = SqlSharding.Shared.Events.ProductWarningReason;
+using SupplyProduct = SqlSharding.Shared.Commands.SupplyProduct;
 
 namespace SqlSharding.Shared.Serialization;
 
@@ -27,40 +33,64 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     public const string InventoryWarningManifest = "iw";
 
     public const string ProductEventManifest = "pe";
-    
+
 
     public override byte[] ToBinary(object obj)
     {
         switch (obj)
         {
-            case ProductCommandResponse pcr:
-                return ToProto(pcr);
-            case ProductState _:
-                return ProductStateManifest;
-            case ProductOrder _:
-                return ProductOrderManifest;
-            case PurchaseProduct _:
-                return PurchaseProductManifest;
-            case ProductSold _:
-                return ProductSoldManifest;
-            case ProductCreated _:
-                return ProductCreatedManifest;
-            case CreateProduct _:
-                return CreateProductMainfest;
-            case SupplyProduct _:
-                return SupplyProductManifest;
-            case InventoryChanged _:
-                return InventoryChangedManifest;
-            case InventoryWarning _:
-                return InventoryWarningManifest;
+            case Commands.ProductCommandResponse pcr:
+                return ToProto(pcr).ToByteArray();
+            case ProductState ps:
+                return ToProto(ps).ToByteArray();
+            case ProductOrder po:
+                return ToProto(po).ToByteArray();
+            case Commands.PurchaseProduct pp:
+                return ToProto(pp).ToByteArray();
+            case ProductSold ps:
+                return ToProto(ps).ToByteArray();
+            case ProductCreated pc:
+                return ToProto(pc).ToByteArray();
+            case CreateProduct cp:
+                return ToProto(cp).ToByteArray();
+            case SupplyProduct sp:
+                return ToProto(sp).ToByteArray();
+            case ProductInventoryChanged ic:
+                return ToProto(ic).ToByteArray();
+            case ProductInventoryWarningEvent iw:
+                return ToProto(iw).ToByteArray();
             default:
-                throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
+                throw new ArgumentOutOfRangeException(nameof(obj), $"Unsupported message type [{obj.GetType()}]");
         }
     }
 
     public override object FromBinary(byte[] bytes, string manifest)
     {
-        throw new NotImplementedException();
+        switch (manifest)
+        {
+            case ProductCommandResponseManifest:
+                return FromProto(Proto.ProductCommandResponse.Parser.ParseFrom(bytes));
+            case ProductStateManifest:
+                return FromProto(Proto.ProductState.Parser.ParseFrom(bytes));
+            case ProductOrderManifest:
+                return FromProto(Proto.ProductOrder.Parser.ParseFrom(bytes));
+            case PurchaseProductManifest:
+                return FromProto(Proto.PurchaseProduct.Parser.ParseFrom(bytes));
+            case ProductSoldManifest:
+                return FromProto(Proto.ProductSold.Parser.ParseFrom(bytes));
+            case ProductCreatedManifest:
+                return FromProto(Proto.ProductCreated.Parser.ParseFrom(bytes));
+            case CreateProductMainfest:
+                return FromProto(Proto.CreateProduct.Parser.ParseFrom(bytes));
+            case SupplyProductManifest:
+                return FromProto(Proto.SupplyProduct.Parser.ParseFrom(bytes));
+            case InventoryChangedManifest:
+                return FromProto(Proto.InventoryChanged.Parser.ParseFrom(bytes));
+            case InventoryWarningManifest:
+                return FromProto(Proto.InventoryWarning.Parser.ParseFrom(bytes));
+            default:
+                throw new ArgumentOutOfRangeException(nameof(manifest), $"Unsupported message manifest [{manifest}]");
+        }
     }
 
     public override string Manifest(object o)
@@ -73,7 +103,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return ProductStateManifest;
             case ProductOrder _:
                 return ProductOrderManifest;
-            case PurchaseProduct _:
+            case Commands.PurchaseProduct _:
                 return PurchaseProductManifest;
             case ProductSold _:
                 return ProductSoldManifest;
@@ -83,21 +113,100 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return CreateProductMainfest;
             case SupplyProduct _:
                 return SupplyProductManifest;
-            case InventoryChanged _:
+            case ProductInventoryChanged _:
                 return InventoryChangedManifest;
-            case InventoryWarning _:
+            case ProductInventoryWarningEvent _:
                 return InventoryWarningManifest;
             default:
                 throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
         }
     }
     
-    private byte[] ToProto(ProductCommandResponse pcr)
+    private static Proto.SupplyProduct ToProto(SupplyProduct purchase)
     {
-        
+        var proto = new Proto.SupplyProduct();
+        proto.AdditionalQuantity = purchase.AdditionalQuantity;
+        proto.ProductId = purchase.ProductId;
+        return proto;
     }
 
-    private ProductEvent ToProductEvent(IProductEvent e)
+    private static SupplyProduct FromProto(Proto.SupplyProduct proto)
+    {
+        var supply = new SupplyProduct(proto.ProductId, proto.AdditionalQuantity);
+        return supply;
+    }
+
+    private static Proto.CreateProduct ToProto(CreateProduct purchase)
+    {
+        var proto = new Proto.CreateProduct();
+        proto.Price = purchase.Price.FromDecimal();
+        proto.InitialQuantity = purchase.InitialQuantity;
+        proto.ProductId = purchase.ProductId;
+        proto.ProductName = purchase.ProductName;
+        return proto;
+    }
+
+    private static CreateProduct FromProto(Proto.CreateProduct protoCreate)
+    {
+        var createProduct = new CreateProduct(protoCreate.ProductId, protoCreate.ProductName,
+            protoCreate.Price.ToDecimal(), protoCreate.InitialQuantity);
+        return createProduct;
+    }
+
+    private static Proto.PurchaseProduct ToProto(Commands.PurchaseProduct purchase)
+    {
+        var protoPurchase = new Proto.PurchaseProduct();
+        protoPurchase.Order = ToProto(purchase.NewOrder);
+        return protoPurchase;
+    }
+
+    private static Commands.PurchaseProduct FromProto(Proto.PurchaseProduct protoPurchase)
+    {
+        var purchase = new Commands.PurchaseProduct(FromProto(protoPurchase.Order));
+        return purchase;
+    }
+    
+    private static Proto.ProductState ToProto(ProductState state)
+    {
+        var protoState = new Proto.ProductState();
+        protoState.Data = ToProto(state.Data);
+        protoState.Orders.AddRange(state.Orders.Select(c => ToProto(c)));
+        protoState.Warnings.AddRange(state.Warnings.Select(c => ToProto(c)));
+        protoState.Totals = ToProto(state.Totals);
+        return protoState;
+    }
+
+    private static ProductState FromProto(Proto.ProductState protoState)
+    {
+        var productState = new ProductState() with
+        {
+            Data = FromProto(protoState.Data),
+            Totals = FromProto(protoState.Totals),
+            Warnings = protoState.Warnings.Select(c => FromProto(c)).ToImmutableSortedSet(),
+            Orders = protoState.Orders.Select(c => FromProto(c)).ToImmutableSortedSet()
+        };
+
+        return productState;
+    }
+    
+    private static Proto.ProductCommandResponse ToProto(Commands.ProductCommandResponse pcr)
+    {
+        var rsp = new Proto.ProductCommandResponse();
+        rsp.Events.AddRange(pcr.ResponseEvents.Select(c => ToProductEvent(c)));
+        rsp.Message = pcr.Message;
+        rsp.Success = pcr.Success;
+        rsp.ProductId = pcr.ProductId;
+        return rsp;
+    }
+    
+    private static Commands.ProductCommandResponse FromProto(Proto.ProductCommandResponse pcr)
+    {
+        var rsp = new Commands.ProductCommandResponse(pcr.ProductId,
+            pcr.Events.Select(c => FromProductEvent(c)).ToArray(), pcr.Success, pcr.Message);
+        return rsp;
+    }
+
+    private static ProductEvent ToProductEvent(IProductEvent e)
     {
         var productEvent = new ProductEvent();
         switch (e)
@@ -111,12 +220,115 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             case ProductSold sold:
                 productEvent.ProductSold = ToProto(sold);
                 break;
+            case ProductInventoryWarningEvent warning:
+                productEvent.InventoryWarning = ToProto(warning);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(e), e, null);
         }
+
+        return productEvent;
     }
 
-    private Proto.ProductSold ToProto(ProductSold changed)
+    private static IProductEvent FromProductEvent(ProductEvent e)
     {
-        
+        if (e.InventoryChanged != null)
+        {
+            return FromProto(e.InventoryChanged);
+        }
+
+        if (e.InventoryWarning != null)
+        {
+            return FromProto(e.InventoryWarning);
+        }
+
+        if (e.ProductCreated != null)
+        {
+            return FromProto(e.ProductCreated);
+        }
+
+        if (e.ProductSold != null)
+        {
+            return FromProto(e.ProductSold);
+        }
+
+        throw new ArgumentException("Did not find matching CLR type for ProductEvent");
+    }
+
+    private static InventoryWarning ToProto(ProductInventoryWarningEvent warning)
+    {
+        var protoWarning = new InventoryWarning
+        {
+            Reason = ToProto(warning.Reason),
+            Timestamp = warning.Timestamp.ToTimestamp(),
+            ProductId = warning.ProductId
+        };
+
+        return protoWarning;
+    }
+
+    private static ProductInventoryWarningEvent FromProto(InventoryWarning protoWarning)
+    {
+        var warning = new ProductInventoryWarningEvent(protoWarning.ProductId, FromProto(protoWarning.Reason),
+            protoWarning.Timestamp.ToDateTime(), protoWarning.Message);
+        return warning;
+    }
+
+    private static Proto.ProductWarningReason ToProto(ProductWarningReason warning)
+    {
+        return warning switch
+        {
+            ProductWarningReason.LowSupply => Proto.ProductWarningReason.LowSupply,
+            ProductWarningReason.NoSupply => Proto.ProductWarningReason.NoSupply,
+            _ => throw new ArgumentOutOfRangeException(nameof(warning), warning, null)
+        };
+    }
+    
+    private static ProductWarningReason FromProto(Proto.ProductWarningReason warning)
+    {
+        return warning switch
+        {
+            Proto.ProductWarningReason.LowSupply => ProductWarningReason.LowSupply,
+            Proto.ProductWarningReason.NoSupply => ProductWarningReason.NoSupply,
+            _ => throw new ArgumentOutOfRangeException(nameof(warning), warning, null)
+        };
+    }
+
+    private static Proto.ProductSold ToProto(ProductSold changed)
+    {
+        var protoSold = new Proto.ProductSold()
+        {
+            Backordered = changed.BackOrdered,
+            UnitPrice = changed.UnitPrice.FromDecimal(),
+            Order = ToProto(changed.Order)
+        };
+
+        return protoSold;
+    }
+
+    private static ProductSold FromProto(Proto.ProductSold protoSold)
+    {
+        var sold = new ProductSold(FromProto(protoSold.Order), protoSold.UnitPrice.ToDecimal(), protoSold.Backordered);
+        return sold;
+    }
+
+    private static Proto.ProductOrder ToProto(ProductOrder order)
+    {
+        var protoOrder = new Proto.ProductOrder()
+        {
+            OrderId = order.OrderId,
+            ProductId = order.ProductId,
+            Quantity = order.Quantity,
+            Timestamp = Timestamp.FromDateTime(order.Timestamp)
+        };
+
+        return protoOrder;
+    }
+
+    private static ProductOrder FromProto(Proto.ProductOrder order)
+    {
+        var po = new ProductOrder(order.OrderId, order.ProductId, order.Quantity, order.Timestamp.ToDateTime());
+        return po;
     }
 
     private static InventoryChanged ToProto(ProductInventoryChanged changed)
@@ -127,6 +339,11 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         inventoryChanged.ProductId = productId;
         inventoryChanged.QuantityChanged = quantity;
         return inventoryChanged;
+    }
+
+    private static ProductInventoryChanged FromProto(InventoryChanged changed)
+    {
+        return new ProductInventoryChanged(changed.ProductId, changed.QuantityChanged, FromProto(changed.Reason));
     }
 
     private static Proto.InventoryChangeReason ToProto(InventoryChangeReason reason)
@@ -140,6 +357,17 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         };
     }
 
+    private static InventoryChangeReason FromProto(Proto.InventoryChangeReason reason)
+    {
+        return reason switch
+        {
+            Proto.InventoryChangeReason.Fulfillment => InventoryChangeReason.Fulfillment,
+            Proto.InventoryChangeReason.SupplyIncrease => InventoryChangeReason.SupplyIncrease,
+            Proto.InventoryChangeReason.Lost => InventoryChangeReason.Lost,
+            _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
+        };
+    }
+
     private static Proto.ProductCreated ToProto(ProductCreated created)
     {
         var productCreated = new  Proto.ProductCreated
@@ -147,6 +375,11 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             Data = CreateProductData(created)
         };
         return productCreated;
+    }
+
+    private static ProductCreated FromProto(Proto.ProductCreated created)
+    {
+        return new ProductCreated(created.Data.ProductId, created.Data.ProductName, created.Data.Price.ToDecimal());
     }
 
     private static Proto.ProductData CreateProductData(ProductCreated created)
@@ -158,9 +391,41 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             ProductName = created.ProductName
         };
     }
+
+    private static ProductData FromProto(Proto.ProductData data)
+    {
+        return new ProductData(data.ProductId, data.ProductName, data.Price.ToDecimal());
+    }
+
+    private static Proto.ProductData ToProto(ProductData data)
+    {
+        var protoData = new Proto.ProductData
+        {
+            Price = data.CurrentPrice.FromDecimal(),
+            ProductId = data.ProductId,
+            ProductName = data.ProductName
+        };
+        return protoData;
+    }
+
+    private static Proto.ProductTotals ToProto(PurchasingTotals totals)
+    {
+        var protoTotals = new Proto.ProductTotals();
+        protoTotals.RemainingInventory = totals.RemainingInventory;
+        protoTotals.TotalRevenue = totals.TotalRevenue.FromDecimal();
+        protoTotals.UnitsSold = totals.SoldInventory;
+        return protoTotals;
+    }
+
+    private static PurchasingTotals FromProto(Proto.ProductTotals protoTotals)
+    {
+        var purchasingTotals = new PurchasingTotals(protoTotals.RemainingInventory, protoTotals.UnitsSold,
+            protoTotals.TotalRevenue.ToDecimal());
+        return purchasingTotals;
+    }
 }
 
-public static class DecimalSerializationExtensions
+public static class ProtoSerializationExtensions
 {
     private const decimal NanoFactor = 1_000_000_000;
     
