@@ -6,18 +6,26 @@
 
 <div class="text-center">
     <h1 class="display-4">Available Products</h1>
-    @if (Model.Products.Count == 0)
-    {
-        <strong>No products created yet.</strong>
-    }
-    else
-    {
-        <ol>
-            @foreach (var (productId, productName, currentPrice) in Model.Products)
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-6">
+            @if (Model.Products.Count == 0)
             {
-                <li><a asp-page="/product" asp-route-productId="@productId">@productName</a> [@($"{currentPrice:C}")]
-                </li>
+                <strong>No products created yet.</strong>
             }
-        </ol>
-    }
+            else
+            {
+                <ol>
+                    @foreach (var (productId, productName, currentPrice) in Model.Products)
+                    {
+                        <li>
+                            <a asp-page="/product" asp-route-productId="@productId">@productName</a> [@($"{currentPrice:C}")]
+                        </li>
+                    }
+                </ol>
+            }
+        </div>
+        <div class="col">
+        </div>
+    </div>
 </div>

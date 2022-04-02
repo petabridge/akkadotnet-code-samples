@@ -51,7 +51,7 @@ public class Product : PageModel
             return BadRequest();
         }
 
-        return Page();
+        return RedirectToAction(nameof(OnGetAsync), new{ productId=ProductId });
     }
     
     public async Task<IActionResult> OnPostInventoryUpdateAsync()
@@ -64,6 +64,6 @@ public class Product : PageModel
             return BadRequest();
         }
 
-        return Page();
+        return RedirectToAction(nameof(OnGetAsync), new{ productId=ProductId });
     }
 }

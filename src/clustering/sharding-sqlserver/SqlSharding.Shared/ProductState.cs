@@ -82,7 +82,7 @@ public record ProductState : IWithProductId
             case PurchaseProduct purchase when !IsEmpty && Data.CurrentPrice > 0:
             {
                 var events = new List<IProductEvent>();
-                var productInventoryChanged = new ProductInventoryChanged(purchase.ProductId, purchase.NewOrder.Quantity,
+                var productInventoryChanged = new ProductInventoryChanged(purchase.ProductId, -1*purchase.NewOrder.Quantity,
                     InventoryChangeReason.Fulfillment);
                 events.Add(productInventoryChanged);
                 var backordered = false;
@@ -146,7 +146,7 @@ public record ProductState : IWithProductId
                     {
                         RemainingInventory = Totals.RemainingInventory + quantity,
                         SoldInventory = inventoryChangeReason == InventoryChangeReason.Fulfillment
-                            ? Totals.SoldInventory + quantity
+                            ? Totals.SoldInventory + Math.Abs(quantity)
                             : Totals.SoldInventory
                     }
                     

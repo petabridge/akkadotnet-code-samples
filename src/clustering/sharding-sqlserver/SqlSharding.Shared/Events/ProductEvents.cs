@@ -22,7 +22,7 @@ public record ProductSold(ProductOrder Order, decimal UnitPrice, bool BackOrdere
     {
         if (other == null) return 1;
 
-        return Order.Timestamp.CompareTo(other.Order);
+        return Order.Timestamp.CompareTo(other.Order.Timestamp);
     }
 }
 
