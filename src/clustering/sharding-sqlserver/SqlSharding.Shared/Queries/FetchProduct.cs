@@ -13,7 +13,7 @@ public sealed class FetchProduct : IWithProductId
     public string ProductId { get; }
 }
 
-public sealed class FetchResult
+public sealed class FetchResult : ISqlShardingProtocolMember
 {
     public FetchResult(ProductState state)
     {

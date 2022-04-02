@@ -6,16 +6,17 @@
 
 <div class="text-center">
     <h1 class="display-4">Available Products</h1>
-    @if (Model.ProductIds.Count == 0)
+    @if (Model.Products.Count == 0)
     {
         <strong>No products created yet.</strong>
     }
     else
     {
         <ol>
-            @foreach (var product in Model.ProductIds)
+            @foreach (var (productId, productName, currentPrice) in Model.Products)
             {
-                <li><a asp-page="/product" asp-route-productId="@product">@product</a></li>
+                <li><a asp-page="/product" asp-route-productId="@productId">@productName</a> [@($"{currentPrice:C}")]
+                </li>
             }
         </ol>
     }

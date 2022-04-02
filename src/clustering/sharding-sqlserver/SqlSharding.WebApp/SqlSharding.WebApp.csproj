@@ -9,9 +9,4 @@
     <ItemGroup>
       <ProjectReference Include="..\SqlSharding.Shared\SqlSharding.Shared.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Akka.Cluster.Hosting" Version="0.1.3" />
-    </ItemGroup>
-
 </Project>

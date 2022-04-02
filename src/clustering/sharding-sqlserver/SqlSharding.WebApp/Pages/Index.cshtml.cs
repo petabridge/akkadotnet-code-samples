@@ -2,6 +2,7 @@
 using Akka.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SqlSharding.Shared;
 using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Sharding;
 
@@ -17,13 +18,13 @@ public class IndexModel : PageModel
         _indexActor = registry.Get<ProductIndexMarker>();
     }
 
-    public IReadOnlyList<string> ProductIds { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<ProductData> Products { get; set; } = Array.Empty<ProductData>();
 
     public async Task<IActionResult> OnGetAsync()
     {
         var products = await _indexActor.Ask<FetchAllProductsResponse>(FetchAllProducts.Instance, TimeSpan.FromSeconds(5));
         
-        ProductIds = products.ProductIds;
+        Products = products.Products;
         
         return Page();
     }

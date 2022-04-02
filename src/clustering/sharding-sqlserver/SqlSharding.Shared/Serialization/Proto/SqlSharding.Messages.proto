@@ -88,6 +88,14 @@ message ProductCommandResponse{
     string Message = 4;
 }
 
+message FetchAllProductsResponse{
+    repeated ProductData Products = 1;
+}
+
+message FetchProduct{
+    string ProductId = 1;
+}
+
 /* State */
 message ProductData{
     string ProductId = 1;

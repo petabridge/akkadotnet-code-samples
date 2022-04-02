@@ -2,6 +2,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Hosting;
 using Akka.Remote.Hosting;
+using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
 {
     configurationBuilder.WithRemoting(hostName, port)
+        .AddAppSerialization()
         .WithClustering(new ClusterOptions()
             { Roles = new[] { "Web" }, SeedNodes = seeds })
         .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,

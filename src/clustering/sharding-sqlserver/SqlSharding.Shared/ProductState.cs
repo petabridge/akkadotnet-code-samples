@@ -4,12 +4,12 @@ using SqlSharding.Shared.Events;
 
 namespace SqlSharding.Shared;
 
-public record ProductData(string ProductId, string ProductName, decimal CurrentPrice)
+public record ProductData(string ProductId, string ProductName, decimal CurrentPrice) : ISqlShardingProtocolMember
 {
     public static readonly ProductData Empty = new(string.Empty, string.Empty, decimal.Zero);
 }
 
-public record PurchasingTotals(int RemainingInventory, int SoldInventory, decimal TotalRevenue)
+public record PurchasingTotals(int RemainingInventory, int SoldInventory, decimal TotalRevenue) : ISqlShardingProtocolMember
 {
     public static readonly PurchasingTotals Empty = new(0, 0, decimal.Zero);
 }

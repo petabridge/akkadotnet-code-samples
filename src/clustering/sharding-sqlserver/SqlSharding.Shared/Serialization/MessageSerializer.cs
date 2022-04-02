@@ -3,9 +3,13 @@ using Akka.Actor;
 using Akka.Serialization;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Logging.Configuration;
 using SqlSharding.Shared.Events;
+using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Serialization.Proto;
 using CreateProduct = SqlSharding.Shared.Commands.CreateProduct;
+using FetchAllProductsResponse = SqlSharding.Shared.Queries.FetchAllProductsResponse;
+using FetchProduct = SqlSharding.Shared.Queries.FetchProduct;
 using InventoryChangeReason = SqlSharding.Shared.Events.InventoryChangeReason;
 using ProductCreated = SqlSharding.Shared.Events.ProductCreated;
 using ProductSold = SqlSharding.Shared.Events.ProductSold;
@@ -32,8 +36,15 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     public const string InventoryChangedManifest = "ic";
     public const string InventoryWarningManifest = "iw";
 
-    public const string ProductEventManifest = "pe";
+    public const string FetchAllProductsManifest = "fall";
+    public const string FetchAllProductsResponseManifest = "fallrsp";
+    public const string FetchProductManifest = "fp";
+    public const string FetchProductResultManifest = "fpr";
 
+    /// <summary>
+    /// Unique value greater than 100 as [0-100] is reserved for Akka.NET System serializers. 
+    /// </summary>
+    public override int Identifier => 556;
 
     public override byte[] ToBinary(object obj)
     {
@@ -43,6 +54,14 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return ToProto(pcr).ToByteArray();
             case ProductState ps:
                 return ToProto(ps).ToByteArray();
+            case FetchProduct fp:
+                return ToProto(fp).ToByteArray();
+            case FetchResult fr:
+                return ToProto(fr.State).ToByteArray();
+            case FetchAllProducts  _:
+                return Array.Empty<byte>();
+            case FetchAllProductsResponse rsp:
+                return ToProto(rsp).ToByteArray();
             case ProductOrder po:
                 return ToProto(po).ToByteArray();
             case Commands.PurchaseProduct pp:
@@ -72,6 +91,14 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return FromProto(Proto.ProductCommandResponse.Parser.ParseFrom(bytes));
             case ProductStateManifest:
                 return FromProto(Proto.ProductState.Parser.ParseFrom(bytes));
+            case FetchProductManifest:
+                return FromProto(Proto.FetchProduct.Parser.ParseFrom(bytes));
+            case FetchProductResultManifest:
+                return new FetchResult(FromProto(Proto.ProductState.Parser.ParseFrom(bytes)));
+            case FetchAllProductsManifest:
+                return FetchAllProducts.Instance;
+            case FetchAllProductsResponseManifest:
+                return FromProto(Proto.FetchAllProductsResponse.Parser.ParseFrom(bytes));
             case ProductOrderManifest:
                 return FromProto(Proto.ProductOrder.Parser.ParseFrom(bytes));
             case PurchaseProductManifest:
@@ -97,10 +124,18 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     {
         switch (o)
         {
-            case ProductCommandResponse _:
+            case Commands.ProductCommandResponse _:
                 return ProductCommandResponseManifest;
             case ProductState _:
                 return ProductStateManifest;
+            case FetchProduct _:
+                return FetchProductManifest;
+            case FetchResult _:
+                return FetchProductResultManifest;
+            case FetchAllProducts  _:
+                return FetchAllProductsManifest;
+            case FetchAllProductsResponse _:
+                return FetchAllProductsResponseManifest;
             case ProductOrder _:
                 return ProductOrderManifest;
             case Commands.PurchaseProduct _:
@@ -120,6 +155,30 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             default:
                 throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
         }
+    }
+    
+    private static Proto.FetchProduct ToProto(Queries.FetchProduct purchase)
+    {
+        var proto = new Proto.FetchProduct();
+        proto.ProductId = purchase.ProductId;
+        return proto;
+    }
+
+    private static Queries.FetchProduct FromProto(Proto.FetchProduct proto)
+    {
+        return new Queries.FetchProduct(proto.ProductId);
+    }
+    
+    private static FetchAllProductsResponse FromProto(Proto.FetchAllProductsResponse protoPurchase)
+    {
+        return new FetchAllProductsResponse(protoPurchase.Products.Select(c => FromProto(c)).ToList());
+    }
+
+    private static Proto.FetchAllProductsResponse ToProto(FetchAllProductsResponse purchase)
+    {
+        var proto = new Proto.FetchAllProductsResponse();
+        proto.Products.AddRange(purchase.Products.Select(c => ToProto(c)));
+        return proto;
     }
     
     private static Proto.SupplyProduct ToProto(SupplyProduct purchase)

@@ -9,10 +9,15 @@ using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SqlSharding.Host.Actors;
+using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
 
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+
 var builder = new HostBuilder()
-    .ConfigureAppConfiguration(c => c.AddEnvironmentVariables())
+    .ConfigureAppConfiguration(c => c.AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json")
+        .AddJsonFile($"appsettings.{environment}.json"))
     .ConfigureServices((context, services) =>
     {
         // maps to environment variable ConnectionStrings__AkkaSqlConnection
@@ -34,12 +39,22 @@ var builder = new HostBuilder()
         {
             configurationBuilder
                 .WithRemoting(hostName, port)
+                .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
+                .WithShardRegion<ProductMarker>("products", s => ProductTotalsActor.GetProps(s),
+                    new ProductMessageRouter(),
+                    new ShardOptions()
+                    {
+                        RememberEntities = true, Role = ProductActorProps.SingletonActorRole,
+                        StateStoreMode = StateStoreMode.DData
+                    })
                 .StartActors((system, registry) =>
                 {
-                    var indexProps = Props.Create(() => new ProductIndexActor());
+                    var shardRegion = registry.Get<ProductMarker>();
+
+                    var indexProps = Props.Create(() => new ProductIndexActor(shardRegion));
                     var singletonProps = system.ProductSingletonProps(indexProps);
                     registry.TryRegister<ProductIndexActor>(system.ActorOf(singletonProps,
                         ProductActorProps.SingletonActorName));
@@ -48,9 +63,8 @@ var builder = new HostBuilder()
                     // in case we do want to message the Singleton directly from the Host node
                     var proxyProps = system.ProductIndexProxyProps();
                     registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
-                })
-                .WithShardRegion<ProductMarker>("products", s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(), 
-                    new ShardOptions(){ RememberEntities = true, Role = ProductActorProps.SingletonActorRole, StateStoreMode = StateStoreMode.DData});
+                });
+
         });
     })
     .Build();
