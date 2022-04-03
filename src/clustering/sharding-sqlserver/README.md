@@ -26,7 +26,7 @@ This app consists of two Akka.Cluster role types:
 
 We have only two actor types in this solution:
 
-1. `ProductTotalsActor` - our `ReceivePersistentActor` that will process `IProductCommand `, transforming them into (0..N) `IProductEvent`s, updating its `ProductState`, and replying to the original sender with a `ProductCommandResponse` with the results of each command process. This entity actor demonstrates one of the more robust ways of executing event-sourcing on top of Akka.Persistence using C#9 `record` types and cleanly separating command / event / query message types from each other.
+1. `ProductTotalsActor` - our `ReceivePersistentActor` that will process `IProductCommand `, transforming them into (0..N) `IProductEvent`s, updating its `ProductState`, and replying to the original sender with a `ProductCommandResponse` with the results of each command. This entity actor demonstrates one of the more robust ways of executing event-sourcing on top of Akka.Persistence using C#9 `record` types and cleanly separating command / event / query message types from each other.
 2. `ProductIndexActor` - uses [Akka.Persistence.Query](https://getakka.net/articles/persistence/persistence-query.html) to receive the list of all available products, queries the `ProductTotalsActor` for some display data, but otherwise just serves up copies of its index to the `/` HTTP route each time it's asked.
 
 > **N.B.** while this application uses event-sourcing heavily, it does not use CQRS. One CQRS modification you would likely find in a production system is that the `ProductIndexActor` would very likely be changed to insert all of the relevant product index data into rows in a SQL table as a materialized view, rather than handle queries directly from the Web UI.
