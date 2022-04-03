@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>$(NetRuntime)</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.42.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Serialization\Proto\SqlSharding.Messages.proto" GrpcServices="None" />		
+    </ItemGroup>
+
+
+</Project>

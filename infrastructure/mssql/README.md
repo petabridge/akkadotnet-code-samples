@@ -29,3 +29,11 @@ To run this image you will still need to provide the default environment variabl
 ```shell
 docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d akkadotnet.sqlserver:0.1.0
 ```
+
+This will produce a connection string that you can use to run Akka.Persistence (from the host machine):
+
+```
+Server=localhost; Database=Akka; User Id=sa; Password=yourStrong(!)Password;
+```
+
+> **N.B.** It might take `akkadotnet.sqlserver` up to 30 seconds to fully initialize the very first time it starts. Please be patient prior to running your sample and check the logs inside the Docker dashboard to see if the `Akka` database has been created.

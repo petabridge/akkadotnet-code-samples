@@ -1,0 +1,126 @@
+﻿@page "/product/{productId}"
+@model SqlSharding.WebApp.Pages.Product
+@{
+    ViewData["Title"] = $"Product - {Model.State.Data.ProductName} [{Model.State.Data.ProductName}]";
+}
+
+<div class="modal fade" id="newOrderModal" tabindex="-1" role="dialog" aria-labelledby="newOrderModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Order for @Model.State.Data.ProductName</h5>
+            </div>
+            <form method="post" id="newOrder" asp-page-handler="newOrder">
+                <div class="modal-body">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="Quantity" class="col-form-label">Quantity:</label>
+                        <input type="text" class="form-control" asp-for="Quantity">
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="place-order">Place Order</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newSupplyModal" tabindex="-1" role="dialog" aria-labelledby="newSupplyModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Re-Supply for @Model.State.Data.ProductName</h5>
+            </div>
+            <form method="post" id="newSupply" asp-page-handler="inventoryUpdate">
+                <div class="modal-body">
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-3">
+                        <label asp-for="Quantity" class="col-form-label">Quantity:</label>
+                        <input type="text" class="form-control" asp-for="Quantity">
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="resupply-confirm">Re-Supply</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="text-center">
+    <div class="container">
+        <h1 class="display-4">@Model.State.Data.ProductName</h1>
+        <table style="margin-left:auto;margin-right: auto;">
+            <thead>
+            <tr>
+                <th>Price</th>
+                <th>Available</th>
+                <th>Units Sold</th>
+                <th>Total Revenue</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>@($"{Model.State.Data.CurrentPrice:C}")</td>
+                <td>
+                    @if (Model.State.Totals.RemainingInventory < 0)
+                    {
+                        <span>
+                            @(Model.State.Totals.RemainingInventory * -1) on backorder
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            @Model.State.Totals.RemainingInventory
+                        </span>
+                    }
+                </td>
+                <td>@Model.State.Totals.SoldInventory</td>
+                <td>@($"{Model.State.Totals.TotalRevenue:C}")</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">Order</button>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#newSupplyModal">Resupply</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-6">
+            <h2>Recent Orders</h2>
+            @if (Model.State.Orders.Any())
+            {
+                <ol>
+                    @foreach (var order in Model.State.Orders)
+                    {
+                        <li>@order.Order.Timestamp - @order.Order.Quantity units at @($"{order.UnitPrice:C}") - Total @($"{order.TotalPrice:C}")</li>
+                    }
+                </ol>
+            }
+            else
+            {
+                <h3>No Orders for @Model.State.Data.ProductName</h3>
+            }
+        </div>
+        <div class="col"></div>
+    </div>
+</div>
+
+@section scripts{
+    <partial name="_ValidationScriptsPartial"/>
+}
