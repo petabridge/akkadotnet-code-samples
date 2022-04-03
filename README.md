@@ -8,7 +8,11 @@ The goals of this repository are to provide users with shovel-ready Akka.NET sam
 * Integrating Akka.NET with other popular technologies: RabbitMQ, Apache Kafka, and more; and
 * Deploying Akka.NET into popular and common deployment environments: Kubernetes, Azure, AWS, and more.
 
-These samples aren't designed to teach how to model complex domains using actors - you can 
+These samples aren't designed to teach how to model complex domains using actors - they are pimarily designed to demosntrate copy-and-pasteable approaches to running AKka.NET infrastructure correctly and succinctly.
+
+## Current Samples:
+
+1. [Akka.NET Cluster.Sharding with Akka.Persistence.SqlServer and Razor Pages](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/sharding-sqlserver)
 
 ## Contributing
 
