@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReliableRabbitMQ.Shared", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReliableRabbitMQ.Producer", "ReliableRabbitMQ.Producer\ReliableRabbitMQ.Producer.csproj", "{10E57FA3-2944-45CD-BE9B-BEE950E7B330}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReliableRabbitMQ.Consumer", "ReliableRabbitMQ.Consumer\ReliableRabbitMQ.Consumer.csproj", "{739CC38D-2B53-453B-B2E3-C1439D2C88A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{10E57FA3-2944-45CD-BE9B-BEE950E7B330}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10E57FA3-2944-45CD-BE9B-BEE950E7B330}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10E57FA3-2944-45CD-BE9B-BEE950E7B330}.Release|Any CPU.Build.0 = Release|Any CPU
+		{739CC38D-2B53-453B-B2E3-C1439D2C88A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{739CC38D-2B53-453B-B2E3-C1439D2C88A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{739CC38D-2B53-453B-B2E3-C1439D2C88A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{739CC38D-2B53-453B-B2E3-C1439D2C88A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

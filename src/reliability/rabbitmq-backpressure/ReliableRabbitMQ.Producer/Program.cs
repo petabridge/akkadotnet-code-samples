@@ -21,8 +21,8 @@ var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?
 
 var builder = new HostBuilder()
    .ConfigureAppConfiguration(c => c.AddEnvironmentVariables()
-      .AddJsonFile("appsettings.json"));
-      //.AddJsonFile($"appsettings.{environment}.json"));
+      .AddJsonFile("appsettings.json")
+      .AddJsonFile($"appsettings.{environment}.json"));
 
 builder.ConfigureServices((context, services) =>
 {
