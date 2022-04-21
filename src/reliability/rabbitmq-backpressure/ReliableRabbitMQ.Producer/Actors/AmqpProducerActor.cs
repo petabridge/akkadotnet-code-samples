@@ -20,7 +20,7 @@ public sealed class AmqpProducerActor : ReceiveActor, IWithTimers
 
     // can be used to cancel the Source.Tick
     private ICancelable _cancelable;
-    private long _totalBytes = 0L;
+    private long _totalMessages = 0L;
     private readonly ILoggingAdapter _log = Context.GetLogger();
 
     public AmqpProducerActor(AmqpConnectionDetails connectionDetails)
@@ -29,13 +29,13 @@ public sealed class AmqpProducerActor : ReceiveActor, IWithTimers
 
         Receive<int>(i =>
         {
-            _totalBytes += i;
+            _totalMessages += i;
         });
 
         Receive<CheckStats>(_ =>
         {
-            _log.Info("Wrote [{0}] bytes to Rabbit topic [{1}]", _totalBytes, QueueSettings.InputQueueName);
-            _totalBytes = 0;
+            _log.Info("Wrote [{0}] messages to Rabbit queue [{1}]", _totalMessages, QueueSettings.InputQueueName);
+            _totalMessages = 0;
         });
     }
 
@@ -51,7 +51,7 @@ public sealed class AmqpProducerActor : ReceiveActor, IWithTimers
         _cancelable = cancel;
 
         var source2 = source
-            .AlsoTo<ByteString, NotUsed>(Flow.Create<ByteString>().Select(b => b.Count).To(Sink.ActorRef<int>(Self, "complete")))
+            .AlsoTo<ByteString, NotUsed>(Flow.Create<ByteString>().Select(b => 1).To(Sink.ActorRef<int>(Self, "complete")))
             .Select(o => new OutgoingMessage(o, true, true));
 
 
