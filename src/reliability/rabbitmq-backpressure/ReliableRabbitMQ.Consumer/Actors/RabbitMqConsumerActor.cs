@@ -14,14 +14,16 @@ namespace ReliableRabbitMQ.Consumer.Actors;
 public sealed class RabbitMqConsumerActor : ReceiveActor
 {
     private readonly AmqpConnectionDetails _connectionDetails;
+    private readonly int _maxParallelism;
     private readonly IActorRef _productsShardRegion;
 
     private readonly ILoggingAdapter _log = Context.GetLogger();
 
-    public RabbitMqConsumerActor(AmqpConnectionDetails connectionDetails, ActorRegistry registry)
+    public RabbitMqConsumerActor(AmqpConnectionDetails connectionDetails, IActorRef productsShardRegion, int maxParallelism)
     {
         _connectionDetails = connectionDetails;
-        _productsShardRegion = registry.Get<ProductActor>();
+        _maxParallelism = maxParallelism;
+        _productsShardRegion = productsShardRegion;
 
         Receive<FailedProcess>(f =>
         {
@@ -71,8 +73,8 @@ public sealed class RabbitMqConsumerActor : ReceiveActor
 
         // stream will run indefinitely and will be automatically killed when this actor stops.
         var source = AmqpSource.CommittableSource(NamedQueueSourceSettings.Create(_connectionDetails, queueName)
-                .WithDeclarations(queueDeclarations), 50)
-            .SelectAsyncUnordered(50, async c =>
+                .WithDeclarations(queueDeclarations), _maxParallelism*2)
+            .SelectAsyncUnordered(_maxParallelism, async c =>
             {
                 var msg = serializer.FromBinary<CreateOrder>(c.Message.Bytes.ToArray());
                 try

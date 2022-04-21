@@ -3,12 +3,14 @@
 using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
+using Akka.DependencyInjection;
 using Akka.Hosting;
 using Akka.Remote.Hosting;
 using Akka.Streams.Amqp.RabbitMq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ReliableRabbitMQ.Consumer;
 using ReliableRabbitMQ.Consumer.Actors;
 using ReliableRabbitMQ.Shared;
 using ReliableRabbitMQ.Shared.Clustering;
@@ -37,15 +39,25 @@ builder.ConfigureServices((context, services) =>
         configurationBuilder.WithRemoting(clusterConfig.ClusterIp, clusterConfig.ClusterPort)
             .WithClustering(new ClusterOptions()
             {
-                Roles = new[] { "shard-host" }, SeedNodes = clusterConfig.ClusterSeeds.Select(Address.Parse).ToArray()
+                Roles = new[] { AmqpConsumerSingletonSettings.SingletonActorRole }, SeedNodes = clusterConfig.ClusterSeeds.Select(Address.Parse).ToArray()
             })
             .WithShardRegion<ProductActor>("products", s => ProductActor.CreateProps(s), new ProductShardMessageExtractor(), 
                 new ShardOptions()
                 {
                     RememberEntities = false,
-                    Role = "shard-host",
+                    Role = AmqpConsumerSingletonSettings.SingletonActorRole,
                     StateStoreMode = StateStoreMode.DData
-                });
+                })
+            .WithActors((system, registry) =>
+            {
+                var rabbitMQConfiguration = context.Configuration.GetRequiredSection("RabbitMQ").Get<RabbitMQSettings>();
+                var dr = DependencyResolver.For(system);
+                var shardRegionActor = registry.Get<ProductActor>();
+                var consumerProps = dr.Props<RabbitMqConsumerActor>(shardRegionActor, rabbitMQConfiguration.MaxParallelism);
+                var singletonProps = system.ProductSingletonProps(consumerProps);
+                registry.TryRegister<RabbitMqConsumerActor>(system.ActorOf(singletonProps,
+                    AmqpConsumerSingletonSettings.SingletonActorName));
+            });
     });
 });
 
