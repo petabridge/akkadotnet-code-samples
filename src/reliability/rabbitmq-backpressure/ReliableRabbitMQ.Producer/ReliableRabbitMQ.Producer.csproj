@@ -8,11 +8,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ReliableRabbitMQ.Shared\ReliableRabbitMQ.Shared.csproj" />
+        <ProjectReference Include="..\ReliableRabbitMQ.Shared\ReliableRabbitMQ.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka.Streams.Amqp.RabbitMq" Version="1.0.0-beta9" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="appsettings.json" />
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>
