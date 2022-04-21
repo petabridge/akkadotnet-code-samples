@@ -1,6 +1,7 @@
 ﻿using Akka;
 using Akka.Actor;
 using Akka.Event;
+using Akka.Hosting;
 using Akka.IO;
 using Akka.Streams;
 using Akka.Streams.Amqp.RabbitMq;
