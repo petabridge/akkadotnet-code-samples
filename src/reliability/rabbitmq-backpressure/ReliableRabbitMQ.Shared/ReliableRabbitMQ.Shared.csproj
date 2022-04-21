@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>$(NetRuntime)</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Akka.Streams.Amqp.RabbitMq" Version="1.0.0-beta9" />
+        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+    </ItemGroup>
+
+</Project>
