@@ -232,6 +232,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         protoState.Orders.AddRange(state.Orders.Select(c => ToProto(c)));
         protoState.Warnings.AddRange(state.Warnings.Select(c => ToProto(c)));
         protoState.Totals = ToProto(state.Totals);
+        protoState.InventoryChanges.AddRange(state.InventoryChanges.Select(c => ToProto(c)));
         return protoState;
     }
 
@@ -241,7 +242,8 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         {
             Data = FromProto(protoState.Data), Totals = FromProto(protoState.Totals),
             Warnings = protoState.Warnings.Select(c => FromProto(c)).ToImmutableSortedSet(),
-            Orders = protoState.Orders.Select(c => FromProto(c)).ToImmutableSortedSet()
+            Orders = protoState.Orders.Select(c => FromProto(c)).ToImmutableSortedSet(),
+            InventoryChanges = protoState.InventoryChanges.Select(c => FromProto(c)).ToImmutableSortedSet()
         };
 
         return productState;
@@ -392,16 +394,17 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     private static InventoryChanged ToProto(ProductInventoryChanged changed)
     {
         var inventoryChanged = new Proto.InventoryChanged();
-        var (productId, quantity, inventoryChangeReason) = changed;
+        var (productId, quantity, timestamp, inventoryChangeReason) = changed;
         inventoryChanged.Reason = ToProto(inventoryChangeReason);
         inventoryChanged.ProductId = productId;
         inventoryChanged.QuantityChanged = quantity;
+        inventoryChanged.Timestamp = Timestamp.FromDateTime(timestamp.ToUniversalTime());
         return inventoryChanged;
     }
 
     private static ProductInventoryChanged FromProto(InventoryChanged changed)
     {
-        return new ProductInventoryChanged(changed.ProductId, changed.QuantityChanged, FromProto(changed.Reason));
+        return new ProductInventoryChanged(changed.ProductId, changed.QuantityChanged, changed.Timestamp?.ToDateTime() ?? DateTime.MinValue, FromProto(changed.Reason));
     }
 
     private static Proto.InventoryChangeReason ToProto(InventoryChangeReason reason)
