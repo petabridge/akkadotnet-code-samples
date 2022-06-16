@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Akka.Persistence.SqlServer.Hosting" Version="$(AkkaHostingVersion)" />
+        <PackageReference Include="Akka.Persistence.PostgreSql.Hosting" Version="$(AkkaHostingVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>

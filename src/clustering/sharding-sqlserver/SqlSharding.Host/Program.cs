@@ -4,6 +4,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
+using Akka.Persistence.PostgreSql.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,7 @@ var builder = new HostBuilder()
     .ConfigureServices((context, services) =>
     {
         // maps to environment variable ConnectionStrings__AkkaSqlConnection
-        var connectionString = context.Configuration.GetConnectionString("AkkaSqlConnection");
+        var connectionString = context.Configuration.GetConnectionString("AkkaPostgresConnection");
 
 
         var akkaSection = context.Configuration.GetSection("Akka");
@@ -42,7 +43,7 @@ var builder = new HostBuilder()
                 .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
-                .WithSqlServerPersistence(connectionString)
+                .WithPostgreSqlPersistence(connectionString, autoInitialize:true)
                 .WithShardRegion<ProductMarker>("products", s => ProductTotalsActor.GetProps(s),
                     new ProductMessageRouter(),
                     new ShardOptions()
