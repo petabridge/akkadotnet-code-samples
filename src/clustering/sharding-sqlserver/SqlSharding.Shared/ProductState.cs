@@ -32,6 +32,7 @@ public record ProductState : IWithProductId
     public ImmutableSortedSet<ProductInventoryWarningEvent> Warnings { get; init; } = ImmutableSortedSet<ProductInventoryWarningEvent>.Empty;
 
     // TODO: could add product inventory change records here too
+    public ImmutableSortedSet<ProductInventoryChanged> InventoryChanges { get; init; } = ImmutableSortedSet<ProductInventoryChanged>.Empty;
 
     public bool IsEmpty => Data == ProductData.Empty;
 
@@ -57,6 +58,7 @@ public record ProductState : IWithProductId
                     // events
                     var productCreated = new ProductCreated(create.ProductId, create.ProductName, create.Price);
                     var productInventoryChanged = new ProductInventoryChanged(create.ProductId, create.InitialQuantity,
+                        DateTime.UtcNow,
                         InventoryChangeReason.SupplyIncrease);
 
 
@@ -72,7 +74,7 @@ public record ProductState : IWithProductId
             }
             case SupplyProduct(var productId, var additionalQuantity) when !IsEmpty:
             {
-                var productInventoryChanged = new ProductInventoryChanged(productId, additionalQuantity,
+                var productInventoryChanged = new ProductInventoryChanged(productId, additionalQuantity, DateTime.UtcNow,
                     InventoryChangeReason.SupplyIncrease);
                 var response = new ProductCommandResponse(productId,
                     new IProductEvent[] { productInventoryChanged });
@@ -83,6 +85,7 @@ public record ProductState : IWithProductId
             {
                 var events = new List<IProductEvent>();
                 var productInventoryChanged = new ProductInventoryChanged(purchase.ProductId, -1*purchase.NewOrder.Quantity,
+                    DateTime.UtcNow,
                     InventoryChangeReason.Fulfillment);
                 events.Add(productInventoryChanged);
                 var backordered = false;
@@ -138,7 +141,7 @@ public record ProductState : IWithProductId
                     }
                 };
             }
-            case ProductInventoryChanged(var productId, var quantity, var inventoryChangeReason):
+            case ProductInventoryChanged(var productId, var quantity, var timestamp, var inventoryChangeReason) @event:
             {
                 return this with
                 {
@@ -148,9 +151,8 @@ public record ProductState : IWithProductId
                         SoldInventory = inventoryChangeReason == InventoryChangeReason.Fulfillment
                             ? Totals.SoldInventory + Math.Abs(quantity)
                             : Totals.SoldInventory
-                    }
-                    
-                    
+                    },
+                    InventoryChanges = InventoryChanges.Add(@event)
                 };
             }
             case ProductInventoryWarningEvent warning:

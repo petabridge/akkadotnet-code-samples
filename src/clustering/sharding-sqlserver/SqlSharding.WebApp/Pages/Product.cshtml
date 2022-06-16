@@ -119,6 +119,35 @@
         </div>
         <div class="col"></div>
     </div>
+    
+    <div class="row">
+            <div class="col"></div>
+            <div class="col-6">
+                <h2>Supply Log</h2>
+                @if (Model.State.InventoryChanges.Any())
+                {
+                    <ol>
+                        @foreach (var changed in Model.State.InventoryChanges)
+                        {
+                            @if (changed.Timestamp.Equals(DateTime.MinValue))
+                            {
+                                <li>[N/A] - @changed.Quantity units [@changed.Reason]</li>
+                            }
+                            else
+                            {
+                                <li>[@changed.Timestamp] - @changed.Quantity units [@changed.Reason]</li>
+                            }
+                                
+                        }
+                    </ol>
+                }
+                else
+                {
+                    <h3>No Inventory Changes @Model.State.Data.ProductName</h3>
+                }
+            </div>
+            <div class="col"></div>
+        </div>
 </div>
 
 @section scripts{

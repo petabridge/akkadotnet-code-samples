@@ -65,7 +65,14 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
                     Sender.Tell(response);
                 }
                 
+                if(LastSequenceNr % 10 == 0)
+                    SaveSnapshot(State);
             });
+        });
+
+        Command<SaveSnapshotSuccess>(success =>
+        {
+            
         });
 
         Command<FetchProduct>(fetch =>

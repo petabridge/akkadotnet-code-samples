@@ -37,8 +37,17 @@ public enum InventoryChangeReason
     Lost
 }
 
-public record ProductInventoryChanged(string ProductId, int Quantity,
-    InventoryChangeReason Reason = InventoryChangeReason.Fulfillment) : IProductEvent;
+public record ProductInventoryChanged(string ProductId, int Quantity, DateTime Timestamp,
+    InventoryChangeReason Reason = InventoryChangeReason.Fulfillment) : IProductEvent,
+    IComparable<ProductInventoryChanged>
+{
+    public int CompareTo(ProductInventoryChanged? other)
+    {
+        if (ReferenceEquals(this, other)) return 0;
+        if (ReferenceEquals(null, other)) return 1;
+        return Timestamp.CompareTo(other.Timestamp);
+    }
+}
 
 public enum ProductWarningReason
 {
