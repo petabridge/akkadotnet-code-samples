@@ -11,9 +11,11 @@ using Microsoft.Extensions.Hosting;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
+using Phobos.Hosting;
 using SqlSharding.Host.Actors;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
+using SqlSharding.Shared.Telemetry;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
@@ -38,6 +40,7 @@ var builder = new HostBuilder()
         var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7919" }).Select(Address.Parse)
             .ToArray();
 
+        services.AddPhobosApm();
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             configurationBuilder
@@ -71,7 +74,8 @@ var builder = new HostBuilder()
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
                     cmd.RegisterCommandPalette(ClusterCommands.Instance);
-                });
+                })
+                .WithPhobos(AkkaRunMode.AkkaCluster);
 
         });
     })

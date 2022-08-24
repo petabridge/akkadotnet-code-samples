@@ -4,6 +4,7 @@ using Akka.Hosting;
 using Akka.Remote.Hosting;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
+using SqlSharding.Shared.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -21,6 +22,7 @@ var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://S
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddPhobosApm();
 builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
 {
     configurationBuilder.WithRemoting(hostName, port)
