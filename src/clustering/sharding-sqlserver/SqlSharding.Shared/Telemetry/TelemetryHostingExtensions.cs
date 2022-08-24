@@ -1,6 +1,8 @@
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -28,10 +30,8 @@ public static class TelemetryHostingExtensions
                 .AddPhobosInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddAspNetCoreInstrumentation()
-                .AddJaegerExporter(opt =>
-                {
-                        
-                });
+                .AddProcessor(new ExcludeShardingProcessor(new[]
+                    { new SimpleActivityExportProcessor(new JaegerExporter(new JaegerExporterOptions())) }));
         });
 
         services.AddOpenTelemetryMetrics(builder =>
