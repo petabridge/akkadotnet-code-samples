@@ -52,7 +52,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseAuthorization();
 
 app.MapRazorPages();
