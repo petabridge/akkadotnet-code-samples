@@ -24,7 +24,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     {
     }
 
-    public const string CreateProductMainfest = "cp";
+    public const string CreateProductManifest = "cp";
     public const string SupplyProductManifest = "sp";
     public const string PurchaseProductManifest = "pp";
     public const string ProductCommandResponseManifest = "pcr";
@@ -44,7 +44,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     /// <summary>
     /// Unique value greater than 100 as [0-100] is reserved for Akka.NET System serializers. 
     /// </summary>
-    public override int Identifier => 556;
+    public override int Identifier => 556; //(int serializerId, string manifest)
 
     public override byte[] ToBinary(object obj)
     {
@@ -58,7 +58,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return ToProto(fp).ToByteArray();
             case FetchResult fr:
                 return ToProto(fr.State).ToByteArray();
-            case FetchAllProducts  _:
+            case FetchAllProducts _:
                 return Array.Empty<byte>();
             case FetchAllProductsResponse rsp:
                 return ToProto(rsp).ToByteArray();
@@ -107,7 +107,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return FromProto(Proto.ProductSold.Parser.ParseFrom(bytes));
             case ProductCreatedManifest:
                 return FromProto(Proto.ProductCreated.Parser.ParseFrom(bytes));
-            case CreateProductMainfest:
+            case CreateProductManifest:
                 return FromProto(Proto.CreateProduct.Parser.ParseFrom(bytes));
             case SupplyProductManifest:
                 return FromProto(Proto.SupplyProduct.Parser.ParseFrom(bytes));
@@ -132,7 +132,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return FetchProductManifest;
             case FetchResult _:
                 return FetchProductResultManifest;
-            case FetchAllProducts  _:
+            case FetchAllProducts _:
                 return FetchAllProductsManifest;
             case FetchAllProductsResponse _:
                 return FetchAllProductsResponseManifest;
@@ -145,7 +145,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             case ProductCreated _:
                 return ProductCreatedManifest;
             case CreateProduct _:
-                return CreateProductMainfest;
+                return CreateProductManifest;
             case SupplyProduct _:
                 return SupplyProductManifest;
             case ProductInventoryChanged _:
@@ -156,7 +156,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
         }
     }
-    
+
     private static Proto.FetchProduct ToProto(Queries.FetchProduct purchase)
     {
         var proto = new Proto.FetchProduct();
@@ -168,7 +168,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     {
         return new Queries.FetchProduct(proto.ProductId);
     }
-    
+
     private static FetchAllProductsResponse FromProto(Proto.FetchAllProductsResponse protoPurchase)
     {
         return new FetchAllProductsResponse(protoPurchase.Products.Select(c => FromProto(c)).ToList());
@@ -180,7 +180,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         proto.Products.AddRange(purchase.Products.Select(c => ToProto(c)));
         return proto;
     }
-    
+
     private static Proto.SupplyProduct ToProto(SupplyProduct purchase)
     {
         var proto = new Proto.SupplyProduct();
@@ -224,7 +224,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         var purchase = new Commands.PurchaseProduct(FromProto(protoPurchase.Order));
         return purchase;
     }
-    
+
     private static Proto.ProductState ToProto(ProductState state)
     {
         var protoState = new Proto.ProductState();
@@ -232,22 +232,23 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         protoState.Orders.AddRange(state.Orders.Select(c => ToProto(c)));
         protoState.Warnings.AddRange(state.Warnings.Select(c => ToProto(c)));
         protoState.Totals = ToProto(state.Totals);
+        protoState.InventoryChanges.AddRange(state.InventoryChanges.Select(c => ToProto(c)));
         return protoState;
     }
 
     private static ProductState FromProto(Proto.ProductState protoState)
     {
-        var productState = new ProductState() with
+        var productState = new ProductState
         {
-            Data = FromProto(protoState.Data),
-            Totals = FromProto(protoState.Totals),
+            Data = FromProto(protoState.Data), Totals = FromProto(protoState.Totals),
             Warnings = protoState.Warnings.Select(c => FromProto(c)).ToImmutableSortedSet(),
-            Orders = protoState.Orders.Select(c => FromProto(c)).ToImmutableSortedSet()
+            Orders = protoState.Orders.Select(c => FromProto(c)).ToImmutableSortedSet(),
+            InventoryChanges = protoState.InventoryChanges.Select(c => FromProto(c)).ToImmutableSortedSet()
         };
 
         return productState;
     }
-    
+
     private static Proto.ProductCommandResponse ToProto(Commands.ProductCommandResponse pcr)
     {
         var rsp = new Proto.ProductCommandResponse();
@@ -257,7 +258,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         rsp.ProductId = pcr.ProductId;
         return rsp;
     }
-    
+
     private static Commands.ProductCommandResponse FromProto(Proto.ProductCommandResponse pcr)
     {
         var rsp = new Commands.ProductCommandResponse(pcr.ProductId,
@@ -342,7 +343,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             _ => throw new ArgumentOutOfRangeException(nameof(warning), warning, null)
         };
     }
-    
+
     private static ProductWarningReason FromProto(Proto.ProductWarningReason warning)
     {
         return warning switch
@@ -393,16 +394,17 @@ public sealed class MessageSerializer : SerializerWithStringManifest
     private static InventoryChanged ToProto(ProductInventoryChanged changed)
     {
         var inventoryChanged = new Proto.InventoryChanged();
-        var (productId, quantity, inventoryChangeReason) = changed;
+        var (productId, quantity, timestamp, inventoryChangeReason) = changed;
         inventoryChanged.Reason = ToProto(inventoryChangeReason);
         inventoryChanged.ProductId = productId;
         inventoryChanged.QuantityChanged = quantity;
+        inventoryChanged.Timestamp = Timestamp.FromDateTime(timestamp.ToUniversalTime());
         return inventoryChanged;
     }
 
     private static ProductInventoryChanged FromProto(InventoryChanged changed)
     {
-        return new ProductInventoryChanged(changed.ProductId, changed.QuantityChanged, FromProto(changed.Reason));
+        return new ProductInventoryChanged(changed.ProductId, changed.QuantityChanged, changed.Timestamp?.ToDateTime() ?? DateTime.MinValue, FromProto(changed.Reason));
     }
 
     private static Proto.InventoryChangeReason ToProto(InventoryChangeReason reason)
@@ -429,7 +431,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
 
     private static Proto.ProductCreated ToProto(ProductCreated created)
     {
-        var productCreated = new  Proto.ProductCreated
+        var productCreated = new Proto.ProductCreated
         {
             Data = CreateProductData(created)
         };
@@ -487,7 +489,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
 public static class ProtoSerializationExtensions
 {
     private const decimal NanoFactor = 1_000_000_000;
-    
+
     public static decimal ToDecimal(this DecimalValue grpcDecimal)
     {
         return grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
@@ -497,6 +499,6 @@ public static class ProtoSerializationExtensions
     {
         var units = decimal.ToInt64(value);
         var nanos = decimal.ToInt32((value - units) * NanoFactor);
-        return new DecimalValue(){ Units=units, Nanos = nanos};
+        return new DecimalValue() { Units = units, Nanos = nanos };
     }
 }

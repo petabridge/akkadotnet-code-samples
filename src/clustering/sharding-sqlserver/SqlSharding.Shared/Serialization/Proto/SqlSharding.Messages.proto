@@ -47,6 +47,7 @@ message InventoryChanged{
     string ProductId = 1;
     int32 QuantityChanged = 2;
     InventoryChangeReason Reason = 3;
+    google.protobuf.Timestamp Timestamp = 4;
 }
 
 message InventoryWarning{
@@ -114,4 +115,5 @@ message ProductState{
     ProductTotals Totals = 2;
     repeated ProductSold Orders = 3;
     repeated InventoryWarning Warnings = 4;
+    repeated InventoryChanged InventoryChanges = 5;
 }
