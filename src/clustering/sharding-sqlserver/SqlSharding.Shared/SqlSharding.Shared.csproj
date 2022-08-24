@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.42.0" />
-        <PackageReference Include="Phobos.Hosting" Version="2.0.6" />
+        <PackageReference Include="Phobos.Hosting" Version="2.1.0-beta1" />
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc9.4" />
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.4" />
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.4" />

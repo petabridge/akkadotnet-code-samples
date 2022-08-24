@@ -2,6 +2,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Hosting;
 using Akka.Remote.Hosting;
+using Phobos.Hosting;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
 using SqlSharding.Shared.Telemetry;
@@ -35,7 +36,8 @@ builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             var proxyProps = system.ProductIndexProxyProps();
             registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
-        });
+        })
+        .WithPhobos(AkkaRunMode.AkkaCluster, configBuilder => configBuilder.WithTracing(t => t.SetTraceFilter(new OnlyActiveTracesFilter())));
 });
 
 var app = builder.Build();

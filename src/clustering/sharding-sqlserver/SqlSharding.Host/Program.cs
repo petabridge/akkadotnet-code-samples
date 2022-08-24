@@ -75,8 +75,7 @@ var builder = new HostBuilder()
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
                     cmd.RegisterCommandPalette(ClusterCommands.Instance);
                 })
-                .WithPhobos(AkkaRunMode.AkkaCluster);
-
+                .WithPhobos(AkkaRunMode.AkkaCluster, configBuilder => configBuilder.WithTracing(t => t.SetTraceFilter(new OnlyActiveTracesFilter())));
         });
     })
     .Build();
