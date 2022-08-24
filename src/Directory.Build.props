@@ -14,10 +14,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <NetRuntime>net6.0</NetRuntime>
-    <XunitVersion>2.4.1</XunitVersion>
-    <TestSdkVersion>17.1.0</TestSdkVersion>
-    <AkkaVersion>1.4.35</AkkaVersion>
-    <AkkaHostingVersion>0.1.4</AkkaHostingVersion>
+    <XunitVersion>2.4.2</XunitVersion>
+    <TestSdkVersion>17.3.0</TestSdkVersion>
+    <AkkaVersion>1.4.40</AkkaVersion>
+    <AkkaHostingVersion>0.4.2</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[6.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <!-- SourceLink support for all Akka.NET projects -->
