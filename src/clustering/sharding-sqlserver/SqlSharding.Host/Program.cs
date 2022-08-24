@@ -8,6 +8,9 @@ using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Petabridge.Cmd.Cluster;
+using Petabridge.Cmd.Cluster.Sharding;
+using Petabridge.Cmd.Host;
 using SqlSharding.Host.Actors;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
@@ -63,6 +66,11 @@ var builder = new HostBuilder()
                     // in case we do want to message the Singleton directly from the Host node
                     var proxyProps = system.ProductIndexProxyProps();
                     registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
+                })
+                .AddPetabridgeCmd(cmd =>
+                {
+                    cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
+                    cmd.RegisterCommandPalette(ClusterCommands.Instance);
                 });
 
         });
