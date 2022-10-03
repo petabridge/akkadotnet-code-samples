@@ -26,6 +26,11 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
     public const string TotalsEntityNameConstant = "totals";
 
     private readonly ILoggingAdapter _log = Context.GetLogger();
+    
+        
+    public override string PersistenceId { get; }
+    
+    public ProductState State { get; set; }
 
     public ProductTotalsActor(string persistenceId)
     {
@@ -48,7 +53,16 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
         Command<IProductCommand>(cmd =>
         {
             var response = State.ProcessCommand(cmd);
+
+            if (!response.Success)
+            {
+                Sender.Tell(response);
+                // bail out
+                return;
+            }
+            
             var sentResponse = false;
+            
             PersistAllAsync(response.ResponseEvents, productEvent =>
             {
                 _log.Info("Processed: {0}", productEvent);
@@ -86,8 +100,4 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             }
         });
     }
-    
-    public override string PersistenceId { get; }
-    
-    public ProductState State { get; set; }
 }

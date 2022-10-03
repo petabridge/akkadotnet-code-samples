@@ -3,6 +3,7 @@
 using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
+using Akka.DependencyInjection;
 using Akka.Hosting;
 using Akka.Persistence.PostgreSql.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
@@ -55,7 +56,8 @@ var builder = new HostBuilder()
                 {
                     var shardRegion = registry.Get<ProductMarker>();
 
-                    var indexProps = Props.Create(() => new ProductIndexActor(shardRegion));
+                    var depR = DependencyResolver.For(system);
+                    var indexProps = depR.Props<ProductIndexActor>(shardRegion);
                     var singletonProps = system.ProductSingletonProps(indexProps);
                     registry.TryRegister<ProductIndexActor>(system.ActorOf(singletonProps,
                         ProductActorProps.SingletonActorName));
