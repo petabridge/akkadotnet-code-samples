@@ -46,10 +46,10 @@ var builder = new HostBuilder()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
+                .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
-                ")
-                .AddHoconFile("sharding.conf")
+                ", HoconAddMode.Prepend)
                 .WithShardRegion<ProductMarker>("products", s => ProductTotalsActor.GetProps(s),
                     new ProductMessageRouter(),
                     new ShardOptions()
