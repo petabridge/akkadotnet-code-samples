@@ -16,7 +16,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="1.1.0" />
-        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="1.1.0" />
+        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="1.1.2" />
         <PackageReference Include="Petabridge.Cmd.Host" Version="1.1.0" />
     </ItemGroup>
 
