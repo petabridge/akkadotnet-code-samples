@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.42.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
     </ItemGroup>
 
     <ItemGroup>
