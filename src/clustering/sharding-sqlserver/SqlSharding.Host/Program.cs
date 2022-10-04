@@ -33,9 +33,9 @@ var builder = new HostBuilder()
         var hostName = akkaSection.GetValue<string>("ClusterIp", "localhost");
 
         // maps to environment variable Akka__ClusterPort
-        var port = akkaSection.GetValue<int>("ClusterPort", 7919);
+        var port = akkaSection.GetValue<int>("ClusterPort", 0);
 
-        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7919" }).Select(Address.Parse)
+        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" }).Select(Address.Parse)
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
@@ -45,14 +45,18 @@ var builder = new HostBuilder()
                 .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
-                .WithSqlServerPersistence(connectionString)
+                .WithSqlServerPersistence(connectionString)               
                 .WithShardRegion<ProductMarker>("products", s => ProductTotalsActor.GetProps(s),
                     new ProductMessageRouter(),
                     new ShardOptions()
                     {
                         RememberEntities = true, Role = ProductActorProps.SingletonActorRole,
-                        StateStoreMode = StateStoreMode.DData
+                        StateStoreMode = StateStoreMode.Persistence
                     })
+                .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
+                .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
+                akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
+                ", HoconAddMode.Prepend)
                 .StartActors((system, registry) =>
                 {
                     var shardRegion = registry.Get<ProductMarker>();
