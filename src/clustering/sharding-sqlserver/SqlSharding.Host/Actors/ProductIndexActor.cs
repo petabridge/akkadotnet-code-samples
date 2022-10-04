@@ -64,15 +64,15 @@ public sealed class ProductIndexActor : ReceiveActor
         /*
          * Kicks off an Akka.Persistence.Query instance that will continuously
          */
-        var query = Context.System.ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
-        query.PersistenceIds()
-            .Where(c => c.StartsWith(ProductTotalsActor.TotalsEntityNameConstant))
-            .Select(c =>
-            {
-                var splitPivot = c.IndexOf("-", StringComparison.Ordinal);
-                return new ProductFound(c[(splitPivot + 1)..]);
-            })
-            .To(Sink.ActorRef<ProductFound>(Self, Done.Instance))
-            .Run(Context.Materializer());
+        // var query = Context.System.ReadJournalFor<SqlReadJournal>(SqlReadJournal.Identifier);
+        // query.PersistenceIds()
+        //     .Where(c => c.StartsWith(ProductTotalsActor.TotalsEntityNameConstant))
+        //     .Select(c =>
+        //     {
+        //         var splitPivot = c.IndexOf("-", StringComparison.Ordinal);
+        //         return new ProductFound(c[(splitPivot + 1)..]);
+        //     })
+        //     .To(Sink.ActorRef<ProductFound>(Self, Done.Instance))
+        //     .Run(Context.Materializer());
     }
 }

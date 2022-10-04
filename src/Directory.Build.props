@@ -16,7 +16,7 @@
     <NetRuntime>net6.0</NetRuntime>
     <XunitVersion>2.4.2</XunitVersion>
     <TestSdkVersion>17.3.0</TestSdkVersion>
-    <AkkaVersion>1.4.43</AkkaVersion>
+    <AkkaVersion>1.5.0-alpha1</AkkaVersion>
     <PbmVersion>1.1.2</PbmVersion>
     <AkkaHostingVersion>0.4.2</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[6.0.0,)</MicrosoftExtensionsVersion>
