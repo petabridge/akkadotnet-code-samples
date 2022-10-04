@@ -1,5 +1,6 @@
 ﻿using Akka.Actor;
 using Akka.Cluster.Tools.Singleton;
+using Akka.DependencyInjection;
 
 namespace SqlSharding.Shared.Sharding;
 

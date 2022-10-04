@@ -1,5 +1,6 @@
 using Akka.Actor;
 using Akka.Cluster.Hosting;
+using Akka.DependencyInjection;
 using Akka.Hosting;
 using Akka.Remote.Hosting;
 using SqlSharding.Shared.Serialization;
@@ -24,15 +25,15 @@ builder.Services.AddRazorPages();
 builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
 {
     configurationBuilder.WithRemoting(hostName, port)
-        .AddAppSerialization()
-        .WithClustering(new ClusterOptions()
-            { Roles = new[] { "Web" }, SeedNodes = seeds })
-        .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,
-            new ProductMessageRouter())
-        .WithActors((system, registry) =>
-        {
-            var proxyProps = system.ProductIndexProxyProps();
-            registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
+              .AddAppSerialization()
+              .WithClustering(new ClusterOptions()
+                  { Roles = new[] { "Web" }, SeedNodes = seeds })
+              .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,
+                  new ProductMessageRouter())
+              .WithActors((system, registry) =>
+              {
+                  var proxyProps = system.ProductIndexProxyProps();
+                  registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
         });
 });
 
