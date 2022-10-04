@@ -1,12 +1,14 @@
 version: 2
 updates:
 - package-ecosystem: nuget
-  directory: "/"
+  directory: "/src/clustering/sharding-sqlserver"
   schedule:
     interval: daily
     time: "11:00"
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: Microsoft.NET.Test.Sdk
-    versions:
-    - 16.8.3
+- package-ecosystem: nuget
+  directory: "/src/reliability/rabbitmq-backpressure"
+  schedule:
+    interval: daily
+    time: "11:00"
+  open-pull-requests-limit: 10
