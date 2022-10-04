@@ -46,6 +46,10 @@ var builder = new HostBuilder()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
+                .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
+                .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
+                akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
+                ", HoconAddMode.Prepend)
                 .WithActors(async (system, registry) =>
                 {
                     var shardRegion = await ClusterSharding.Get(system).StartAsync("products",
@@ -55,10 +59,6 @@ var builder = new HostBuilder()
 
                     registry.Register<ProductMarker>(shardRegion);
                 })
-                .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
-                .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
-                akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
-                ", HoconAddMode.Prepend)
                 .StartActors((system, registry) =>
                 {
                     var shardRegion = registry.Get<ProductMarker>();
