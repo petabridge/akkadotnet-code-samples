@@ -7,7 +7,7 @@ public class MessageTagger : IWriteEventAdapter
 {
     public string Manifest(object evt)
     {
-        return string.Empty;
+        return null;
     }
 
     public object ToJournal(object evt)
