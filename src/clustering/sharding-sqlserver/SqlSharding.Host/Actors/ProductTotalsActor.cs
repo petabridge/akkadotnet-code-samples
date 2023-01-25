@@ -45,11 +45,14 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             State = State.ProcessEvent(productEvent);
         });
 
-        Command<IProductCommand>(cmd =>
+        CommandAsync<IProductCommand>(async cmd =>
         {
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
-            PersistAllAsync(response.ResponseEvents, productEvent =>
+
+            await Task.Delay(100);
+            
+            PersistAll(response.ResponseEvents, productEvent =>
             {
                 _log.Info("Processed: {0}", productEvent);
                 

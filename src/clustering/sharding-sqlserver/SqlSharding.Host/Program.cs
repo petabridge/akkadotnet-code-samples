@@ -35,7 +35,7 @@ var builder = new HostBuilder()
         // maps to environment variable Akka__ClusterPort
         var port = akkaSection.GetValue<int>("ClusterPort", 0);
 
-        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" }).Select(Address.Parse)
+        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" })
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
@@ -46,33 +46,16 @@ var builder = new HostBuilder()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
-                .WithActors(async (system, registry) =>
-                {
-                    var shardRegion = await ClusterSharding.Get(system).StartAsync("products",
-                        s => ProductTotalsActor.GetProps(s),
-                        ClusterShardingSettings.Create(system)
-                            .WithRole(ProductActorProps.SingletonActorRole), new ProductMessageRouter());
-
-                    registry.Register<ProductMarker>(shardRegion);
-                })
+                .WithShardRegion<ProductMarker>("products",
+                    s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(), new ShardOptions(){ Role = ProductActorProps.SingletonActorRole})
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
                 ", HoconAddMode.Prepend)
-                .StartActors((system, registry) =>
+                .WithSingleton<ProductIndexActor>("product-proxy", (system, registry, resolver) =>
                 {
-                    var shardRegion = registry.Get<ProductMarker>();
-
-                    var indexProps = Props.Create(() => new ProductIndexActor(shardRegion));
-                    var singletonProps = system.ProductSingletonProps(indexProps);
-                    registry.TryRegister<ProductIndexActor>(system.ActorOf(singletonProps,
-                        ProductActorProps.SingletonActorName));
-
-                    // don't really need the ClusterSingletonProxy in this service, but it doesn't hurt to have it
-                    // in case we do want to message the Singleton directly from the Host node
-                    var proxyProps = system.ProductIndexProxyProps();
-                    registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
-                })
+                    return resolver.Props<ProductIndexActor>();
+                }, new ClusterSingletonOptions(){ Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);

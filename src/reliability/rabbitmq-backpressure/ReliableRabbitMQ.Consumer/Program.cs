@@ -39,7 +39,7 @@ builder.ConfigureServices((context, services) =>
         configurationBuilder.WithRemoting(clusterConfig.ClusterIp, clusterConfig.ClusterPort)
             .WithClustering(new ClusterOptions()
             {
-                Roles = new[] { AmqpConsumerSingletonSettings.SingletonActorRole }, SeedNodes = clusterConfig.ClusterSeeds.Select(Address.Parse).ToArray()
+                Roles = new[] { AmqpConsumerSingletonSettings.SingletonActorRole }, SeedNodes = clusterConfig.ClusterSeeds
             })
             .WithShardRegion<ProductActor>("products", s => ProductActor.CreateProps(s), new ProductShardMessageExtractor(), 
                 new ShardOptions()
