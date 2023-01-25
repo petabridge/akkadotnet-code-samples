@@ -16,7 +16,7 @@ var hostName = akkaSection.GetValue<string>("ClusterIp", "localhost");
 // maps to environment variable Akka__ClusterPort
 var port = akkaSection.GetValue<int>("ClusterPort", 7918);
 
-var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" }).Select(Address.Parse)
+var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" })
     .ToArray();
 
 // Add services to the container.
@@ -29,11 +29,8 @@ builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
             { Roles = new[] { "Web" }, SeedNodes = seeds })
         .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,
             new ProductMessageRouter())
-        .WithActors((system, registry) =>
-        {
-            var proxyProps = system.ProductIndexProxyProps();
-            registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
-        });
+        .WithSingletonProxy<ProductIndexMarker>("product-proxy",
+            new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole });
 });
 
 var app = builder.Build();
