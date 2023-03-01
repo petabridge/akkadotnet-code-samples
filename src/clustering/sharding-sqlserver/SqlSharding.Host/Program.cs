@@ -4,6 +4,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
+using Akka.Persistence.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +40,16 @@ var builder = new HostBuilder()
 
             .ToArray();
 
+        var journalOptions = new SqlServerJournalOptions()
+        {
+            ConnectionString = connectionString
+        };
+
+        var snapshotOptions = new SqlServerSnapshotOptions()
+        {
+            ConnectionString = connectionString
+        };
+
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             configurationBuilder
@@ -46,14 +57,18 @@ var builder = new HostBuilder()
                 .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
-                .WithSqlServerPersistence(connectionString)
+                .WithSqlServerPersistence(journalOptions, snapshotOptions)
                 .WithShardRegion<ProductMarker>("products",
                     s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(),
                     new ShardOptions()
                     {
                         Role = ProductActorProps.SingletonActorRole, RememberEntities = true,
-                        StateStoreMode = StateStoreMode.Persistence
+                        StateStoreMode = StateStoreMode.Persistence,
+                        RememberEntitiesStore = RememberEntitiesStore.Eventsourced,
+                        JournalPluginId = "akka.persistence.journal.sharding",
+                        SnapshotPluginId = "akka.persistence.snapshot-store.sharding"
                     })
+                .WithClusterShardingJournalMigrationAdapter(journalOptions)
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
