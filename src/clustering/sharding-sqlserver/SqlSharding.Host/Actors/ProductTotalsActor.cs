@@ -45,33 +45,41 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             State = State.ProcessEvent(productEvent);
         });
 
-        CommandAsync<IProductCommand>(async cmd =>
+        Command<IProductCommand>(cmd =>
         {
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
 
-            await Task.Delay(100);
-            
-            PersistAll(response.ResponseEvents, productEvent =>
-            {
-                _log.Info("Processed: {0}", productEvent);
-                
-                if (productEvent is ProductInventoryWarningEvent warning)
-                {
-                    _log.Warning(warning.ToString());
-                }
-                State = State.ProcessEvent(productEvent);
+            var sender = Sender;
 
-                if (!sentResponse) // otherwise we'll generate a response-per-event
+            if (response.ResponseEvents.Any())
+            {
+                PersistAll(response.ResponseEvents, productEvent =>
                 {
-                    sentResponse = true;
-                    Sender.Tell(response);
-                }
+                    _log.Info("Processed: {0}", productEvent);
                 
-                if(LastSequenceNr % 10 == 0)
-                    SaveSnapshot(State);
-            });
+                    if (productEvent is ProductInventoryWarningEvent warning)
+                    {
+                        _log.Warning(warning.ToString());
+                    }
+                    State = State.ProcessEvent(productEvent);
+
+                    if (!sentResponse) // otherwise we'll generate a response-per-event
+                    {
+                        sentResponse = true;
+                        sender.Tell(response);
+                    }
+                
+                    if(LastSequenceNr % 10 == 0)
+                        SaveSnapshot(State);
+                });
+            }
+            else
+            {
+                Sender.Tell(response);
+            }
         });
+
 
         Command<SaveSnapshotSuccess>(success =>
         {
