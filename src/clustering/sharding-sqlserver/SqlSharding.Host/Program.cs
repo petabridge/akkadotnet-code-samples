@@ -36,6 +36,7 @@ var builder = new HostBuilder()
         var port = akkaSection.GetValue<int>("ClusterPort", 0);
 
         var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new[] { "akka.tcp://SqlSharding@localhost:7918" })
+
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
