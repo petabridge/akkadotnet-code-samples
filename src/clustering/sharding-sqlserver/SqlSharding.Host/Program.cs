@@ -35,7 +35,8 @@ var builder = new HostBuilder()
         // maps to environment variable Akka__ClusterPort
         var port = akkaSection.GetValue<int>("ClusterPort", 0);
 
-        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" })
+        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new[] { "akka.tcp://SqlSharding@localhost:7918" })
+
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
@@ -47,21 +48,27 @@ var builder = new HostBuilder()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
                 .WithShardRegion<ProductMarker>("products",
-                    s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(), new ShardOptions(){ Role = ProductActorProps.SingletonActorRole})
+                    s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(),
+                    new ShardOptions()
+                    {
+                        Role = ProductActorProps.SingletonActorRole, RememberEntities = true,
+                        StateStoreMode = StateStoreMode.Persistence
+                    })
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
                 ", HoconAddMode.Prepend)
-                .WithSingleton<ProductIndexActor>("product-proxy", (system, registry, resolver) =>
-                {
-                    return resolver.Props<ProductIndexActor>();
-                }, new ClusterSingletonOptions(){ Role = ProductActorProps.SingletonActorRole })
+                .WithSingleton<ProductIndexActor>("product-proxy",
+                    (_, _, resolver) => resolver.Props<ProductIndexActor>(),
+                    new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+                .WithSingleton<ProductCreatorActor>("product-creator",
+                    (system, registry, resolver) => resolver.Props<ProductCreatorActor>(20_000),
+                    new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
                     cmd.RegisterCommandPalette(ClusterCommands.Instance);
                 });
-
         });
     })
     .Build();
