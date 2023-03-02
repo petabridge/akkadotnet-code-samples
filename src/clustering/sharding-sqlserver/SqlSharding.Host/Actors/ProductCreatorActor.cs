@@ -31,9 +31,9 @@ public class ProductCreatorActor : ReceiveActor
 
         Receive<PopulateProducts>(_ =>
         {
-            var source = Source.From(Enumerable.Range(1, _totalProducts))
+            var source = Source.From(Enumerable.Range(20_000, _totalProducts))
                 .Select(i => new CreateProduct(i.ToString(), "product-{i}", 10.0m, 100))
-                .SelectAsync(30,
+                .SelectAsyncUnordered(30,
                     async product =>
                         await _productsShardRegion.Ask<ProductCommandResponse>(product, TimeSpan.FromSeconds(30)))
                 .RunWith(Sink.ActorRef<ProductCommandResponse>(Self, Done.Instance), Context.System.Materializer());

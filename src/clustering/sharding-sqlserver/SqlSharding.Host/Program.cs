@@ -40,16 +40,6 @@ var builder = new HostBuilder()
 
             .ToArray();
 
-        var journalOptions = new SqlServerJournalOptions()
-        {
-            ConnectionString = connectionString
-        };
-
-        var snapshotOptions = new SqlServerSnapshotOptions()
-        {
-            ConnectionString = connectionString
-        };
-
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         {
             configurationBuilder
@@ -57,18 +47,18 @@ var builder = new HostBuilder()
                 .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
-                .WithSqlServerPersistence(journalOptions, snapshotOptions)
+                .WithSqlServerPersistence(connectionString)
                 .WithShardRegion<ProductMarker>("products",
                     s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(),
                     new ShardOptions()
                     {
                         Role = ProductActorProps.SingletonActorRole, RememberEntities = true,
-                        StateStoreMode = StateStoreMode.Persistence,
+                        StateStoreMode = StateStoreMode.DData,
                         RememberEntitiesStore = RememberEntitiesStore.Eventsourced,
                         JournalPluginId = "akka.persistence.journal.sharding",
                         SnapshotPluginId = "akka.persistence.snapshot-store.sharding"
                     })
-                .WithClusterShardingJournalMigrationAdapter(journalOptions)
+                .WithClusterShardingJournalMigrationAdapter("akka.persistence.journal.sharding")
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
@@ -76,9 +66,9 @@ var builder = new HostBuilder()
                 .WithSingleton<ProductIndexActor>("product-proxy",
                     (_, _, resolver) => resolver.Props<ProductIndexActor>(),
                     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
-                .WithSingleton<ProductCreatorActor>("product-creator",
-                    (system, registry, resolver) => resolver.Props<ProductCreatorActor>(20_000),
-                    new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+                // .WithSingleton<ProductCreatorActor>("product-creator",
+                //     (system, registry, resolver) => resolver.Props<ProductCreatorActor>(21_000),
+                //     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
