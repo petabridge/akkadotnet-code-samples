@@ -4,6 +4,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
+using Akka.Persistence.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -52,8 +53,12 @@ var builder = new HostBuilder()
                     new ShardOptions()
                     {
                         Role = ProductActorProps.SingletonActorRole, RememberEntities = true,
-                        StateStoreMode = StateStoreMode.Persistence
+                        StateStoreMode = StateStoreMode.DData,
+                        RememberEntitiesStore = RememberEntitiesStore.Eventsourced,
+                        JournalPluginId = "akka.persistence.journal.sharding",
+                        SnapshotPluginId = "akka.persistence.snapshot-store.sharding"
                     })
+                .WithClusterShardingJournalMigrationAdapter("akka.persistence.journal.sharding")
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
@@ -61,9 +66,9 @@ var builder = new HostBuilder()
                 .WithSingleton<ProductIndexActor>("product-proxy",
                     (_, _, resolver) => resolver.Props<ProductIndexActor>(),
                     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
-                .WithSingleton<ProductCreatorActor>("product-creator",
-                    (system, registry, resolver) => resolver.Props<ProductCreatorActor>(20_000),
-                    new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+                // .WithSingleton<ProductCreatorActor>("product-creator",
+                //     (system, registry, resolver) => resolver.Props<ProductCreatorActor>(21_000),
+                //     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
