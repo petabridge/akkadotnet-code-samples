@@ -1,13 +1,19 @@
 ﻿using System.Collections.Immutable;
 using Akka.Actor;
 using Akka.Cluster.Tools.Singleton;
+using Akka.DependencyInjection;
 using Akka.Event;
+using Akka.Hosting;
 using Akka.Persistence.Query;
 using Akka.Persistence.Query.Sql;
 using Akka.Streams;
 using Akka.Streams.Dsl;
-using SqlSharding.Shared;
 using SqlSharding.Shared.Queries;
+using SqlSharding.Shared.Serialization.Proto;
+using SqlSharding.Shared.Sharding;
+using FetchAllProductsResponse = SqlSharding.Shared.Queries.FetchAllProductsResponse;
+using FetchProduct = SqlSharding.Shared.Queries.FetchProduct;
+using ProductData = SqlSharding.Shared.ProductData;
 
 namespace SqlSharding.Host.Actors;
 
@@ -20,9 +26,11 @@ public sealed class ProductIndexActor : ReceiveActor
     private readonly IActorRef _shardRegion;
     private ImmutableDictionary<string, ProductData> _productIds = ImmutableDictionary<string, ProductData>.Empty;
 
-    public ProductIndexActor(IActorRef shardRegion)
+    public ProductIndexActor(IRequiredActor<ProductMarker> requiredActor)
     {
-        _shardRegion = shardRegion;
+        // GRAB ISERVICEPROVIDER
+        var diResolver = DependencyResolver.For(Context.System); 
+        _shardRegion = requiredActor.ActorRef;
         Receive<ProductFound>(found =>
         {
             _logging.Info("Found product [{0}]", found);
@@ -45,6 +53,11 @@ public sealed class ProductIndexActor : ReceiveActor
         {
             // this should never happen
             throw new InvalidOperationException("SHOULD NOT REACH END OF ID STREAM");
+        });
+
+        Receive<EventEnvelope>(e =>
+        {
+            
         });
     }
 

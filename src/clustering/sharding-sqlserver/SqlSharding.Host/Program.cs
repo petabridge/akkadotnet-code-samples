@@ -4,6 +4,7 @@ using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
+using Akka.Persistence.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +36,8 @@ var builder = new HostBuilder()
         // maps to environment variable Akka__ClusterPort
         var port = akkaSection.GetValue<int>("ClusterPort", 0);
 
-        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" }).Select(Address.Parse)
+        var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new[] { "akka.tcp://SqlSharding@localhost:7918" })
+
             .ToArray();
 
         services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
@@ -46,39 +48,32 @@ var builder = new HostBuilder()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
                 .WithSqlServerPersistence(connectionString)
-                .WithActors(async (system, registry) =>
-                {
-                    var shardRegion = await ClusterSharding.Get(system).StartAsync("products",
-                        s => ProductTotalsActor.GetProps(s),
-                        ClusterShardingSettings.Create(system)
-                            .WithRole(ProductActorProps.SingletonActorRole), new ProductMessageRouter());
-
-                    registry.Register<ProductMarker>(shardRegion);
-                })
+                .WithShardRegion<ProductMarker>("products",
+                    s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(),
+                    new ShardOptions()
+                    {
+                        Role = ProductActorProps.SingletonActorRole, RememberEntities = true,
+                        StateStoreMode = StateStoreMode.DData,
+                        RememberEntitiesStore = RememberEntitiesStore.Eventsourced,
+                        JournalPluginId = "akka.persistence.journal.sharding",
+                        SnapshotPluginId = "akka.persistence.snapshot-store.sharding"
+                    })
+                .WithClusterShardingJournalMigrationAdapter("akka.persistence.journal.sharding")
                 .AddHoconFile("sharding.conf", HoconAddMode.Prepend)
                 .AddHocon(@$"akka.persistence.journal.sharding.connection-string = ""{connectionString}""
                 akka.persistence.snapshot-store.sharding.connection-string = ""{connectionString}""
                 ", HoconAddMode.Prepend)
-                .StartActors((system, registry) =>
-                {
-                    var shardRegion = registry.Get<ProductMarker>();
-
-                    var indexProps = Props.Create(() => new ProductIndexActor(shardRegion));
-                    var singletonProps = system.ProductSingletonProps(indexProps);
-                    registry.TryRegister<ProductIndexActor>(system.ActorOf(singletonProps,
-                        ProductActorProps.SingletonActorName));
-
-                    // don't really need the ClusterSingletonProxy in this service, but it doesn't hurt to have it
-                    // in case we do want to message the Singleton directly from the Host node
-                    var proxyProps = system.ProductIndexProxyProps();
-                    registry.TryRegister<ProductIndexMarker>(system.ActorOf(proxyProps, "product-proxy"));
-                })
+                .WithSingleton<ProductIndexActor>("product-proxy",
+                    (_, _, resolver) => resolver.Props<ProductIndexActor>(),
+                    new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+                // .WithSingleton<ProductCreatorActor>("product-creator",
+                //     (system, registry, resolver) => resolver.Props<ProductCreatorActor>(21_000),
+                //     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
                     cmd.RegisterCommandPalette(ClusterCommands.Instance);
                 });
-
         });
     })
     .Build();

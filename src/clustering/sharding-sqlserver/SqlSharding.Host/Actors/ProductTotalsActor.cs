@@ -49,26 +49,37 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
         {
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
-            PersistAllAsync(response.ResponseEvents, productEvent =>
-            {
-                _log.Info("Processed: {0}", productEvent);
-                
-                if (productEvent is ProductInventoryWarningEvent warning)
-                {
-                    _log.Warning(warning.ToString());
-                }
-                State = State.ProcessEvent(productEvent);
 
-                if (!sentResponse) // otherwise we'll generate a response-per-event
+            var sender = Sender;
+
+            if (response.ResponseEvents.Any())
+            {
+                PersistAll(response.ResponseEvents, productEvent =>
                 {
-                    sentResponse = true;
-                    Sender.Tell(response);
-                }
+                    _log.Info("Processed: {0}", productEvent);
                 
-                if(LastSequenceNr % 10 == 0)
-                    SaveSnapshot(State);
-            });
+                    if (productEvent is ProductInventoryWarningEvent warning)
+                    {
+                        _log.Warning(warning.ToString());
+                    }
+                    State = State.ProcessEvent(productEvent);
+
+                    if (!sentResponse) // otherwise we'll generate a response-per-event
+                    {
+                        sentResponse = true;
+                        sender.Tell(response);
+                    }
+                
+                    if(LastSequenceNr % 10 == 0)
+                        SaveSnapshot(State);
+                });
+            }
+            else
+            {
+                Sender.Tell(response);
+            }
         });
+
 
         Command<SaveSnapshotSuccess>(success =>
         {
