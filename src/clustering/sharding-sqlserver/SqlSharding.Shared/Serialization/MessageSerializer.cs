@@ -202,13 +202,14 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         proto.InitialQuantity = purchase.InitialQuantity;
         proto.ProductId = purchase.ProductId;
         proto.ProductName = purchase.ProductName;
+        proto.Tags.AddRange(purchase.Tags);
         return proto;
     }
 
     private static CreateProduct FromProto(Proto.CreateProduct protoCreate)
     {
         var createProduct = new CreateProduct(protoCreate.ProductId, protoCreate.ProductName,
-            protoCreate.Price.ToDecimal(), protoCreate.InitialQuantity);
+            protoCreate.Price.ToDecimal(), protoCreate.InitialQuantity, protoCreate.Tags.ToArray());
         return createProduct;
     }
 

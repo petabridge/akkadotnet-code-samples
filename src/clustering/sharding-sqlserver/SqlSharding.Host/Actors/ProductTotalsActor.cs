@@ -1,8 +1,10 @@
-﻿using Akka.Actor;
+﻿using System.Collections.Immutable;
+using Akka.Actor;
 using Akka.Cluster.Sharding;
 using Akka.Dispatch.SysMsg;
 using Akka.Event;
 using Akka.Persistence;
+using Akka.Persistence.Journal;
 using SqlSharding.Shared;
 using SqlSharding.Shared.Commands;
 using SqlSharding.Shared.Events;
@@ -54,7 +56,10 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
 
             if (response.ResponseEvents.Any())
             {
-                PersistAll(response.ResponseEvents, productEvent =>
+                var events = cmd is CreateProduct { Tags.Length: > 0 } cp
+                    ? response.ResponseEvents.Select(e => new TaggedEvent(e, cp.Tags, string.Empty)).ToArray()
+                    : response.ResponseEvents;
+                PersistAll(events, productEvent =>
                 {
                     _log.Info("Processed: {0}", productEvent);
                 

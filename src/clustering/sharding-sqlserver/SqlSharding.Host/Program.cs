@@ -13,6 +13,8 @@ using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
 using SqlSharding.Host.Actors;
+using SqlSharding.Shared;
+using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
 
@@ -47,7 +49,10 @@ var builder = new HostBuilder()
                 .AddAppSerialization()
                 .WithClustering(new ClusterOptions()
                     { Roles = new[] { ProductActorProps.SingletonActorRole }, SeedNodes = seeds })
-                .WithSqlServerPersistence(connectionString)
+                .WithSqlServerPersistence(connectionString, journalBuilder: builder =>
+                {
+                    builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });
+                })
                 .WithShardRegion<ProductMarker>("products",
                     s => ProductTotalsActor.GetProps(s), new ProductMessageRouter(),
                     new ShardOptions()

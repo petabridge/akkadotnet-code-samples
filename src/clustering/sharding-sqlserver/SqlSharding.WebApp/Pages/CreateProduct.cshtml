@@ -23,6 +23,11 @@
             <input asp-for="Product.InitialQuantity" class="form-control"/>
             <span asp-validation-for="Product.InitialQuantity" class="text-danger"></span>
         </div>
+        <div class="mb-3">
+            <label asp-for="Product.Tags">Tags (Separate With ';')</label>
+            <input asp-for="Product.Tags" class="form-control"/>
+            <span asp-validation-for="Product.Tags" class="text-danger"></span>
+        </div>
         <button type="submit" class="btn btn-primary my-1">Submit</button>
     </form>
 </div>

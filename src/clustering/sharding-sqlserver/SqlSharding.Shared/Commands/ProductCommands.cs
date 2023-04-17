@@ -7,7 +7,7 @@ namespace SqlSharding.Shared.Commands;
 /// </summary>
 public interface IProductCommand : IWithProductId{}
 
-public record CreateProduct(string ProductId, string ProductName, decimal Price, int InitialQuantity) : IProductCommand;
+public record CreateProduct(string ProductId, string ProductName, decimal Price, int InitialQuantity, string[] Tags) : IProductCommand;
 
 public record SupplyProduct(string ProductId, int AdditionalQuantity) : IProductCommand;
 
