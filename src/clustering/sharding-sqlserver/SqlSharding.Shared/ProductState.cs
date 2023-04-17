@@ -153,8 +153,12 @@ public static class ProductStateExtensions
                     }
                 };
             }
+            case TaggedEvent tagged:
+            {
+                return productState.ProcessEvent(tagged.Event);
+            }
             default:
-                throw new ArgumentOutOfRangeException(nameof(productEvent));
+                throw new ArgumentOutOfRangeException(nameof(productEvent), $"Unknown type: {productEvent.GetType()}");
         }
     }
 }

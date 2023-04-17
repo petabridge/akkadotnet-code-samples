@@ -23,6 +23,8 @@ public sealed class NewProduct
     
     [Range(0, 100000)]
     public int InitialQuantity { get; set; }
+
+    public string? Tags { get; set; } = string.Empty;
 }
 
 public class CreateProduct : PageModel
@@ -50,7 +52,7 @@ public class CreateProduct : PageModel
         }
 
         var createProductCommand = new SqlSharding.Shared.Commands.CreateProduct(Guid.NewGuid().ToString(),
-            Product.ProductName, Product.Price, Product.InitialQuantity);
+            Product.ProductName, Product.Price, Product.InitialQuantity, Product.Tags?.Split(';') ?? Array.Empty<string>());
 
         var createRsp = await _productActor.Ask<ProductCommandResponse>(createProductCommand, TimeSpan.FromSeconds(3));
 

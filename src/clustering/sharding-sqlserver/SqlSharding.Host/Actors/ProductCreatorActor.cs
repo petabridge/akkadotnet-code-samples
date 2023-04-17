@@ -24,15 +24,22 @@ public class ProductCreatorActor : ReceiveActor
     private readonly int _totalProducts;
     private readonly IActorRef _productsShardRegion;
 
-    public ProductCreatorActor(int totalProducts, IRequiredActor<ProductMarker> shardRegion)
+    public ProductCreatorActor(int totalProducts, int taggedProducts, IRequiredActor<ProductMarker> shardRegion)
     {
         _totalProducts = totalProducts;
         _productsShardRegion = shardRegion.ActorRef;
 
         Receive<PopulateProducts>(_ =>
         {
+            var tagged = 0;
             var source = Source.From(Enumerable.Range(20_000, _totalProducts))
-                .Select(i => new CreateProduct(i.ToString(), "product-{i}", 10.0m, 100))
+                .Select(i =>
+                {
+                    tagged++;
+                    return tagged <= taggedProducts
+                        ? new CreateProduct(i.ToString(), $"product-{i}", 10.0m, 100, new [] {$"tag-{tagged}"})
+                        : new CreateProduct(i.ToString(), $"product-{i}", 10.0m, 100, Array.Empty<string>());
+                })
                 .SelectAsyncUnordered(30,
                     async product =>
                         await _productsShardRegion.Ask<ProductCommandResponse>(product, TimeSpan.FromSeconds(30)))

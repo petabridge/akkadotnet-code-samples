@@ -71,6 +71,7 @@ message CreateProduct{
     string ProductName = 2;
     DecimalValue Price = 3;
     int32 InitialQuantity = 4;
+    repeated string Tags = 5;
 }
 
 message SupplyProduct{
