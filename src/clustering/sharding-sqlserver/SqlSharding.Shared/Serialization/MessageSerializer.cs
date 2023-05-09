@@ -96,7 +96,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             case FetchProductResultManifest:
                 return new FetchResult(FromProto(Proto.ProductState.Parser.ParseFrom(bytes)));
             case FetchAllProductsManifest:
-                return FetchAllProducts.Instance;
+                throw new NotImplementedException();
             case FetchAllProductsResponseManifest:
                 return FromProto(Proto.FetchAllProductsResponse.Parser.ParseFrom(bytes));
             case ProductOrderManifest:

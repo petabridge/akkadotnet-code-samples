@@ -9,4 +9,8 @@
     <ItemGroup>
       <ProjectReference Include="..\SqlSharding.Shared\SqlSharding.Shared.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Actors\" />
+    </ItemGroup>
 </Project>

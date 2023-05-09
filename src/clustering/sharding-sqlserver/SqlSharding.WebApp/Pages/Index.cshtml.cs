@@ -22,7 +22,7 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var products = await _indexActor.Ask<FetchAllProductsResponse>(FetchAllProducts.Instance, TimeSpan.FromSeconds(5));
+        var products = await _indexActor.Ask<FetchAllProductsResponse>(new FetchAllProducts("Foo", ActorRefs.Nobody), TimeSpan.FromSeconds(5));
         
         Products = products.Products;
         

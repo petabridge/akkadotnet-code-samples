@@ -25,6 +25,7 @@ public sealed class ProductIndexActor : ReceiveActor
     private readonly ILoggingAdapter _logging = Context.GetLogger();
     private readonly IActorRef _shardRegion;
     private ImmutableDictionary<string, ProductData> _productIds = ImmutableDictionary<string, ProductData>.Empty;
+    private ImmutableDictionary<string, (IActorRef producerController, bool hasDemand)> _producers = ImmutableDictionary<string, (IActorRef producerController, bool hasDemand)>.Empty;
 
     public ProductIndexActor(IRequiredActor<ProductMarker> requiredActor)
     {
