@@ -5,24 +5,26 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SqlSharding.Shared;
 using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Sharding;
+using SqlSharding.WebApp.Services;
 
 namespace SqlSharding.WebApp.Pages;
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IActorRef _indexActor;
+    private readonly IProductsResolver _resolver;
 
-    public IndexModel(ILogger<IndexModel> logger, ActorRegistry registry)
+    public IndexModel(ILogger<IndexModel> logger, IProductsResolver resolver)
     {
         _logger = logger;
-        _indexActor = registry.Get<ProductIndexMarker>();
+        _resolver = resolver;
     }
 
     public IReadOnlyList<ProductData> Products { get; set; } = Array.Empty<ProductData>();
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var products = await _indexActor.Ask<FetchAllProductsResponse>(FetchAllProducts.Instance, TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        var products = await _resolver.FetchAllProductsAsync(cts.Token);
         
         Products = products.Products;
         

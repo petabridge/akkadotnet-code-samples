@@ -64,9 +64,9 @@ public sealed class FetchAllProductsConsumer : UntypedActor, IWithStash, IWithTi
         {
             switch (message)
             {
-                case ConsumerController.Delivery<IFetchAllProductsProtocol> response:
+                case ConsumerController.Delivery<IFetchAllProductsProtocol> { Message: FetchAllProductsResponse resp } response:
                     response.ConfirmTo.Tell(ConsumerController.Confirmed.Instance);
-                    requestor.Tell(response.Message);
+                    requestor.Tell(resp);
                     BecomeActive();
                     return true;
                 case FetchAllProducts:

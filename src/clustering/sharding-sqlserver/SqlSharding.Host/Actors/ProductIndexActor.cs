@@ -62,7 +62,11 @@ public sealed class ProductIndexActor : ReceiveActor, IWithTimers
         
         Receive<ConsumerTerminated>(t =>
         {
-            _producers = _producers.Remove(t.ProducerId);
+            if (_producers.TryGetValue(t.ProducerId, out var p))
+            {
+                Context.Stop(p.producerController);
+                _producers = _producers.Remove(t.ProducerId);
+            }
         });
 
         Receive<Done>(_ =>
@@ -154,7 +158,11 @@ public sealed class ProductIndexActor : ReceiveActor, IWithTimers
         var producerControllerProps =
             ProducerController.Create<IFetchAllProductsProtocol>(Context, producerId, Option<Props>.None, producerControllerSettings);
         Context.WatchWith(requestor, new ConsumerTerminated(producerId));
-        return Context.ActorOf(producerControllerProps, $"producer-controller-{producerId}");
+        var producerController = Context.ActorOf(producerControllerProps, $"producer-controller-{producerId}");
+        
+        // register the consumer with the producer
+        producerController.Tell(new ProducerController.RegisterConsumer<IFetchAllProductsProtocol>(requestor));
+        return producerController;
     }
 
     public ITimerScheduler Timers { get; set; } = null!;
