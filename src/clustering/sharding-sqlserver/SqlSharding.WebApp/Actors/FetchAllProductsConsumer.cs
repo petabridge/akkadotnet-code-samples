@@ -9,6 +9,7 @@ using Akka.Actor;
 using Akka.Delivery;
 using Akka.Event;
 using Akka.Hosting;
+using Akka.Util;
 using Akka.Util.Extensions;
 using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Sharding;
@@ -38,9 +39,10 @@ public sealed class FetchAllProductsConsumer : UntypedActor, IWithStash, IWithTi
         _productIndexProxy = productIndexProxy.ActorRef;
         var consumerControllerSettings = ConsumerController.Settings.Create(Context.System);
         var consumerControllerProps =
-            ConsumerController.Create<IFetchAllProductsProtocol>(Context, _productIndexProxy.AsOption(),
+            ConsumerController.Create<IFetchAllProductsProtocol>(Context, Option<IActorRef>.None,
                 consumerControllerSettings);
         _fetchAllProductsConsumerController = Context.ActorOf(consumerControllerProps, "controller");
+        _fetchAllProductsConsumerController.Tell(new ConsumerController.Start<IFetchAllProductsProtocol>(Self));
     }
 
     protected override void OnReceive(object message)

@@ -162,6 +162,9 @@ public sealed class ProductIndexActor : ReceiveActor, IWithTimers
         
         // register the consumer with the producer
         producerController.Tell(new ProducerController.RegisterConsumer<IFetchAllProductsProtocol>(requestor));
+        
+        // start production
+        producerController.Tell(new ProducerController.Start<IFetchAllProductsProtocol>(Self));
         return producerController;
     }
 

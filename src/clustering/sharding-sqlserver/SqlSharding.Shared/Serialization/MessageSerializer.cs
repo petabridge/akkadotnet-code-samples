@@ -84,15 +84,6 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         }
     }
 
-    private Proto.FetchAllProductsImpl ToProto(FetchAllProductsImpl purchase)
-    {
-        return new Proto.FetchAllProductsImpl()
-        {
-            ProducerId = purchase.ProducerId,
-            ActorRefPath = Akka.Serialization.Serialization.SerializedActorPath(purchase.ConsumerController)
-        };
-    }
-
     public override object FromBinary(byte[] bytes, string manifest)
     {
         switch (manifest)
@@ -130,16 +121,6 @@ public sealed class MessageSerializer : SerializerWithStringManifest
         }
     }
 
-    private FetchAllProductsImpl FromProto(Proto.FetchAllProductsImpl protoPurchase)
-    {
-        return new FetchAllProductsImpl(protoPurchase.ProducerId, ResolveActorRef(protoPurchase.ActorRefPath));
-    }
-    
-    private IActorRef ResolveActorRef(string path)
-    {
-        return system.Provider.ResolveActorRef(path);
-    }
-
     public override string Manifest(object o)
     {
         switch (o)
@@ -152,7 +133,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return FetchProductManifest;
             case FetchResult _:
                 return FetchProductResultManifest;
-            case FetchAllProducts _:
+            case FetchAllProductsImpl _:
                 return FetchAllProductsManifest;
             case FetchAllProductsResponse _:
                 return FetchAllProductsResponseManifest;
@@ -175,6 +156,25 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             default:
                 throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
         }
+    }
+
+    private FetchAllProductsImpl FromProto(Proto.FetchAllProductsImpl protoPurchase)
+    {
+        return new FetchAllProductsImpl(protoPurchase.ProducerId, ResolveActorRef(protoPurchase.ActorRefPath));
+    }
+    
+    private IActorRef ResolveActorRef(string path)
+    {
+        return system.Provider.ResolveActorRef(path);
+    }
+    
+    private Proto.FetchAllProductsImpl ToProto(FetchAllProductsImpl purchase)
+    {
+        return new Proto.FetchAllProductsImpl()
+        {
+            ProducerId = purchase.ProducerId,
+            ActorRefPath = Akka.Serialization.Serialization.SerializedActorPath(purchase.ConsumerController)
+        };
     }
 
     private static Proto.FetchProduct ToProto(Queries.FetchProduct purchase)
