@@ -55,9 +55,10 @@ public sealed class ProductIndexActor : ReceiveActor
             throw new InvalidOperationException("SHOULD NOT REACH END OF ID STREAM");
         });
 
-        Receive<EventEnvelope>(e =>
+        Receive<Status.Failure>(f =>
         {
-            
+            _logging.Error(f.Cause, "Failed to read product from Akka.Persistence.Query");
+            throw new InvalidOperationException("SHOULD NOT REACH END OF ID STREAM");
         });
     }
 
@@ -85,7 +86,7 @@ public sealed class ProductIndexActor : ReceiveActor
                 var splitPivot = c.IndexOf("-", StringComparison.Ordinal);
                 return new ProductFound(c[(splitPivot + 1)..]);
             })
-            .To(Sink.ActorRef<ProductFound>(Self, Done.Instance))
+            .To(Sink.ActorRef<ProductFound>(Self, Done.Instance, ex => new Status.Failure(ex)))
             .Run(Context.Materializer());
     }
 }
