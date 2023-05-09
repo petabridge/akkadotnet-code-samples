@@ -57,6 +57,9 @@ public sealed class FetchAllProductsConsumer : UntypedActor, IWithStash, IWithTi
                 break;
             case RequestTimeout:
                 break; // ignore
+            case ConsumerController.Delivery<IFetchAllProductsProtocol> { Message: FetchAllProductsResponse resp } response:
+                response.ConfirmTo.Tell(ConsumerController.Confirmed.Instance); // old request, but need to confirm
+                break;
         }
     }
 

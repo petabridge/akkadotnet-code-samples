@@ -104,7 +104,7 @@ public sealed class ProductIndexActor : ReceiveActor, IWithTimers
         else
         {
             // need to start ProducerController
-            var producerController = CreateProducerController(f.ProducerId, Sender);
+            var producerController = CreateProducerController(f.ProducerId, f.ConsumerController);
             _producers = _producers.Add(f.ProducerId, (producerController, false));
             RetryRequest(f, attemptNo + 1);
         }
