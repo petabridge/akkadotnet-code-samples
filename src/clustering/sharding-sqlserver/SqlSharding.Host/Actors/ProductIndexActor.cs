@@ -154,7 +154,7 @@ public sealed class ProductIndexActor : ReceiveActor, IWithTimers
     private IActorRef CreateProducerController(string producerId, IActorRef requestor)
     {
         // 64KB chunks
-        var producerControllerSettings = ProducerController.Settings.Create(Context.System) with { ChunkLargeMessagesBytes = 64 * 1024 };
+        var producerControllerSettings = ProducerController.Settings.Create(Context.System);
         var producerControllerProps =
             ProducerController.Create<IFetchAllProductsProtocol>(Context, producerId, Option<Props>.None, producerControllerSettings);
         Context.WatchWith(requestor, new ConsumerTerminated(producerId));

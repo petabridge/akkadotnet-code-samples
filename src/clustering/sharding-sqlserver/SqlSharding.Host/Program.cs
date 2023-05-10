@@ -72,7 +72,7 @@ var builder = new HostBuilder()
                     (_, _, resolver) => resolver.Props<ProductIndexActor>(),
                     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 // .WithSingleton<ProductCreatorActor>("product-creator",
-                //     (system, registry, resolver) => resolver.Props<ProductCreatorActor>(21_000),
+                //     (system, registry, resolver) => resolver.Props<ProductCreatorActor>(21_000, 100),
                 //     new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
                 .AddPetabridgeCmd(cmd =>
                 {
