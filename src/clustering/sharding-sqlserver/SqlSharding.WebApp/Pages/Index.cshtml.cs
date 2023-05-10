@@ -26,7 +26,7 @@ public class IndexModel : PageModel
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var products = await _resolver.FetchAllProductsAsync(cts.Token);
         
-        Products = products.Products;
+        Products = products.Products.OrderByDescending(c => c.CurrentPrice).ToList();
         
         return Page();
     }
