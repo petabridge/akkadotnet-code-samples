@@ -1,9 +1,10 @@
-using Akka.Actor;
 using Akka.Cluster.Hosting;
 using Akka.Hosting;
 using Akka.Remote.Hosting;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
+using SqlSharding.WebApp.Actors;
+using SqlSharding.WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -30,8 +31,15 @@ builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
         .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,
             new ProductMessageRouter())
         .WithSingletonProxy<ProductIndexMarker>("product-proxy",
-            new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole });
+            new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+        .WithActors((system, registry, resolver) =>
+        {
+            var consumerProps = resolver.Props<FetchAllProductsConsumer>();
+            var consumerActor = system.ActorOf(consumerProps, "fetch-all-products-consumer");
+            registry.Register<FetchAllProductsConsumer>(consumerActor);
+        });
 });
+builder.Services.AddSingleton<IProductsResolver, ActorProductsResolver>();
 
 var app = builder.Build();
 

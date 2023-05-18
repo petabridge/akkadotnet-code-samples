@@ -94,6 +94,11 @@ message FetchAllProductsResponse{
     repeated ProductData Products = 1;
 }
 
+message FetchAllProductsImpl {
+    string ProducerId = 1;
+    string ActorRefPath = 2;
+}
+
 message FetchProduct{
     string ProductId = 1;
 }

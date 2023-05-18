@@ -43,7 +43,7 @@ public class ProductCreatorActor : ReceiveActor
                 .SelectAsyncUnordered(30,
                     async product =>
                         await _productsShardRegion.Ask<ProductCommandResponse>(product, TimeSpan.FromSeconds(30)))
-                .RunWith(Sink.ActorRef<ProductCommandResponse>(Self, Done.Instance), Context.System.Materializer());
+                .RunWith(Sink.ActorRef<ProductCommandResponse>(Self, Done.Instance, f => new Status.Failure(f)), Context.System.Materializer());
         });
 
         Receive<ProductCommandResponse>(pcr =>

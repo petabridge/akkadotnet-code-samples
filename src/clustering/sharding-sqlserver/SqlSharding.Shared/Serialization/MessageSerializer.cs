@@ -8,6 +8,7 @@ using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Serialization.Proto;
 using CreateProduct = SqlSharding.Shared.Commands.CreateProduct;
+using FetchAllProductsImpl = SqlSharding.Shared.Queries.FetchAllProductsImpl;
 using FetchAllProductsResponse = SqlSharding.Shared.Queries.FetchAllProductsResponse;
 using FetchProduct = SqlSharding.Shared.Queries.FetchProduct;
 using InventoryChangeReason = SqlSharding.Shared.Events.InventoryChangeReason;
@@ -58,8 +59,8 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return ToProto(fp).ToByteArray();
             case FetchResult fr:
                 return ToProto(fr.State).ToByteArray();
-            case FetchAllProducts _:
-                return Array.Empty<byte>();
+            case FetchAllProductsImpl fp:
+                return ToProto(fp).ToByteArray();
             case FetchAllProductsResponse rsp:
                 return ToProto(rsp).ToByteArray();
             case ProductOrder po:
@@ -96,7 +97,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             case FetchProductResultManifest:
                 return new FetchResult(FromProto(Proto.ProductState.Parser.ParseFrom(bytes)));
             case FetchAllProductsManifest:
-                return FetchAllProducts.Instance;
+                return FromProto(Proto.FetchAllProductsImpl.Parser.ParseFrom(bytes));
             case FetchAllProductsResponseManifest:
                 return FromProto(Proto.FetchAllProductsResponse.Parser.ParseFrom(bytes));
             case ProductOrderManifest:
@@ -132,7 +133,7 @@ public sealed class MessageSerializer : SerializerWithStringManifest
                 return FetchProductManifest;
             case FetchResult _:
                 return FetchProductResultManifest;
-            case FetchAllProducts _:
+            case FetchAllProductsImpl _:
                 return FetchAllProductsManifest;
             case FetchAllProductsResponse _:
                 return FetchAllProductsResponseManifest;
@@ -155,6 +156,25 @@ public sealed class MessageSerializer : SerializerWithStringManifest
             default:
                 throw new ArgumentOutOfRangeException(nameof(o), $"Unsupported message type [{o.GetType()}]");
         }
+    }
+
+    private FetchAllProductsImpl FromProto(Proto.FetchAllProductsImpl protoPurchase)
+    {
+        return new FetchAllProductsImpl(protoPurchase.ProducerId, ResolveActorRef(protoPurchase.ActorRefPath));
+    }
+    
+    private IActorRef ResolveActorRef(string path)
+    {
+        return system.Provider.ResolveActorRef(path);
+    }
+    
+    private Proto.FetchAllProductsImpl ToProto(FetchAllProductsImpl purchase)
+    {
+        return new Proto.FetchAllProductsImpl()
+        {
+            ProducerId = purchase.ProducerId,
+            ActorRefPath = Akka.Serialization.Serialization.SerializedActorPath(purchase.ConsumerController)
+        };
     }
 
     private static Proto.FetchProduct ToProto(Queries.FetchProduct purchase)
