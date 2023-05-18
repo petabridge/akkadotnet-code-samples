@@ -10,7 +10,7 @@ This solution is built with:
 - C# `record` types;
 - ASP.NET Core 6;
 - Google.Protobuf for message and state schema;
-- Akka.NET v1.4 w/ Akka.Cluster;
+- Akka.NET v1.5 w/ Akka.Cluster;
 - Akka.Persistence.SqlServer; and
 - [Akka.Hosting](https://github.com/akkadotnet/Akka.Hosting) - which minimizes the amount of configuration for Akka.NET to practically zero.
 
