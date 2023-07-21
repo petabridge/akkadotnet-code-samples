@@ -1,28 +1,32 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Akka.Actor;
 using Akka.Cluster;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Event;
 using Akka.Hosting;
 using Akka.Persistence.Hosting;
-using Akka.Persistence.SqlServer.Hosting;
+using Akka.Persistence.Sql;
+using Akka.Persistence.Sql.Config;
+using Akka.Persistence.Sql.Hosting;
 using Akka.Remote.Hosting;
+using LinqToDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
-using SqlSharding.Host.Actors;
 using SqlSharding.Shared;
 using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
+using SqlSharding.Sql.Host.Actors;
+using SqlJournalOptions = Akka.Persistence.Sql.Hosting.SqlJournalOptions;
+using SqlSnapshotOptions = Akka.Persistence.Sql.Hosting.SqlSnapshotOptions;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 var seedDb = Environment.GetEnvironmentVariable("SEED_DB")?.ToLowerInvariant() is "true" ||
-             (args.Length > 0 && args[0] == "seed-db");
+             (args.Length > 0 && args[0] == "seed");
 
 var builder = new HostBuilder()
     .ConfigureAppConfiguration(c => c.AddEnvironmentVariables()
@@ -50,14 +54,20 @@ var builder = new HostBuilder()
         {
             #region Custom sharding journal options setup
 
-            var shardingJournalOptions = new SqlServerJournalOptions(
+            var shardingJournalDbOptions = JournalDatabaseOptions.SqlServer;
+            shardingJournalDbOptions.JournalTable!.TableName = "ShardingEventJournal";
+            shardingJournalDbOptions.MetadataTable!.TableName = "ShardingMetadata";
+
+            var shardingJournalOptions = new SqlJournalOptions(
                 isDefaultPlugin: false, 
                 identifier: "shading")
             {
                 ConnectionString = connectionString,
-                TableName = "ShardingEventJournal", 
-                MetadataTableName = "ShardingMetadata",
-                AutoInitialize = true
+                ProviderName = ProviderName.SqlServer2019,
+                DatabaseOptions = shardingJournalDbOptions,
+                TagStorageMode = TagMode.Csv,
+                DeleteCompatibilityMode = true,
+                AutoInitialize = false
             };
             shardingJournalOptions.Adapters.AddWriteEventAdapter<MessageTagger>("tagger", new[] { typeof(object) });
 
@@ -65,13 +75,17 @@ var builder = new HostBuilder()
 
             #region Custom sharding snapshot store options setup
 
-            var shardingSnapshotOptions = new SqlServerSnapshotOptions(
+            var shardingSnapshotDbOptions = SnapshotDatabaseOptions.SqlServer;
+            shardingSnapshotDbOptions.SnapshotTable!.TableName = "ShardingSnapshotStore";
+            
+            var shardingSnapshotOptions = new SqlSnapshotOptions(
                 isDefaultPlugin: false, 
                 identifier: "sharding")
             {
                 ConnectionString = connectionString,
-                TableName = "ShardingSnapshotStore",
-                AutoInitialize = true
+                ProviderName = ProviderName.SqlServer2019,
+                DatabaseOptions = shardingSnapshotDbOptions, 
+                AutoInitialize = false
             };
 
             #endregion
@@ -84,10 +98,18 @@ var builder = new HostBuilder()
                     Roles = new[] { ProductActorProps.SingletonActorRole }, 
                     SeedNodes = seeds
                 })
-                .WithSqlServerPersistence(connectionString, journalBuilder: builder =>
-                {
-                    builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });
-                })
+                .WithSqlPersistence(
+                    connectionString: connectionString,
+                    providerName: ProviderName.SqlServer2019,
+                    databaseMapping: DatabaseMapping.SqlServer,
+                    tagStorageMode: TagMode.Csv,
+                    deleteCompatibilityMode: true,
+                    useWriterUuidColumn: false,
+                    autoInitialize: false,
+                    journalBuilder: builder =>
+                    {
+                        builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });
+                    })
                 .WithJournalAndSnapshot(shardingJournalOptions, shardingSnapshotOptions)
                 .WithShardRegion<ProductMarker>(
                     typeName: "products",
@@ -103,7 +125,7 @@ var builder = new HostBuilder()
                         SnapshotOptions = shardingSnapshotOptions, 
                         FailOnInvalidEntityStateTransition = true
                     })
-                .WithClusterShardingJournalMigrationAdapter("akka.persistence.journal.sharding")
+                .WithClusterShardingJournalMigrationAdapter(shardingJournalOptions.PluginId)
                 .WithSingleton<ProductIndexActor>(
                     singletonName: "product-proxy",
                     propsFactory: (_, _, resolver) => resolver.Props<ProductIndexActor>(),
@@ -118,26 +140,26 @@ var builder = new HostBuilder()
                 })
                 .AddStartup((system, registry) =>
                 {
-                    if (!seedDb) 
-                        return;
-                    
-                    var log = Logging.GetLogger(system, nameof(Program));
-                    var actor = registry.Get<ProductMarker>();
-                    var generator = new FakeDataGenerator(actor);
-                    
-                    var cluster = Cluster.Get(system);
-                    cluster.RegisterOnMemberUp(() =>
+                    if (seedDb)
                     {
-                        generator.Generate(100, log)
-                            .ContinueWith(t =>
-                            {
-                                if (!t.IsCompletedSuccessfully)
+                        var log = Logging.GetLogger(system, nameof(Program));
+                        var actor = registry.Get<ProductMarker>();
+                        var generator = new FakeDataGenerator(actor);
+                        
+                        var cluster = Cluster.Get(system);
+                        cluster.RegisterOnMemberUp(() =>
+                        {
+                            generator.Generate(100, log)
+                                .ContinueWith(t =>
                                 {
-                                    log.Error(t.Exception, "Failed to generate fake data");
-                                }
-                            })
-                            .ConfigureAwait(false);
-                    });
+                                    if (!t.IsCompletedSuccessfully)
+                                    {
+                                        log.Error(t.Exception, "Failed to generate fake data");
+                                    }
+                                })
+                                .ConfigureAwait(false);
+                        });
+                    }
                 });
         });
     })
