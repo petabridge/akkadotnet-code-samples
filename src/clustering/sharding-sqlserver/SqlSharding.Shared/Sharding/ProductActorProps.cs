@@ -15,6 +15,25 @@ public sealed class ProductIndexMarker
 /// <summary>
 /// Key type for DI
 /// </summary>
+public sealed class SoldProductIndexMarker
+{
+    public static readonly SoldProductIndexMarker Instance = new();
+    private SoldProductIndexMarker(){}
+}
+
+
+/// <summary>
+/// Key type for DI
+/// </summary>
+public sealed class WarningEventIndexMarker
+{
+    public static readonly WarningEventIndexMarker Instance = new();
+    private WarningEventIndexMarker(){}
+}
+
+/// <summary>
+/// Key type for DI
+/// </summary>
 public sealed class ProductMarker
 {
     public static readonly ProductMarker Instance = new ProductMarker();

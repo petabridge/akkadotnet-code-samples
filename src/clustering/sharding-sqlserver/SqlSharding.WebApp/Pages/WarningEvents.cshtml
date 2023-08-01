@@ -1,0 +1,56 @@
+﻿@page
+@model SqlSharding.WebApp.Pages.WarningEvents
+@{
+    ViewData["Title"] = "Inventory Change Warning Events";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Warning Events</h1>
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-12 text-start">
+            @if (Model.Warnings.Count == 0)
+            {
+                <strong>No products have been sold.</strong>
+            }
+            else
+            {
+                @foreach (var product in Model.Warnings)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                        <tr class="table-primary">
+                            <th scope="col" colspan="7" class="align-self-start">
+                                <a asp-page="/product" asp-route-productId="@product.ProductData.ProductId">@product.ProductData.ProductName</a>                                
+                            </th>
+                        </tr>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Message</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @{
+                            var num = 1;
+                            foreach (var warning in product.Warnings)
+                            {
+                                <tr>
+                                    <th scope="row">@num</th>
+                                    <td>@warning.Timestamp</td>
+                                    <td>@warning.Reason</td>
+                                    <td>@warning.Message</td>
+                                </tr>
+                                num++;
+                            }
+                        }
+                        </tbody>
+                    </table>
+                }
+            }
+        </div>
+        <div class="col">
+        </div>
+    </div>
+</div>

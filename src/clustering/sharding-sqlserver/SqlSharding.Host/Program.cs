@@ -1,10 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using Akka.Actor;
-using Akka.Cluster;
 using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
-using Akka.Event;
 using Akka.Hosting;
 using Akka.Persistence.Hosting;
 using Akka.Persistence.SqlServer.Hosting;
@@ -111,6 +108,20 @@ var builder = new HostBuilder()
                     {
                         Role = ProductActorProps.SingletonActorRole
                     })
+                .WithSingleton<SoldProductIndexActor>(
+                    singletonName: "sold-product-proxy",
+                    propsFactory: (_, _, resolver) => resolver.Props<SoldProductIndexActor>(),
+                    options: new ClusterSingletonOptions
+                    {
+                        Role = ProductActorProps.SingletonActorRole
+                    })
+                .WithSingleton<WarningEventIndexActor>(
+                    singletonName: "warning-proxy",
+                    propsFactory: (_, _, resolver) => resolver.Props<WarningEventIndexActor>(),
+                    options: new ClusterSingletonOptions
+                    {
+                        Role = ProductActorProps.SingletonActorRole
+                    })
                 .AddPetabridgeCmd(cmd =>
                 {
                     cmd.RegisterCommandPalette(ClusterShardingCommands.Instance);
@@ -121,23 +132,7 @@ var builder = new HostBuilder()
                     if (!seedDb) 
                         return;
                     
-                    var log = Logging.GetLogger(system, nameof(Program));
-                    var actor = registry.Get<ProductMarker>();
-                    var generator = new FakeDataGenerator(actor);
-                    
-                    var cluster = Cluster.Get(system);
-                    cluster.RegisterOnMemberUp(() =>
-                    {
-                        generator.Generate(100, log)
-                            .ContinueWith(t =>
-                            {
-                                if (!t.IsCompletedSuccessfully)
-                                {
-                                    log.Error(t.Exception, "Failed to generate fake data");
-                                }
-                            })
-                            .ConfigureAwait(false);
-                    });
+                    new FakeDataGenerator().Generate(system, registry, 100);
                 });
         });
     })

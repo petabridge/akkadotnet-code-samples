@@ -53,10 +53,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
 
             if (response.ResponseEvents.Any())
             {
-                var events = cmd is CreateProduct { Tags.Length: > 0 } cp
-                    ? response.ResponseEvents.Select(e => new TaggedEvent(e, cp.Tags, string.Empty)).ToArray()
-                    : response.ResponseEvents;
-                PersistAll(events, productEvent =>
+                PersistAll(response.ResponseEvents, productEvent =>
                 {
                     _log.Info("Processed: {0}", productEvent);
                 

@@ -1,0 +1,62 @@
+﻿@page
+@model SqlSharding.WebApp.Pages.Sold
+@{
+    ViewData["Title"] = "Sold Products";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Sold Products</h1>
+    <div class="row">
+        <div class="col"></div>
+        <div class="col-12 text-start">
+            @if (Model.Products.Count == 0)
+            {
+                <strong>No products have been sold.</strong>
+            }
+            else
+            {
+                @foreach (var product in Model.Products)
+                {
+                    <table class="table table-striped">
+                        <thead>
+                        <tr class="table-primary">
+                            <th scope="col" colspan="7" class="align-self-start">
+                                <a asp-page="/product" asp-route-productId="@product.ProductData.ProductId">@product.ProductData.ProductName</a>                                
+                            </th>
+                        </tr>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Order Id</th>
+                            <th scope="col">Purchase Date</th>
+                            <th scope="col">Item Price</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Back Ordered</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @{
+                            var num = 1;
+                            foreach (var invoice in product.Invoices)
+                            {
+                                <tr>
+                                    <th scope="row">@num</th>
+                                    <td>@invoice.OrderId</td>
+                                    <td>@invoice.Order.Timestamp</td>
+                                    <td>@($"{invoice.UnitPrice:C}")</td>
+                                    <td>@invoice.Order.Quantity</td>
+                                    <td>@($"{invoice.TotalPrice:C}")</td>
+                                    <td>@(invoice.BackOrdered ? "YES" : "NO")</td>
+                                </tr>
+                                num++;
+                            }
+                        }
+                        </tbody>
+                    </table>
+                }
+            }
+        </div>
+        <div class="col">
+        </div>
+    </div>
+</div>

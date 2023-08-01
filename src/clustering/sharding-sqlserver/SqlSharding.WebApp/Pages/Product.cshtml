@@ -57,39 +57,37 @@
 </div>
 
 <div class="text-center">
-    <div class="container">
-        <h1 class="display-4">@Model.State.Data.ProductName</h1>
-        <table style="margin-left:auto;margin-right: auto;">
-            <thead>
-            <tr>
-                <th>Price</th>
-                <th>Available</th>
-                <th>Units Sold</th>
-                <th>Total Revenue</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>@($"{Model.State.Data.CurrentPrice:C}")</td>
-                <td>
-                    @if (Model.State.Totals.RemainingInventory < 0)
-                    {
-                        <span>
-                            @(Model.State.Totals.RemainingInventory * -1) on backorder
-                        </span>
-                    }
-                    else
-                    {
-                        <span>
+    <h1 class="display-4">@Model.State.Data.ProductName</h1>
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <table class="table text-start">
+                <thead>
+                <tr>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th>Units Sold</th>
+                    <th>Total Revenue</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>@($"{Model.State.Data.CurrentPrice:C}")</td>
+                    <td>
+                        @if (Model.State.Totals.RemainingInventory < 0)
+                        {
+                            @($"{Model.State.Totals.RemainingInventory * -1} on backorder")
+                        }
+                        else
+                        {
                             @Model.State.Totals.RemainingInventory
-                        </span>
-                    }
-                </td>
-                <td>@Model.State.Totals.SoldInventory</td>
-                <td>@($"{Model.State.Totals.TotalRevenue:C}")</td>
-            </tr>
-            </tbody>
-        </table>
+                        }
+                    </td>
+                    <td>@Model.State.Totals.SoldInventory</td>
+                    <td>@($"{Model.State.Totals.TotalRevenue:C}")</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="row">
@@ -99,18 +97,37 @@
         </div>
     </div>
 
+    <h2>Recent Orders</h2>
     <div class="row">
         <div class="col"></div>
-        <div class="col-6">
-            <h2>Recent Orders</h2>
+        <div class="col-8">
             @if (Model.State.Orders.Any())
             {
-                <ol>
+                var num = 1;
+                <table class="table text-start">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Unit Price</th>
+                        <th scope="col">Total Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     @foreach (var order in Model.State.Orders)
                     {
-                        <li>@order.Order.Timestamp - @order.Order.Quantity units at @($"{order.UnitPrice:C}") - Total @($"{order.TotalPrice:C}")</li>
+                        <tr>
+                            <th scope="row">@num</th>
+                            <td>@order.Order.Timestamp</td>
+                            <td>@order.Order.Quantity</td>
+                            <td>@($"{order.UnitPrice:C}")</td>
+                            <td>@($"{order.TotalPrice:C}")</td>
+                        </tr>
+                        num++;
                     }
-                </ol>
+                    </tbody>
+                </table>
             }
             else
             {
@@ -120,34 +137,43 @@
         <div class="col"></div>
     </div>
     
+    <h2>Supply Log</h2>
     <div class="row">
-            <div class="col"></div>
-            <div class="col-6">
-                <h2>Supply Log</h2>
+        <div class="col"></div>
+        <div class="col-8">
                 @if (Model.State.InventoryChanges.Any())
                 {
-                    <ol>
+                    var num = 1;
+                    <table class="table text-start">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Reason</th>
+                        </tr>
+                        </thead>
+                        <tbody>
                         @foreach (var changed in Model.State.InventoryChanges)
                         {
-                            @if (changed.Timestamp.Equals(DateTime.MinValue))
-                            {
-                                <li>[N/A] - @changed.Quantity units [@changed.Reason]</li>
-                            }
-                            else
-                            {
-                                <li>[@changed.Timestamp] - @changed.Quantity units [@changed.Reason]</li>
-                            }
-                                
+                            <tr>
+                                <th scope="row">@num</th>
+                                <td>@(changed.Timestamp.Equals(DateTime.MinValue) ? "[N/A]" : changed.Timestamp)</td>
+                                <td>@changed.Quantity</td>
+                                <td>@changed.Reason</td>
+                            </tr>
+                            num++;
                         }
-                    </ol>
+                        </tbody>
+                    </table>
                 }
                 else
                 {
                     <h3>No Inventory Changes @Model.State.Data.ProductName</h3>
                 }
-            </div>
-            <div class="col"></div>
         </div>
+        <div class="col"></div>
+    </div>
 </div>
 
 @section scripts{
