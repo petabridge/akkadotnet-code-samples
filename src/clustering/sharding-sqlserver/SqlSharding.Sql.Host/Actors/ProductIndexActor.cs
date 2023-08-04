@@ -14,7 +14,7 @@ using FetchAllProductsResponse = SqlSharding.Shared.Queries.FetchAllProductsResp
 using FetchProduct = SqlSharding.Shared.Queries.FetchProduct;
 using ProductData = SqlSharding.Shared.ProductData;
 
-namespace SqlSharding.Sql.Host.Actors;
+namespace SqlSharding.Host.Actors;
 
 /// <summary>
 /// Uses Akka.Persistence.Query to index all actively maintained <see cref="ProductTotalsActor"/>.

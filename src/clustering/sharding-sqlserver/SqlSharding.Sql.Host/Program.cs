@@ -4,26 +4,26 @@ using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
 using Akka.Persistence.Hosting;
-using Akka.Persistence.Sql.Config;
-using Akka.Persistence.Sql.Hosting;
 using Akka.Remote.Hosting;
-using LinqToDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Petabridge.Cmd.Cluster;
 using Petabridge.Cmd.Cluster.Sharding;
 using Petabridge.Cmd.Host;
+using SqlSharding.Host.Actors;
 using SqlSharding.Shared;
 using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
-using SqlSharding.Sql.Host.Actors;
+using Akka.Persistence.Sql.Config;
+using Akka.Persistence.Sql.Hosting;
+using LinqToDB;
 using SqlJournalOptions = Akka.Persistence.Sql.Hosting.SqlJournalOptions;
 using SqlSnapshotOptions = Akka.Persistence.Sql.Hosting.SqlSnapshotOptions;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 var seedDb = Environment.GetEnvironmentVariable("SEED_DB")?.ToLowerInvariant() is "true" ||
-             (args.Length > 0 && args[0] == "seed");
+             (args.Length > 0 && args[0] == "seed-db");
 
 var builder = new HostBuilder()
     .ConfigureAppConfiguration(c => c.AddEnvironmentVariables()
@@ -57,7 +57,7 @@ var builder = new HostBuilder()
 
             var shardingJournalOptions = new SqlJournalOptions(
                 isDefaultPlugin: false, 
-                identifier: "shading")
+                identifier: "sharding")
             {
                 ConnectionString = connectionString,
                 ProviderName = ProviderName.SqlServer2019,

@@ -5,6 +5,7 @@
         <TargetFramework>$(NetRuntime)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RootNamespace>SqlSharding.Host</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

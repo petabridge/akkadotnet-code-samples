@@ -4,7 +4,6 @@ using Akka.Cluster.Hosting;
 using Akka.Cluster.Sharding;
 using Akka.Hosting;
 using Akka.Persistence.Hosting;
-using Akka.Persistence.SqlServer.Hosting;
 using Akka.Remote.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +15,7 @@ using SqlSharding.Shared;
 using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Serialization;
 using SqlSharding.Shared.Sharding;
+using Akka.Persistence.SqlServer.Hosting;
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 var seedDb = Environment.GetEnvironmentVariable("SEED_DB")?.ToLowerInvariant() is "true" ||
@@ -49,7 +49,7 @@ var builder = new HostBuilder()
 
             var shardingJournalOptions = new SqlServerJournalOptions(
                 isDefaultPlugin: false, 
-                identifier: "shading")
+                identifier: "sharding")
             {
                 ConnectionString = connectionString,
                 TableName = "ShardingEventJournal", 
@@ -81,10 +81,12 @@ var builder = new HostBuilder()
                     Roles = new[] { ProductActorProps.SingletonActorRole }, 
                     SeedNodes = seeds
                 })
-                .WithSqlServerPersistence(connectionString, journalBuilder: builder =>
-                {
-                    builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });
-                })
+                .WithSqlServerPersistence(
+                    connectionString: connectionString,
+                    journalBuilder: builder =>
+                    {
+                        builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });
+                    })
                 .WithJournalAndSnapshot(shardingJournalOptions, shardingSnapshotOptions)
                 .WithShardRegion<ProductMarker>(
                     typeName: "products",
@@ -100,7 +102,7 @@ var builder = new HostBuilder()
                         SnapshotOptions = shardingSnapshotOptions, 
                         FailOnInvalidEntityStateTransition = true
                     })
-                .WithClusterShardingJournalMigrationAdapter("akka.persistence.journal.sharding")
+                .WithClusterShardingJournalMigrationAdapter(shardingJournalOptions.PluginId)
                 .WithSingleton<ProductIndexActor>(
                     singletonName: "product-proxy",
                     propsFactory: (_, _, resolver) => resolver.Props<ProductIndexActor>(),
