@@ -7,7 +7,7 @@ using SqlSharding.Shared.Commands;
 using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Queries;
 
-namespace SqlSharding.Sql.Host.Actors;
+namespace SqlSharding.Host.Actors;
 
 /// <summary>
 /// Manages the state for a given product.

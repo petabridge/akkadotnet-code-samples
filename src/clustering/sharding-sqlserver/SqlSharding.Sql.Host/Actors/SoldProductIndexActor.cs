@@ -13,7 +13,7 @@ using SqlSharding.Shared.Events;
 using SqlSharding.Shared.Queries;
 using SqlSharding.Shared.Sharding;
 
-namespace SqlSharding.Sql.Host.Actors;
+namespace SqlSharding.Host.Actors;
 
 public class SoldProductIndexActor : ReceiveActor, IWithTimers
 {

@@ -1,10 +1,7 @@
-﻿using System.Collections.Immutable;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Cluster.Sharding;
-using Akka.Dispatch.SysMsg;
 using Akka.Event;
 using Akka.Persistence;
-using Akka.Persistence.Journal;
 using SqlSharding.Shared;
 using SqlSharding.Shared.Commands;
 using SqlSharding.Shared.Events;
