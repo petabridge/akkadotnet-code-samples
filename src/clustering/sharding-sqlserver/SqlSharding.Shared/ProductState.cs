@@ -4,6 +4,26 @@ using SqlSharding.Shared.Events;
 
 namespace SqlSharding.Shared;
 
+public record WarningEventData(ProductData ProductData, ImmutableSortedSet<ProductInventoryWarningEvent> Warnings): IComparable<WarningEventData>
+{
+    public static readonly WarningEventData Empty = new(ProductData.Empty, ImmutableSortedSet<ProductInventoryWarningEvent>.Empty);
+
+    public int CompareTo(WarningEventData? other)
+    {
+        return string.Compare(ProductData.ProductName, other?.ProductData.ProductName, StringComparison.Ordinal);
+    }
+}
+
+public record ProductsSoldData(ProductData ProductData, ImmutableList<ProductSold> Invoices): IComparable<ProductsSoldData>
+{
+    public static readonly ProductsSoldData Empty = new(ProductData.Empty, ImmutableList<ProductSold>.Empty);
+
+    public int CompareTo(ProductsSoldData? other)
+    {
+        return string.Compare(ProductData.ProductName, other?.ProductData.ProductName, StringComparison.Ordinal);
+    }
+}
+
 public record ProductData(string ProductId, string ProductName, decimal CurrentPrice) : ISqlShardingProtocolMember
 {
     public static readonly ProductData Empty = new(string.Empty, string.Empty, decimal.Zero);
@@ -61,33 +81,38 @@ public static class ProductStateExtensions
                 return response;
             }
             // if Price is 0, then it is likely not set
-            case PurchaseProduct purchase when !productState.IsEmpty && productState.Data.CurrentPrice > 0:
+            case PurchaseProduct purchase when productState is { IsEmpty: false, Data.CurrentPrice: > 0 }:
             {
                 var events = new List<IProductEvent>();
                 var productInventoryChanged = new ProductInventoryChanged(purchase.ProductId, -1*purchase.NewOrder.Quantity,
-                    DateTime.UtcNow,
+                    purchase.NewOrder.Timestamp,
                     InventoryChangeReason.Fulfillment);
                 events.Add(productInventoryChanged);
-                var backordered = false;
+                var backOrdered = false;
 
                 if (productState.Totals.RemainingInventory - purchase.NewOrder.Quantity <= ProductState.LowInventoryWarningThreshold)
                 {
-                    if (productState.Totals.RemainingInventory <= 0)
+                    if (productState.Totals.RemainingInventory - purchase.NewOrder.Quantity <= 0)
                     {
-                        backordered = true;
-                        var warningEvent = new ProductInventoryWarningEvent(purchase.ProductId,
-                            ProductWarningReason.NoSupply, DateTime.UtcNow, $"Product [Id={productState.Data.ProductId}, Name={productState.Data.ProductName}] is now on backorder. [{productState.Totals.RemainingInventory}] available inventory.");
+                        backOrdered = true;
+                        var warningEvent = new ProductInventoryWarningEvent(
+                            purchase.ProductId,
+                            ProductWarningReason.NoSupply, 
+                            purchase.NewOrder.Timestamp, 
+                            $"Product [Id={productState.Data.ProductId}, Name={productState.Data.ProductName}] is now on backorder. [{productState.Totals.RemainingInventory}] available inventory.");
                         events.Add(warningEvent);
                     }
                     else
                     {
                         var warningEvent = new ProductInventoryWarningEvent(purchase.ProductId,
-                            ProductWarningReason.LowSupply, DateTime.UtcNow, $"Product [Id={productState.Data.ProductId}, Name={productState.Data.ProductName}] is low on supply. [{productState.Totals.RemainingInventory}] available inventory.");
+                            ProductWarningReason.LowSupply, 
+                            purchase.NewOrder.Timestamp, 
+                            $"Product [Id={productState.Data.ProductId}, Name={productState.Data.ProductName}] is low on supply. [{productState.Totals.RemainingInventory}] available inventory.");
                         events.Add(warningEvent);
                     }
                 }
 
-                var productSold = new ProductSold(purchase.NewOrder, productState.Data.CurrentPrice, backordered);
+                var productSold = new ProductSold(purchase.NewOrder, productState.Data.CurrentPrice, backOrdered);
                 events.Add(productSold);
 
                 return new ProductCommandResponse(purchase.ProductId, events);
@@ -102,12 +127,6 @@ public static class ProductStateExtensions
 
     public static ProductState ProcessEvent(this ProductState productState, IProductEvent productEvent)
     {
-        /*
-         *     var newTotals = new PurchasingTotals(create.InitialQuantity, 0, decimal.Zero);
-                    var newData = new ProductData(create.ProductId, create.ProductName, create.Price);
-                    var newProduct = this with { Data = newData, Totals = newTotals };
-         * 
-         */
         switch (productEvent)
         {
             case ProductCreated(var productId, var productName, var price):
@@ -116,7 +135,8 @@ public static class ProductStateExtensions
                 {
                     Data = productState.Data with
                     {
-                        ProductId = productId, CurrentPrice = price,
+                        ProductId = productId, 
+                        CurrentPrice = price,
                         ProductName = productName
                     }
                 };
@@ -152,10 +172,6 @@ public static class ProductStateExtensions
                         TotalRevenue = productState.Totals.TotalRevenue + sold.TotalPrice
                     }
                 };
-            }
-            case TaggedEvent tagged:
-            {
-                return productState.ProcessEvent(tagged.Event);
             }
             default:
                 throw new ArgumentOutOfRangeException(nameof(productEvent), $"Unknown type: {productEvent.GetType()}");

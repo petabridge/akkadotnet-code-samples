@@ -7,8 +7,6 @@ public interface IProductEvent : IWithProductId
 {
 }
 
-public record TaggedEvent(IProductEvent Event, string[] Tags, string ProductId) : IProductEvent;
-
 public record ProductCreated(string ProductId, string ProductName, decimal Price) : IProductEvent;
 
 public record ProductSold(ProductOrder Order, decimal UnitPrice, bool BackOrdered = false) : IProductEvent,

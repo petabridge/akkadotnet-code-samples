@@ -99,8 +99,26 @@ message FetchAllProductsImpl {
     string ActorRefPath = 2;
 }
 
+message FetchSoldProductsResponse {
+    repeated ProductsSoldData Products = 1;
+}
+
+message FetchSoldProductsImpl {
+    string ProducerId = 1;
+    string ActorRefPath = 2;
+}
+
 message FetchProduct{
     string ProductId = 1;
+}
+
+message FetchWarningEventsResponse {
+    repeated WarningEventData Warnings = 1;
+}
+
+message FetchWarningEventsImpl {
+    string ProducerId = 1;
+    string ActorRefPath = 2;
 }
 
 /* State */
@@ -108,6 +126,11 @@ message ProductData{
     string ProductId = 1;
     string ProductName = 2;
     DecimalValue Price = 3;
+}
+
+message ProductsSoldData{
+    ProductData ProductData = 1;
+    repeated ProductSold Invoices = 2;
 }
 
 message ProductTotals{
@@ -122,4 +145,9 @@ message ProductState{
     repeated ProductSold Orders = 3;
     repeated InventoryWarning Warnings = 4;
     repeated InventoryChanged InventoryChanges = 5;
+}
+
+message WarningEventData{
+    ProductData ProductData = 1;
+    repeated InventoryWarning Warnings = 2;
 }

@@ -15,14 +15,27 @@
             }
             else
             {
-                <ol>
-                    @foreach (var (productId, productName, currentPrice) in Model.Products)
+                var num = 1;
+                <table class="table table-striped text-start">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Current Price</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var product in Model.Products)
                     {
-                        <li>
-                            <a asp-page="/product" asp-route-productId="@productId">@productName</a> [@($"{currentPrice:C}")]
-                        </li>
+                        <tr>
+                            <th scope="row">@num</th>
+                            <td><a asp-page="/product" asp-route-productId="@product.ProductId">@product.ProductName</a></td>
+                            <td>@($"{product.CurrentPrice:C}")</td>
+                        </tr>
+                        num++;
                     }
-                </ol>
+                    </tbody>
+                </table>
             }
         </div>
         <div class="col">

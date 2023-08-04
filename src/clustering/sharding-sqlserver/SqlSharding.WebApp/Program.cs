@@ -26,17 +26,29 @@ builder.Services.AddAkka("SqlSharding", (configurationBuilder, provider) =>
 {
     configurationBuilder.WithRemoting(hostName, port)
         .AddAppSerialization()
-        .WithClustering(new ClusterOptions()
+        .WithClustering(new ClusterOptions
             { Roles = new[] { "Web" }, SeedNodes = seeds })
         .WithShardRegionProxy<ProductMarker>("products", ProductActorProps.SingletonActorRole,
             new ProductMessageRouter())
         .WithSingletonProxy<ProductIndexMarker>("product-proxy",
-            new ClusterSingletonOptions() { Role = ProductActorProps.SingletonActorRole })
+            new ClusterSingletonOptions { Role = ProductActorProps.SingletonActorRole })
+        .WithSingletonProxy<SoldProductIndexMarker>("sold-product-proxy",
+            new ClusterSingletonOptions { Role = ProductActorProps.SingletonActorRole })
+        .WithSingletonProxy<WarningEventIndexMarker>("warning-proxy",
+            new ClusterSingletonOptions { Role = ProductActorProps.SingletonActorRole })
         .WithActors((system, registry, resolver) =>
         {
             var consumerProps = resolver.Props<FetchAllProductsConsumer>();
             var consumerActor = system.ActorOf(consumerProps, "fetch-all-products-consumer");
             registry.Register<FetchAllProductsConsumer>(consumerActor);
+            
+            var soldConsumerProps = resolver.Props<FetchSoldProductsConsumer>();
+            var soldConsumerActor = system.ActorOf(soldConsumerProps, "fetch-sold-products-consumer");
+            registry.Register<FetchSoldProductsConsumer>(soldConsumerActor);
+            
+            var alertConsumerProps = resolver.Props<FetchWarningEventsConsumer>();
+            var alertConsumerActor = system.ActorOf(alertConsumerProps, "fetch-warnings-consumer");
+            registry.Register<FetchWarningEventsConsumer>(alertConsumerActor);
         });
 });
 builder.Services.AddSingleton<IProductsResolver, ActorProductsResolver>();
