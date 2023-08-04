@@ -99,7 +99,7 @@ var builder = new HostBuilder()
                     connectionString: connectionString,
                     providerName: ProviderName.SqlServer2019,
                     databaseMapping: DatabaseMapping.SqlServer,
-                    tagStorageMode: TagMode.Csv,
+                    tagStorageMode: TagMode.TagTable, // Change this parameter value to TagMode.TagTable
                     deleteCompatibilityMode: true,
                     useWriterUuidColumn: true, // Change this parameter value to true
                     autoInitialize: false,
