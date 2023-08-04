@@ -101,7 +101,7 @@ var builder = new HostBuilder()
                     databaseMapping: DatabaseMapping.SqlServer,
                     tagStorageMode: TagMode.Csv,
                     deleteCompatibilityMode: true,
-                    useWriterUuidColumn: false,
+                    useWriterUuidColumn: true, // Change this parameter value to true
                     autoInitialize: false,
                     journalBuilder: builder =>
                     {
