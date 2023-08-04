@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharding.WebApp", "SqlSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharding.Sql.Host", "SqlSharding.Sql.Host\SqlSharding.Sql.Host.csproj", "{915E613A-A6ED-4633-BC50-832A15CF4596}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharding.Host.Migration", "SqlSharding.Host.Migration\SqlSharding.Host.Migration.csproj", "{3A017770-7221-4083-86ED-B414D7064454}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{915E613A-A6ED-4633-BC50-832A15CF4596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{915E613A-A6ED-4633-BC50-832A15CF4596}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{915E613A-A6ED-4633-BC50-832A15CF4596}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A017770-7221-4083-86ED-B414D7064454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A017770-7221-4083-86ED-B414D7064454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A017770-7221-4083-86ED-B414D7064454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A017770-7221-4083-86ED-B414D7064454}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
