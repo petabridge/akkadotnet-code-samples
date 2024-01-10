@@ -15,10 +15,6 @@ public sealed class ProductMessageRouter : HashCodeMessageExtractor
             return productId.ProductId;
         }
 
-        // need this for remember-entities
-        if (message is ShardRegion.StartEntity se)
-            return se.EntityId;
-
         return null;
     }
 }
