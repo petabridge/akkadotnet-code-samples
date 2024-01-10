@@ -70,8 +70,8 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
                             await Task.Delay(1);
                             return response;
                         }
-
-                        ReplyToSender().PipeTo(Sender, failure: ex => new Status.Failure(ex));
+                        var sender = Sender;
+                        ReplyToSender().PipeTo(sender, failure: ex => new Status.Failure(ex));
 
                     }
                 
