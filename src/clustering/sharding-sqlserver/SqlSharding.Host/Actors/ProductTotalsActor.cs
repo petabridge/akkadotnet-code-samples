@@ -49,8 +49,6 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
 
-            var sender = Sender;
-
             if (response.ResponseEvents.Any())
             {
                 PersistAll(response.ResponseEvents, productEvent =>
@@ -66,7 +64,15 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
                     if (!sentResponse) // otherwise we'll generate a response-per-event
                     {
                         sentResponse = true;
-                        sender.Tell(response);
+
+                        async Task<ProductCommandResponse> ReplyToSender()
+                        {
+                            await Task.Delay(1);
+                            return response;
+                        }
+
+                        ReplyToSender().PipeTo(Sender, failure: ex => new Status.Failure(ex));
+
                     }
                 
                     if(LastSequenceNr % 10 == 0)
