@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
         <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
         <PackageReference Include="Bogus" Version="35.5.0" />
     </ItemGroup>
 
