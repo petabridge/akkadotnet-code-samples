@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\CqrsSqlServer.DataModel\CqrsSqlServer.DataModel.csproj" />
         <ProjectReference Include="..\CqrsSqlServer.Shared\CqrsSqlServer.Shared.csproj"/>
     </ItemGroup>
 
