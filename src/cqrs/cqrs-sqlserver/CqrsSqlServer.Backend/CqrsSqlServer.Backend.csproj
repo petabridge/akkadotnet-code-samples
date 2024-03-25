@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Serialization\Proto\SqlSharding.Messages.proto" GrpcServices="None" />
+      <Folder Include="Actors\" />
     </ItemGroup>
 
 </Project>
