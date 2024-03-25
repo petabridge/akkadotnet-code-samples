@@ -12,11 +12,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Cluster.Hosting" Version="1.5.18"/>
         <PackageReference Include="Akka.Persistence.SqlServer.Hosting" Version="1.5.15"/>
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Serialization\Proto\SqlSharding.Messages.proto" GrpcServices="None" />
     </ItemGroup>
 
 </Project>

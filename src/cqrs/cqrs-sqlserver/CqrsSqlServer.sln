@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Shared", "src\CqrsSqlServer.Shared\CqrsSqlServer.Shared.csproj", "{0D4E5405-9584-43BB-AFA5-11ECB4150264}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Shared", "CqrsSqlServer.Shared\CqrsSqlServer.Shared.csproj", "{50E991B0-B7F6-4EA9-9A49-DCB775008152}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Backend", "src\CqrsSqlServer.Backend\CqrsSqlServer.Backend.csproj", "{EC803A09-89B0-4004-9CEB-FC0EADC17677}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Backend", "CqrsSqlServer.Backend\CqrsSqlServer.Backend.csproj", "{E5872C18-242A-4F52-BBE4-CF4CB272CC4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,13 +16,13 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50E991B0-B7F6-4EA9-9A49-DCB775008152}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50E991B0-B7F6-4EA9-9A49-DCB775008152}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50E991B0-B7F6-4EA9-9A49-DCB775008152}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50E991B0-B7F6-4EA9-9A49-DCB775008152}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5872C18-242A-4F52-BBE4-CF4CB272CC4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5872C18-242A-4F52-BBE4-CF4CB272CC4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5872C18-242A-4F52-BBE4-CF4CB272CC4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5872C18-242A-4F52-BBE4-CF4CB272CC4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
