@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Shared", "src\CqrsSqlServer.Shared\CqrsSqlServer.Shared.csproj", "{0D4E5405-9584-43BB-AFA5-11ECB4150264}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CqrsSqlServer.Backend", "src\CqrsSqlServer.Backend\CqrsSqlServer.Backend.csproj", "{EC803A09-89B0-4004-9CEB-FC0EADC17677}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D4E5405-9584-43BB-AFA5-11ECB4150264}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC803A09-89B0-4004-9CEB-FC0EADC17677}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

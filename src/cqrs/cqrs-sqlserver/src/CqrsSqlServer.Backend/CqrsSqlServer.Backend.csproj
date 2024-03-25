@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CqrsSqlServer.Shared\CqrsSqlServer.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Akka.Cluster.Hosting" Version="1.5.18"/>
+        <PackageReference Include="Akka.Persistence.SqlServer.Hosting" Version="1.5.15"/>
+        <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)"/>
+        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="$(PbmVersion)"/>
+        <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)"/>
+    </ItemGroup>
+
+</Project>
