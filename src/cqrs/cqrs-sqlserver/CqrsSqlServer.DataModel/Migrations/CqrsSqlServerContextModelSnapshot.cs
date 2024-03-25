@@ -42,7 +42,7 @@ namespace CqrsSqlServer.DataModel.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int>("RemainingInventory")
+                    b.Property<int>("AllInventory")
                         .HasColumnType("int");
 
                     b.Property<int>("SoldUnits")

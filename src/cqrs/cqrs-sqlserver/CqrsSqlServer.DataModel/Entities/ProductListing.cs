@@ -14,7 +14,7 @@ public class ProductListing
     
     public decimal Price { get; set; }
     
-    public int RemainingInventory { get; set; }
+    public int AllInventory { get; set; }
     
     public int SoldUnits { get; set; }
     

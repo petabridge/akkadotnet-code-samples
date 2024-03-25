@@ -133,12 +133,7 @@ public static class ProductStateExtensions
             {
                 return productState with
                 {
-                    Data = productState.Data with
-                    {
-                        ProductId = productId, 
-                        CurrentPrice = price,
-                        ProductName = productName
-                    }
+                    Data = new ProductData(ProductId: productId, CurrentPrice: price, ProductName: productName)
                 };
             }
             case ProductInventoryChanged(var productId, var quantity, var timestamp, var inventoryChangeReason) @event:
