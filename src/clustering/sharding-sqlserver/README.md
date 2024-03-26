@@ -6,9 +6,9 @@ The goal of this sample is to demonstrate how to host Akka.Cluster.Sharding with
 
 This solution is built with:
 
-- .NET 6 minimal APIs;
+- Minimal APIs;
 - C# `record` types;
-- ASP.NET Core 6;
+- ASP.NET Core;
 - Google.Protobuf for message and state schema;
 - Akka.NET v1.5 w/ Akka.Cluster;
 - Akka.Persistence.SqlServer; and
