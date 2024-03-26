@@ -14,6 +14,7 @@ These samples aren't designed to teach how to model complex domains using actors
 
 1. [Akka.NET Cluster.Sharding with Akka.Persistence.SqlServer and Razor Pages](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/sharding-sqlserver)
 2. [Akka.Streams.Amqp.RabbitMQ with Akka.Cluster.Sharding - Reliable Delivery + Backpressure Support](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/reliability/rabbitmq-backpressure)
+3. [Event-Sourcing and CQRS with Akka.Peristence and Akka.Peristence.Query](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/cqrs/cqrs-sqlserver)
 
 ## Contributing
 
@@ -50,8 +51,7 @@ You are free to modify and use these diagrams in your own derivative works as lo
 
 [Petabridge](https://petabridge.com/) is a company dedicated to making it easier for .NET developers to build distributed applications.
 
-Petabridge provides Akka.NET consulting and training, including advanced training in [Akka.Remote](https://petabridge.com/training/akka-remoting/), [Akka.Cluster](https://petabridge.com/training/akka-clustering/), and [Akka.NET Design Patterns](https://petabridge.com/training/akka-design-patterns/)!
+Petabridge provides [Akka.NET support, consulting, and training](https://petabridge.com/services/support/).
 
 ---
-Copyright 2015 - 2022 Petabridge, LLC
-
+Copyright 2015 - 2024 Petabridge, LLC
