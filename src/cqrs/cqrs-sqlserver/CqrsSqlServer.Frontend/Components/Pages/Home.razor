@@ -1,0 +1,58 @@
+﻿@page "/"
+@using CqrsSqlServer.DataModel.Entities
+@using CqrsSqlServer.DataModel
+@using Microsoft.EntityFrameworkCore
+@inject CqrsSqlServerContext DbContext
+
+<PageTitle>Product Data</PageTitle>
+<div class="d-flex flex-grow-1 gap-4">
+    <MudText Typo="Typo.h3" GutterBottom="true">Product Data</MudText>
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh" OnClick="RefreshCallback"></MudFab>
+</div>
+
+<MudTable Items="_products" Hover="true" SortLabel="Sort By" Elevation="0" Loading="@_loading">
+    <HeaderContent>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ProductListing, object>(x=>x.ProductId)">Id</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.ProductName)">Name</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.Price)">Price</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.AllInventory)">Inventory</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.SoldUnits)">Sold</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.TotalRevenue)">Revenue</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.Created)">Created</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<ProductListing, object>(x=>x.LastModified)">Updated</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.ProductId</MudTd>
+        <MudTd DataLabel="Name">@context.ProductName</MudTd>
+        <MudTd DataLabel="Price">@context.Price</MudTd>
+        <MudTd DataLabel="Inventory">@context.AllInventory</MudTd>
+        <MudTd DataLabel="Sold">@context.SoldUnits</MudTd>
+        <MudTd DataLabel="Revenue">@context.TotalRevenue</MudTd>
+        <MudTd DataLabel="Created">@context.Created</MudTd>
+        <MudTd DataLabel="Updated">@context.LastModified</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{10, 50, 100}" />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private ProductListing[] _products = Array.Empty<ProductListing>();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _products = await DbContext.Products.ToArrayAsync();
+        _loading = false;
+    }
+
+    private async Task RefreshCallback()
+    {
+        _loading = true;
+        StateHasChanged();
+        _products = await DbContext.Products.ToArrayAsync();
+        _loading = false;
+        StateHasChanged();
+    }
+
+}
