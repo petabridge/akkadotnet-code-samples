@@ -33,8 +33,4 @@
         </Content>
         <None Remove="sharding.conf" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Configuration\" />
-    </ItemGroup>
 </Project>
