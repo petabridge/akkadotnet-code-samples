@@ -1,24 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>$(NetRuntime)</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
-        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+        <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)"/>
+        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)"/>
+        <PackageReference Include="Bogus" Version="35.5.0" />
         <PackageReference Include="Grpc.Tools" Version="2.62.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Bogus" Version="35.5.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Serialization\Proto\SqlSharding.Messages.proto" GrpcServices="None" />		
+        <Protobuf Include="Serialization\Proto\CqrsSqlServer.Messages.proto" GrpcServices="None" />
     </ItemGroup>
-
 
 </Project>

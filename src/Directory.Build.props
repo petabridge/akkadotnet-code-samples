@@ -2,7 +2,7 @@
   <PropertyGroup>
    <Copyright>Copyright © 2015-2022 Petabridge, LLC</Copyright>
     <Authors>Petabridge</Authors>
-    <VersionPrefix>0.2.0</VersionPrefix>
+    <VersionPrefix>0.1.0</VersionPrefix>
     <PackageReleaseNotes>• Initial rewrite of repository</PackageReleaseNotes>
     <PackageIconUrl>
     </PackageIconUrl>
@@ -13,7 +13,7 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
-    <NetRuntime>net6.0</NetRuntime>
+    <NetRuntime>net8.0</NetRuntime>
     <XunitVersion>2.4.2</XunitVersion>
     <TestSdkVersion>17.6.0</TestSdkVersion>
     <AkkaVersion>1.5.15</AkkaVersion>
