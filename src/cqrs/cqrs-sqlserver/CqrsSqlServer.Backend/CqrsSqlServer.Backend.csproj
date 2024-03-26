@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Persistence.SqlServer.Hosting" Version="1.5.15"/>
+        <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.13" />
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)"/>

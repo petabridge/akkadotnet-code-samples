@@ -8,7 +8,7 @@ using Akka.Actor;
 using Akka.Event;
 using Akka.Persistence;
 using Akka.Persistence.Query;
-using Akka.Persistence.Query.Sql;
+using Akka.Persistence.Sql.Query;
 using Akka.Streams;
 using Akka.Streams.Dsl;
 using CqrsSqlServer.DataModel;
@@ -51,9 +51,11 @@ public sealed class ProductProjectorActor : ReceivePersistentActor
     public ProductProjectorActor(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
+        CurrentState = new MaterializedViewState(Offset.NoOffset());
         PersistenceId = "product-projector";
 
         Recovers();
+        Commands();
     }
 
     private void Recovers()

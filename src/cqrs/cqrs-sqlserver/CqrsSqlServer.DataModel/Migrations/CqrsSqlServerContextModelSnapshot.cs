@@ -28,6 +28,9 @@ namespace CqrsSqlServer.DataModel.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<int>("AllInventory")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -41,9 +44,6 @@ namespace CqrsSqlServer.DataModel.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("AllInventory")
-                        .HasColumnType("int");
 
                     b.Property<int>("SoldUnits")
                         .HasColumnType("int");

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CqrsSqlServer.DataModel.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreat : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace CqrsSqlServer.DataModel.Migrations
                     ProductId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    RemainingInventory = table.Column<int>(type: "int", nullable: false),
+                    AllInventory = table.Column<int>(type: "int", nullable: false),
                     SoldUnits = table.Column<int>(type: "int", nullable: false),
                     TotalRevenue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),

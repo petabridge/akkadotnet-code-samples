@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CqrsSqlServer.DataModel.Migrations
 {
     [DbContext(typeof(CqrsSqlServerContext))]
-    [Migration("20240325192428_InitialCreat")]
-    partial class InitialCreat
+    [Migration("20240326010601_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,9 @@ namespace CqrsSqlServer.DataModel.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<int>("AllInventory")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -44,9 +47,6 @@ namespace CqrsSqlServer.DataModel.Migrations
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("RemainingInventory")
-                        .HasColumnType("int");
 
                     b.Property<int>("SoldUnits")
                         .HasColumnType("int");
