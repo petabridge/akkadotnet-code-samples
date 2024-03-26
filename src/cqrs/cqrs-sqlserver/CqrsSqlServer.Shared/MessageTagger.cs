@@ -19,6 +19,7 @@ public sealed class MessageTagger : IWriteEventAdapter
     {
         return evt switch
         {
+            ProductCreated created => new Tagged(created, new[] { ProductEventTag }),
             ProductInventoryChanged pic => new Tagged(pic, new[] { ProductEventTag, ChangedEventTag, pic.Reason.ToString() }),
             ProductSold sold => new Tagged(sold, new[] {ProductEventTag,  SoldEventTag }),
             ProductInventoryWarningEvent warning => new Tagged(warning, new [] { ProductEventTag, WarningEventTag }), 

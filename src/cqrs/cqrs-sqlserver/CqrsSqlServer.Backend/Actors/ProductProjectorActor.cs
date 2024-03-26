@@ -198,6 +198,9 @@ public sealed class ProductProjectorActor : ReceivePersistentActor
         {
             productListing.AllInventory += changed.Quantity;
             productListing.LastModified = changed.Timestamp;
+            context.Attach(productListing);
+            context.Entry(productListing).Property(p => p.AllInventory).IsModified = true;
+            context.Entry(productListing).Property(p => p.LastModified).IsModified = true;
             await context.SaveChangesAsync(ctsToken);
         }
     }
@@ -210,6 +213,10 @@ public sealed class ProductProjectorActor : ReceivePersistentActor
             productListing.SoldUnits += sold.Order.Quantity;
             productListing.TotalRevenue += sold.TotalPrice;
             productListing.LastModified = sold.Order.Timestamp;
+            context.Attach(productListing);
+            context.Entry(productListing).Property(p => p.SoldUnits).IsModified = true;
+            context.Entry(productListing).Property(p => p.TotalRevenue).IsModified = true;
+            context.Entry(productListing).Property(p => p.LastModified).IsModified = true;
             await context.SaveChangesAsync(ctsToken);
         }
     }
