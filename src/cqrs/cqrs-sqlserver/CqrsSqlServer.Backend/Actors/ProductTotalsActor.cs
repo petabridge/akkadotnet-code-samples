@@ -18,7 +18,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
     {
         return Props.Create(() => new ProductTotalsActor(persistenceId));
     }
-    
+
     /// <summary>
     /// Used to help differentiate what type of entity this is inside Akka.Persistence's database
     /// </summary>
@@ -30,7 +30,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
     {
         PersistenceId = $"{TotalsEntityNameConstant}-" + persistenceId;
         State = new ProductState();
-        
+
         Recover<SnapshotOffer>(offer =>
         {
             if (offer.Snapshot is ProductState state)
@@ -39,43 +39,33 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             }
         });
 
-        Recover<IProductEvent>(productEvent =>
-        {
-            State = State.ProcessEvent(productEvent);
-        });
+        Recover<IProductEvent>(productEvent => { State = State.ProcessEvent(productEvent); });
 
         Command<IProductCommand>(cmd =>
         {
             var response = State.ProcessCommand(cmd);
             var sentResponse = false;
 
-            if (response.ResponseEvents.Any())
+            if (response.ResponseEvents.Count != 0)
             {
                 PersistAll(response.ResponseEvents, productEvent =>
                 {
                     _log.Info("Processed: {0}", productEvent);
-                
+
                     if (productEvent is ProductInventoryWarningEvent warning)
                     {
                         _log.Warning(warning.ToString());
                     }
+
                     State = State.ProcessEvent(productEvent);
 
                     if (!sentResponse) // otherwise we'll generate a response-per-event
                     {
                         sentResponse = true;
-
-                        async Task<ProductCommandResponse> ReplyToSender()
-                        {
-                            await Task.Delay(1);
-                            return response;
-                        }
-                        var sender = Sender;
-                        ReplyToSender().PipeTo(sender, failure: ex => new Status.Failure(ex));
-
+                        Sender.Tell(response);
                     }
-                
-                    if(LastSequenceNr % 10 == 0)
+
+                    if (LastSequenceNr % 10 == 0)
                         SaveSnapshot(State);
                 });
             }
@@ -86,10 +76,7 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
         });
 
 
-        Command<SaveSnapshotSuccess>(success =>
-        {
-            
-        });
+        Command<SaveSnapshotSuccess>(success => { });
 
         Command<FetchProduct>(fetch =>
         {
@@ -102,8 +89,8 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             }
         });
     }
-    
+
     public override string PersistenceId { get; }
-    
+
     public ProductState State { get; set; }
 }
