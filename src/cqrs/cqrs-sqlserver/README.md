@@ -88,4 +88,4 @@ If you run the application a second time with this setting, some of the random d
 
 Launch `CqrsSqlServer.Backend.csproj` via Visual Studio, Rider, or the `dotnet` CLI first.
 
-Then, once that app is running, launch `CqrsSqlServer.Frontend.csproj` and go to http://localhost:5000/
+Then, once that app is running, launch `CqrsSqlServer.Frontend.csproj` and go to http://localhost:5191/
