@@ -14,9 +14,9 @@ public class Product : PageModel
 {
     private readonly IActorRef _productActor;
 
-    public Product(ActorRegistry registry)
+    public Product(IRequiredActor<ProductMarker> productActor)
     {
-        _productActor = registry.Get<ProductMarker>();
+        _productActor = productActor.ActorRef;
     }
 
     [BindProperty(SupportsGet = true)]
