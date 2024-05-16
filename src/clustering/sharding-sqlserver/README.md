@@ -88,7 +88,10 @@ This will build a copy of our [MSSQL image](https://github.com/petabridge/akkado
 
 ### Run the Sample
 
+On initial run, the database can be seeded by setting the `SEED_DB=true` environment variable
+
 Load up Rider or Visual Studio and
+
 
 1. Launch `SqlSharding.Host`, followed by
 2. Launch `SqlSharding.WebApp`.
