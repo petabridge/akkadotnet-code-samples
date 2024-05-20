@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <AkkaVersion>1.5.20</AkkaVersion>
+    <AkkaHostingVersion>1.5.20</AkkaHostingVersion>
+  </PropertyGroup>
+  <!-- Akka dependencies -->
+  <ItemGroup>
+    <PackageVersion Include="Akka.Cluster.Tools" Version="$(AkkaVersion)" />
+    <PackageVersion Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
+    <PackageVersion Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+    <PackageVersion Include="Akka.Serialization.Hyperion" Version="$(AkkaVersion)" />
+  </ItemGroup>
+  <!-- SourceLink support for all Akka.NET projects -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+  </ItemGroup>
+</Project>

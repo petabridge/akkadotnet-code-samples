@@ -1,0 +1,37 @@
+﻿<Project>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>latestmajor</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <LibraryFramework>netstandard2.0</LibraryFramework>
+        <TestsNetCoreFramework>net6.0</TestsNetCoreFramework>
+        <XunitVersion>2.7.1</XunitVersion>
+        <TestSdkVersion>17.9.0</TestSdkVersion>
+        <CoverletVersion>6.0.2</CoverletVersion>
+	    <XunitRunneVisualstudio>2.5.8</XunitRunneVisualstudio>
+        <AkkaVersion>1.5.19</AkkaVersion>
+        <MicrosoftExtensionsVersion>[6.0.0,)</MicrosoftExtensionsVersion>
+    </PropertyGroup>
+
+    <!-- SourceLink support for all Akka.NET projects -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)\..\docs\images\akkalogo.png" Pack="true" Visible="false" PackagePath="\" />
+        <None Include="$(MSBuildThisFileDirectory)\..\README.md" Pack="true" Visible="false" PackagePath="\" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+</Project>
