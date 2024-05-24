@@ -88,7 +88,9 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
 
         Command<SaveSnapshotSuccess>(success =>
         {
-            
+            // purge older snapshots and messages
+            DeleteSnapshots(new SnapshotSelectionCriteria(success.Metadata.SequenceNr - 1));
+            //DeleteMessages(success.Metadata.SequenceNr);
         });
 
         Command<FetchProduct>(fetch =>

@@ -23,8 +23,10 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
     /// Used to help differentiate what type of entity this is inside Akka.Persistence's database
     /// </summary>
     public const string TotalsEntityNameConstant = "totals";
-
     private readonly ILoggingAdapter _log = Context.GetLogger();
+    public override string PersistenceId { get; }
+    // <ProductStateUsage>
+    public ProductState State { get; set; }
 
     public ProductTotalsActor(string persistenceId)
     {
@@ -38,6 +40,9 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
                 State = state;
             }
         });
+        
+        // rest of message processing
+        // </ProductStateUsage>
 
         Recover<IProductEvent>(productEvent =>
         {
@@ -96,8 +101,4 @@ public sealed class ProductTotalsActor : ReceivePersistentActor
             }
         });
     }
-    
-    public override string PersistenceId { get; }
-    
-    public ProductState State { get; set; }
 }
