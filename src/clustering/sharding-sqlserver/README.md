@@ -21,8 +21,8 @@ Like all of the samples in this repository, we are using a simple domain since t
 
 This app consists of two Akka.Cluster role types:
 
-1. `SqlSharding.WebApp` - a web-application that joins the cluster and queries actors hosted on the `SqlSharding.Host` instances via Akka.Cluster.Sharding and Akka.Cluster.Singleton  and
-2. `SqlSharding.Host` - a [headless Akka.NET process](https://petabridge.com/blog/akkadotnet-ihostedservice/) that hosts the `ShardRegion` for all `ProductTotalsActor` instances and a `ClusterSingletonManager` for the singular `ProductIndexActor` instance.
+1. `SqlSharding.WebApp` - a web-application that joins the cluster and queries actors hosted on the `SqlSharding.Sql.Host` instances via Akka.Cluster.Sharding and Akka.Cluster.Singleton  and
+2. `SqlSharding.Sql.Host` - a [headless Akka.NET process](https://petabridge.com/blog/akkadotnet-ihostedservice/) that hosts the `ShardRegion` for all `ProductTotalsActor` instances and a `ClusterSingletonManager` for the singular `ProductIndexActor` instance.
 
 We have only two actor types in this solution:
 
@@ -60,8 +60,8 @@ Implementing this with actors instead gives us the following:
 
 Here are the key details for understanding what this sample does and how it works:
 
-1. **Akka.Cluster.Sharding does all of the heavy lifting** - it guarantees that for every unique `productID` there exists exactly one `ProductTotalsActor` that owns the state of that entity. That guarantee is upheld even across network splits. One `ProductTotalsActor` can be moved from one `SqlSharding.Host` node to another, message traffic to that actor will be paused while this happens, the actor will be recreated on its new home node, and message traffic will be resumed. The `WebApp` and `ProductIndexActor` instances have no idea that this is happening *and they don't need to*. In addition to that, the `ShardRegion` hosting the `ProductIndexActor` will dynamically create new instances of those actors on-demand and will, by default, kill existing instances of those actors if they haven't been sent a message for more than 120 seconds. You can change how the "kill off actors" behavior works, however: `akka.cluster.sharding.remember-entities=off` turns this off and keeps entity actors alive forever, or you can just change the time threshold via `akka.cluster.sharding.passivate-idle-entity-after = 400s`.
-2. **`ShardRegionProxy` is how `SqlSharding.WebApp` communicates with `ProductTotalsActor`s hosted on the `SqlSharding.Host` instances** - again, the Akka.Cluster.Sharding infrastructure does most of the heavy work here; but this time from the perspective of the WebApp - all of the messages sent to the `/product/{productId}` route are ultimately routed to a `ShardRegionProxy` `IActorRef`. This actor knows how to communicate with the `ShardRegion` on the `SqlSharding.Host` role to dynamically instantiate a new `ProductTotalsActor` instance, if necessary, and route messages to it.
+1. **Akka.Cluster.Sharding does all of the heavy lifting** - it guarantees that for every unique `productID` there exists exactly one `ProductTotalsActor` that owns the state of that entity. That guarantee is upheld even across network splits. One `ProductTotalsActor` can be moved from one `SqlSharding.Sql.Host` node to another, message traffic to that actor will be paused while this happens, the actor will be recreated on its new home node, and message traffic will be resumed. The `WebApp` and `ProductIndexActor` instances have no idea that this is happening *and they don't need to*. In addition to that, the `ShardRegion` hosting the `ProductIndexActor` will dynamically create new instances of those actors on-demand and will, by default, kill existing instances of those actors if they haven't been sent a message for more than 120 seconds. You can change how the "kill off actors" behavior works, however: `akka.cluster.sharding.remember-entities=off` turns this off and keeps entity actors alive forever, or you can just change the time threshold via `akka.cluster.sharding.passivate-idle-entity-after = 400s`.
+2. **`ShardRegionProxy` is how `SqlSharding.WebApp` communicates with `ProductTotalsActor`s hosted on the `SqlSharding.Sql.Host` instances** - again, the Akka.Cluster.Sharding infrastructure does most of the heavy work here; but this time from the perspective of the WebApp - all of the messages sent to the `/product/{productId}` route are ultimately routed to a `ShardRegionProxy` `IActorRef`. This actor knows how to communicate with the `ShardRegion` on the `SqlSharding.Sql.Host` role to dynamically instantiate a new `ProductTotalsActor` instance, if necessary, and route messages to it.
 3. **Akka.Persistence is what we use to manage entity state, and we use event-sourcing to provide long-term extensibility** - the separation between commands, events, and queries is an important feature of how this application is designed. Cleanly segmenting the "message grammar" helps keep things organized ultimately simplifies the stateful piece of our programming model: the state of any given entity must be derived from the sum of its events. We use Akka.Persistence.SqlServer to store / recover this data and we use Google.Protobuf to serialize events, state, commands, and queries in a highly versionable way.
 
 ## Running Sample
@@ -88,9 +88,12 @@ This will build a copy of our [MSSQL image](https://github.com/petabridge/akkado
 
 ### Run the Sample
 
+On initial run, the database can be seeded by setting the `SEED_DB=true` environment variable
+
 Load up Rider or Visual Studio and
 
-1. Launch `SqlSharding.Host`, followed by
+
+1. Launch `SqlSharding.Sql.Host`, followed by
 2. Launch `SqlSharding.WebApp`.
 
-Provided that you don't see any SQL Server connection errors originating from `SqlSharding.Host` - you should have no trouble using the WebApp's UI to add products, submit orders, change inventory levels, and more.
+Provided that you don't see any SQL Server connection errors originating from `SqlSharding.Sql.Host` - you should have no trouble using the WebApp's UI to add products, submit orders, change inventory levels, and more.

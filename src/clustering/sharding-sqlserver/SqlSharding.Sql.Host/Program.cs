@@ -42,7 +42,7 @@ var builder = new HostBuilder()
         var hostName = akkaSection.GetValue<string>("ClusterIp", "localhost");
 
         // maps to environment variable Akka__ClusterPort
-        var port = akkaSection.GetValue<int>("ClusterPort", 0);
+        var port = akkaSection.GetValue<int>("ClusterPort", 7918);
 
         var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new[] { "akka.tcp://SqlSharding@localhost:7918" })
             .ToArray();
@@ -64,7 +64,7 @@ var builder = new HostBuilder()
                 DatabaseOptions = shardingJournalDbOptions,
                 TagStorageMode = TagMode.Csv,
                 DeleteCompatibilityMode = true,
-                AutoInitialize = false
+                AutoInitialize = true
             };
             shardingJournalOptions.Adapters.AddWriteEventAdapter<MessageTagger>("tagger", new[] { typeof(object) });
 
@@ -82,7 +82,7 @@ var builder = new HostBuilder()
                 ConnectionString = connectionString,
                 ProviderName = ProviderName.SqlServer2019,
                 DatabaseOptions = shardingSnapshotDbOptions, 
-                AutoInitialize = false
+                AutoInitialize = true
             };
 
             #endregion
@@ -101,8 +101,8 @@ var builder = new HostBuilder()
                     databaseMapping: DatabaseMapping.SqlServer,
                     tagStorageMode: TagMode.Csv,
                     deleteCompatibilityMode: true,
-                    useWriterUuidColumn: false,
-                    autoInitialize: false,
+                    useWriterUuidColumn: true,
+                    autoInitialize: true,
                     journalBuilder: builder =>
                     {
                         builder.AddWriteEventAdapter<MessageTagger>("product-tagger", new[] { typeof(IProductEvent) });

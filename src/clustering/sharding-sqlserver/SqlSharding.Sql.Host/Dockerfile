@@ -3,4 +3,4 @@ WORKDIR /app
 
 COPY ./bin/Release/net8.0/publish/ /app
 
-CMD ["dotnet", "SqlSharding.Host.dll"]
+CMD ["dotnet", "SqlSharding.Sql.Host.dll"]

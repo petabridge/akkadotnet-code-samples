@@ -15,7 +15,7 @@ var akkaSection = builder.Configuration.GetSection("Akka");
 var hostName = akkaSection.GetValue<string>("ClusterIp", "localhost");
 
 // maps to environment variable Akka__ClusterPort
-var port = akkaSection.GetValue<int>("ClusterPort", 7918);
+var port = akkaSection.GetValue<int>("ClusterPort", 7919);
 
 var seeds = akkaSection.GetValue<string[]>("ClusterSeeds", new []{ "akka.tcp://SqlSharding@localhost:7918" })
     .ToArray();
