@@ -179,6 +179,7 @@ public static class ProductStateExtensions
     }
 }
 
+// <ProductState>
 /// <summary>
 /// The state object responsible for all event and message processing
 /// </summary>
@@ -201,3 +202,4 @@ public record ProductState : IWithProductId
 
     public bool IsEmpty => Data == ProductData.Empty;
 }
+// </ProductState>
