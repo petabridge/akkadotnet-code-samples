@@ -14,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.20" />
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)" />
