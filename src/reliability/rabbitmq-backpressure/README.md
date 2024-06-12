@@ -8,7 +8,7 @@ This solution is built with:
 
 - .NET 6 minimal APIs;
 - C# `record` types;
-- Akka.NET v1.4 w/ Akka.Cluster;
+- Akka.NET v1.5 w/ Akka.Cluster;
 - [Akka.Streams.Amqp.RabbitMq](https://www.nuget.org/packages/Akka.Streams.Amqp.RabbitMq); and
 - [Akka.Hosting](https://github.com/akkadotnet/Akka.Hosting) - which minimizes the amount of configuration for Akka.NET to practically zero.
 
