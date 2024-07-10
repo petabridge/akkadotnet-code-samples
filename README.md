@@ -15,7 +15,7 @@ These samples aren't designed to teach how to model complex domains using actors
 1. [Akka.NET Cluster.Sharding with Akka.Persistence.SqlServer and Razor Pages](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/sharding-sqlserver)
 2. [Akka.Streams.Amqp.RabbitMQ with Akka.Cluster.Sharding - Reliable Delivery + Backpressure Support](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/reliability/rabbitmq-backpressure)
 3. [Event-Sourcing and CQRS with Akka.Peristence and Akka.Peristence.Query](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/cqrs/cqrs-sqlserver)
-4. [Autofac And Akka.Hosting Integration](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/dependency-injection\AutofacIntegration)
+4. [Autofac And Akka.Hosting Integration](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/dependency-injection/AutofacIntegration)
 
 ## Contributing
 
