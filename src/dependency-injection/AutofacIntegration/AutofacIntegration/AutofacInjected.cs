@@ -5,11 +5,9 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
-using Autofac;
-
 namespace AutoFacIntegration;
 
-public class AutofacModule
+public class AutofacInjected
 {
-    public string TestString { get; } = nameof(TestString);
+    public string TestString => nameof(TestString);
 }

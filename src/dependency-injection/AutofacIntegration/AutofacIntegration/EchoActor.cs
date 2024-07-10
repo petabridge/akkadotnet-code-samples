@@ -31,7 +31,7 @@ public class EchoActor: UntypedActor
     protected override void PreStart()
     {
         base.PreStart();
-        var moduleFromProvider = _provider.GetRequiredService<AutofacModule>();
+        var moduleFromProvider = _provider.GetRequiredService<AutofacInjected>();
         _log.Info(
             "TestActor started. Injected module TestString = {0}", 
             moduleFromProvider.TestString);

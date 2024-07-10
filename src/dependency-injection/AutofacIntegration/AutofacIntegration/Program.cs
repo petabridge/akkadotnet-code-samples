@@ -37,7 +37,7 @@ public static class Program
         hostBuilder.UseServiceProviderFactory(new AutofacServiceProviderFactory());
         hostBuilder.ConfigureContainer<ContainerBuilder>((context, builder) =>
         {
-            builder.RegisterType<AutofacModule>();
+            builder.RegisterType<AutofacInjected>();
         });
 
         #endregion
