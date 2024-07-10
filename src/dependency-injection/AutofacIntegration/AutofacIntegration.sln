@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutofacIntegration", "AutofacIntegration\AutofacIntegration.csproj", "{154A11A6-FC4D-4BB0-A784-6940F40B1DC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{154A11A6-FC4D-4BB0-A784-6940F40B1DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{154A11A6-FC4D-4BB0-A784-6940F40B1DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{154A11A6-FC4D-4BB0-A784-6940F40B1DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{154A11A6-FC4D-4BB0-A784-6940F40B1DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
