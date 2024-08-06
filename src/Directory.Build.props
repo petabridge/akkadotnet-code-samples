@@ -18,7 +18,7 @@
     <TestSdkVersion>17.6.0</TestSdkVersion>
     <AkkaVersion>1.5.27.1</AkkaVersion>
     <PbmVersion>1.4.3</PbmVersion>
-    <AkkaHostingVersion>1.5.25</AkkaHostingVersion>
+    <AkkaHostingVersion>1.5.27</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[8.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <!-- SourceLink support for all Akka.NET projects -->
