@@ -13,7 +13,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Bogus" Version="35.5.1" />
+        <PackageReference Include="Bogus" Version="35.6.1" />
     </ItemGroup>
 
     <ItemGroup>
