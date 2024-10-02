@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Cluster.Sharding" Version="1.5.28" />
+        <PackageReference Include="Akka.Cluster.Sharding" Version="1.5.29" />
         <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.28" />
         <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
