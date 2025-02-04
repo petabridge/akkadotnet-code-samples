@@ -11,7 +11,7 @@ This solution is built with:
 - ASP.NET Core;
 - Google.Protobuf for message and state schema;
 - Akka.NET v1.5 w/ Akka.Cluster;
-- Akka.Persistence.SqlServer; and
+- Akka.Persistence.Sql; and
 - [Akka.Hosting](https://github.com/akkadotnet/Akka.Hosting) - which minimizes the amount of configuration for Akka.NET to practically zero.
 
 
