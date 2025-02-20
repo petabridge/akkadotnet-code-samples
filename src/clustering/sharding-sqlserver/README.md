@@ -1,4 +1,4 @@
-# Akka.NET Cluster.Sharding with Akka.Persistence.SqlServer and Razor Pages
+# Akka.NET Cluster.Sharding with Akka.Persistence.Sql and Razor Pages
 
 The goal of this sample is to demonstrate how to host Akka.Cluster.Sharding with persistent entity actors backed by Microsoft SQL Server.
 
