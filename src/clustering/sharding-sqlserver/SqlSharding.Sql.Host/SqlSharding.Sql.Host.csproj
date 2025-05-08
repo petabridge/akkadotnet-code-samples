@@ -15,7 +15,7 @@
     <ItemGroup>
         <PackageReference Include="Akka.Cluster.Sharding" Version="1.5.39" />
         <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.30" />
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)" />
