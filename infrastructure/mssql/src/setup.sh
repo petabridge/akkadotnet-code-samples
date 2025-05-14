@@ -8,6 +8,6 @@ sleep 15s
 
 # setup the tables
 echo "Connecting to SQL and creating Akka database."
-/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -d master -i setup.sql
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -d master -i setup.sql
 
 sleep infinity
