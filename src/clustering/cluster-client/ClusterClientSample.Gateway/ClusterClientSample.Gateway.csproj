@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="Akka.Cluster.Hosting" />
       <PackageReference Include="Akka.Serialization.Hyperion" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
     </ItemGroup>
 
     <ItemGroup>

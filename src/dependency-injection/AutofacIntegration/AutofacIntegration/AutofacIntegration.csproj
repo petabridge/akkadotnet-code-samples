@@ -8,9 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka" Version="1.5.27-beta2" />
-      <PackageReference Include="Akka.Hosting" Version="1.5.25" />
+      <PackageReference Include="Akka" Version="$(AkkaVersion)" />
+      <PackageReference Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
       <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 
 </Project>
