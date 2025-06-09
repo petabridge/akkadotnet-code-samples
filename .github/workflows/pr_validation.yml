@@ -42,6 +42,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.*
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v4
         with:
@@ -68,6 +71,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.*
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
         uses: actions/cache@v4
         with:
