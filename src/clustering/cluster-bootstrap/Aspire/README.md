@@ -1,6 +1,6 @@
-# Akka.NET Actor System intercommunication
+# Akka.NET Cluster Setup Using Microsoft .NET Aspire
 
-The goal of this sample is to demonstrate how Akka cluster can be set-up in a single machine using Microsoft .NET Aspire 
+The goal of this sample is to demonstrate how a three-node cluster can be set-up in a single machine using Microsoft .NET Aspire 
 
 ## Technology
 
