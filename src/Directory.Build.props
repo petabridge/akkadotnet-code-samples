@@ -16,9 +16,9 @@
     <NetRuntime>net8.0</NetRuntime>
     <XunitVersion>2.4.2</XunitVersion>
     <TestSdkVersion>17.6.0</TestSdkVersion>
-    <AkkaVersion>1.5.49</AkkaVersion>
+    <AkkaVersion>1.5.52</AkkaVersion>
     <PbmVersion>1.4.4</PbmVersion>
-    <AkkaHostingVersion>1.5.45</AkkaHostingVersion>
+    <AkkaHostingVersion>1.5.52</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[8.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <!-- SourceLink support for all Akka.NET projects -->
