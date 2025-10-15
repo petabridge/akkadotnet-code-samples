@@ -16,8 +16,8 @@
     <NetRuntime>net8.0</NetRuntime>
     <XunitVersion>2.4.2</XunitVersion>
     <TestSdkVersion>17.6.0</TestSdkVersion>
-    <AkkaVersion>1.5.49</AkkaVersion>
-    <PbmVersion>1.4.4</PbmVersion>
+    <AkkaVersion>1.5.53</AkkaVersion>
+    <PbmVersion>1.4.6</PbmVersion>
     <AkkaHostingVersion>1.5.45</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[8.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
