@@ -36,13 +36,13 @@ jobs:
         run: chmod +x ./build.sh
       - name: Make build.cmd executable
         run: chmod +x ./build.cmd
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 6.0.*
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.*
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
@@ -65,13 +65,13 @@ jobs:
         run: chmod +x ./build.sh
       - name: Make build.cmd executable
         run: chmod +x ./build.cmd
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 6.0.*
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0.*
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
