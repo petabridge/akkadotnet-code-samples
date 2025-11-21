@@ -31,7 +31,7 @@ jobs:
     name: windows-latest
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Make build.sh executable
         run: chmod +x ./build.sh
       - name: Make build.cmd executable
@@ -60,7 +60,7 @@ jobs:
     name: ubuntu-latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Make build.sh executable
         run: chmod +x ./build.sh
       - name: Make build.cmd executable
