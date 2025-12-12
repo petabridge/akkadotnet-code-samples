@@ -46,7 +46,7 @@ jobs:
         with:
           dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .nuke/temp
@@ -75,7 +75,7 @@ jobs:
         with:
           dotnet-version: 9.0.*
       - name: Cache .nuke/temp, ~/.nuget/packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .nuke/temp
