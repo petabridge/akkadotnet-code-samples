@@ -17,7 +17,7 @@
     <XunitVersion>2.4.2</XunitVersion>
     <TestSdkVersion>17.6.0</TestSdkVersion>
     <AkkaVersion>1.5.54</AkkaVersion>
-    <PbmVersion>1.4.6</PbmVersion>
+    <PbmVersion>1.5.0</PbmVersion>
     <AkkaHostingVersion>1.5.53</AkkaHostingVersion>
     <MicrosoftExtensionsVersion>[8.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
