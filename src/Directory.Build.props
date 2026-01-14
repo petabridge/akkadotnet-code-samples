@@ -19,7 +19,7 @@
     <AkkaVersion>1.5.58</AkkaVersion>
     <PbmVersion>1.5.0</PbmVersion>
     <AkkaHostingVersion>1.5.58</AkkaHostingVersion>
-    <MicrosoftExtensionsVersion>[8.0.0,)</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>10.0.2</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <!-- SourceLink support for all Akka.NET projects -->
   <ItemGroup>
