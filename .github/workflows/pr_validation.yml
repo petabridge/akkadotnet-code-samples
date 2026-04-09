@@ -19,6 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        solution-name:
+          - ShardingSqlServer
+          - ClusterClient
+          - Aspire
+          - CqrsSqlServer
+          - AutofacIntegration
+          - ReliableRabbitMQ
+          - SqlInitContainer
         include:
           - solution-name: ShardingSqlServer
             solution-path: src/clustering/sharding-sqlserver/ShardingSqlServer.slnx
@@ -43,6 +51,14 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           global-json-file: "./global.json"
+
+      - name: "Cache NuGet packages"
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: "Update release notes"
         shell: pwsh

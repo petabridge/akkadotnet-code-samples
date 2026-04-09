@@ -40,6 +40,11 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
   - package-ecosystem: nuget
+    directory: "/src/dependency-injection/AutofacIntegration"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
     directory: "/infrastructure/mssql-init-container/src"
     schedule:
       interval: weekly
