@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="SimpleCluster.AppHost/SimpleCluster.AppHost.csproj" />
+  <Project Path="SimpleCluster.Node/SimpleCluster.Node.csproj" />
+</Solution>

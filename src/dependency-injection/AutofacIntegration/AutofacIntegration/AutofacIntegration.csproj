@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>$(NetRuntime)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -10,7 +10,7 @@
     <ItemGroup>
       <PackageReference Include="Akka" Version="$(AkkaVersion)" />
       <PackageReference Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="9.0.0" />
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 

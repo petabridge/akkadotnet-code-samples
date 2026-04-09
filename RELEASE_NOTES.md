@@ -1,2 +1,2 @@
-## [0.1.0] / 30 March 2022
+#### 0.1.0 March 30 2022
 - Initial rewrite of repository

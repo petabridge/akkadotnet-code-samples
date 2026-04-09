@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/_/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="ClusterClientSample.FrontEnd/ClusterClientSample.FrontEnd.csproj" />
+  <Project Path="ClusterClientSample.Gateway/ClusterClientSample.Gateway.csproj" />
+  <Project Path="ClusterClientSample.Node/ClusterClientSample.Node.csproj" />
+  <Project Path="ClusterClientSample.Shared/ClusterClientSample.Shared.csproj" />
+</Solution>

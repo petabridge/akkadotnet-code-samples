@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AkkaVersion>1.5.42</AkkaVersion>
-    <AkkaHostingVersion>1.5.42</AkkaHostingVersion>
+    <AkkaVersion>1.5.64</AkkaVersion>
+    <AkkaHostingVersion>1.5.64</AkkaHostingVersion>
   </PropertyGroup>
   <!-- Akka dependencies -->
   <ItemGroup>
@@ -14,6 +14,6 @@
   </ItemGroup>
   <!-- SourceLink support for all Akka.NET projects -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
   </ItemGroup>
 </Project>

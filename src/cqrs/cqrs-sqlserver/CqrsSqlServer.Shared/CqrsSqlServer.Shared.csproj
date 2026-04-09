@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>$(NetRuntime)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -9,8 +9,8 @@
     <ItemGroup>
         <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)"/>
         <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)"/>
-        <PackageReference Include="Bogus" Version="35.5.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.62.0">
+        <PackageReference Include="Bogus" Version="35.6.5" />
+        <PackageReference Include="Grpc.Tools" Version="2.76.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

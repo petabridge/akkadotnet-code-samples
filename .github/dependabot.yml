@@ -1,26 +1,46 @@
 version: 2
 updates:
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "11:00"
-- package-ecosystem: nuget
-  directory: "/src/clustering/sharding-sqlserver"
-  schedule:
-    interval: daily
-    time: "11:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: nuget
-  directory: "/src/reliability/rabbitmq-backpressure"
-  schedule:
-    interval: daily
-    time: "11:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: nuget
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "11:00"
-  open-pull-requests-limit: 10
-
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      akka:
+        patterns: ["Akka*", "Petabridge*"]
+      microsoft:
+        patterns: ["Microsoft*"]
+  - package-ecosystem: nuget
+    directory: "/src/clustering/sharding-sqlserver"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
+    directory: "/src/clustering/cluster-bootstrap/Aspire"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
+    directory: "/src/clustering/cluster-client"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
+    directory: "/src/cqrs/cqrs-sqlserver"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
+    directory: "/src/reliability/rabbitmq-backpressure"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: nuget
+    directory: "/infrastructure/mssql-init-container/src"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
