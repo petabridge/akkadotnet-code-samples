@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(NetRuntime)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
+    <PackageReference Include="Akka.Hosting.TestKit.Xunit2" Version="$(AkkaHostingVersion)" />
+    <PackageReference Include="Akka.Streams" Version="$(AkkaVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LongRunningTasks\LongRunningTasks.csproj" />
+  </ItemGroup>
+
+</Project>
