@@ -27,6 +27,7 @@ jobs:
           - AutofacIntegration
           - ReliableRabbitMQ
           - SqlInitContainer
+          - LongRunningTasks
         include:
           - solution-name: ShardingSqlServer
             solution-path: src/clustering/sharding-sqlserver/ShardingSqlServer.slnx
@@ -42,6 +43,8 @@ jobs:
             solution-path: src/reliability/rabbitmq-backpressure/ReliableRabbitMQ.slnx
           - solution-name: SqlInitContainer
             solution-path: infrastructure/mssql-init-container/src/Akka.SqlInitContainer.slnx
+          - solution-name: LongRunningTasks
+            solution-path: src/async/long-running-tasks/LongRunningTasks.slnx
     steps:
       - uses: actions/checkout@v6
         with:
