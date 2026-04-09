@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CqrsSqlServer.Backend/CqrsSqlServer.Backend.csproj" />
+  <Project Path="CqrsSqlServer.DataModel/CqrsSqlServer.DataModel.csproj" />
+  <Project Path="CqrsSqlServer.Frontend/CqrsSqlServer.Frontend.csproj" />
+  <Project Path="CqrsSqlServer.Shared/CqrsSqlServer.Shared.csproj" />
+</Solution>

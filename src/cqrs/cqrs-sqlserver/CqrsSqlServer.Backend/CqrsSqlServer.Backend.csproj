@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>$(NetRuntime)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.42" />
+        <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.62" />
         <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="$(PbmVersion)"/>
         <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)"/>
