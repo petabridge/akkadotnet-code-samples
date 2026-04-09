@@ -52,14 +52,6 @@ jobs:
         with:
           global-json-file: "./global.json"
 
-      - name: "Cache NuGet packages"
-        uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/global.json', '**/*.csproj', '**/Directory.Packages.props') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
       - name: "Update release notes"
         shell: pwsh
         run: ./build.ps1
