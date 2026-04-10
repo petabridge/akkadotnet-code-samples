@@ -14,11 +14,13 @@ public class BatchImportActor : ReceiveActor
 {
     private bool _isImporting;
     private CancellationTokenSource? _importCts;
-    private SharedKillSwitch? _killSwitch;
     private int _recordsProcessed;
     private int _totalRecords;
     private readonly Stopwatch _stopwatch = new();
     private readonly ILoggingAdapter _log = Context.GetLogger();
+    
+    // materialize stream processors as child actors
+    private readonly IMaterializer _materializer = Context.Materializer();
 
     public BatchImportActor()
     {
@@ -47,14 +49,12 @@ public class BatchImportActor : ReceiveActor
         _importCts?.Cancel();
         _importCts?.Dispose();
         _importCts = new CancellationTokenSource();
-        _killSwitch = KillSwitches.Shared("import-kill-switch");
 
         var ct = _importCts.Token;
         var batchSize = msg.BatchSize;
         var csvRecords = FakeDataGenerator.Generate(msg.RecordCount);
 
         // Capture the materializer while we're on the actor's thread
-        var materializer = Context.System.Materializer();
 
         _log.Info("Starting import of {0} records in batches of {1}...",
             msg.RecordCount, batchSize);
@@ -62,12 +62,12 @@ public class BatchImportActor : ReceiveActor
         // KEY PATTERN: _ = RunStreamPipeline(...).PipeTo(Self)
         // The critical fire-and-forget line. HandleStartImport returns immediately
         // after this. The actor's mailbox is free to process GetStatus and CancelImport.
-        _ = RunStreamPipeline(csvRecords, batchSize, ct, materializer).PipeTo(Self);
+        _ = RunStreamPipeline(csvRecords, batchSize, _materializer, ct).PipeTo(Self);
     }
 
     private async Task<ImportCompleted> RunStreamPipeline(
-        List<CustomerRecord> csvRecords, int batchSize, CancellationToken ct,
-        IMaterializer materializer)
+        List<CustomerRecord> csvRecords, int batchSize, 
+        IMaterializer materializer, CancellationToken ct)
     {
         var recordsProcessed = 0;
         try
@@ -75,9 +75,9 @@ public class BatchImportActor : ReceiveActor
             ct.ThrowIfCancellationRequested();
 
             await Source.From(csvRecords)
-                .Via(_killSwitch!.Flow<CustomerRecord>())
-                .Grouped(batchSize) // Process in batches
-                .SelectAsync(1, async batch =>
+                .Via(ct.AsFlow<CustomerRecord>(true))
+                .Grouped(batchSize) // Process up to 5 records concurrently
+                .SelectAsync(5, async batch =>
                 {
                     // Simulate processing work per batch
                     await Task.Delay(TimeSpan.FromMilliseconds(100), ct);
@@ -125,8 +125,7 @@ public class BatchImportActor : ReceiveActor
 
         _log.Info("Cancelling import...");
 
-        // SharedKillSwitch is Akka.Streams' built-in mechanism to abort a running stream
-        _killSwitch?.Shutdown();
+        // Terminates the stream too
         _importCts?.Cancel();
         _importCts?.Dispose();
         _importCts = null;
@@ -155,7 +154,6 @@ public class BatchImportActor : ReceiveActor
     // ReceiveAsync handlers can use await CancelAsync() instead.
     protected override void PostStop()
     {
-        _killSwitch?.Shutdown();
         _importCts?.Cancel();
         _importCts?.Dispose();
         _importCts = null;
