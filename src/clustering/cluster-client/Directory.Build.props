@@ -6,6 +6,6 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <MicrosoftExtensionsVersion>[10.0.0,)</MicrosoftExtensionsVersion>
+        <MicrosoftExtensionsVersion>10.0.7</MicrosoftExtensionsVersion>
     </PropertyGroup>
 </Project>
