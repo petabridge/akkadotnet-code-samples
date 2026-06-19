@@ -10,7 +10,7 @@
     <ItemGroup>
       <PackageReference Include="Akka" Version="$(AkkaVersion)" />
       <PackageReference Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.1" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 
