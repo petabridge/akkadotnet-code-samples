@@ -1,4 +1,4 @@
-# Akka.NET Actor System intercommunication
+# Akka.NET Cluster Client
 
 The goal of this sample is to demonstrate how an external actor system can communicate with a cluster
 
@@ -8,6 +8,7 @@ This solution is built with:
 
 - Minimal APIs;
 - C# `record` types;
+- .NET 10 SDK with Akka.NET 1.5.x;
 - Akka.NET v1.5 w/ Akka.Cluster;
 - Akka.Cluster.Tools; and
 - [Akka.Hosting](https://github.com/akkadotnet/Akka.Hosting) - which minimizes the amount of configuration for Akka.NET to practically zero.

@@ -6,7 +6,7 @@ The goal of this sample is to demonstrate how to use [Akka.Streams](https://geta
 
 This solution is built with:
 
-- .NET 6 minimal APIs;
+- .NET 10 SDK with Akka.NET 1.5.x (minimal APIs);
 - C# `record` types;
 - Akka.NET v1.5 w/ Akka.Cluster;
 - [Akka.Streams.Amqp.RabbitMq](https://www.nuget.org/packages/Akka.Streams.Amqp.RabbitMq); and

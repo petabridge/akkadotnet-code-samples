@@ -6,6 +6,7 @@ The goal of this sample is to demonstrate how a three-node cluster can be set-up
 
 This solution is built with:
 
+- .NET 10 SDK with Akka.NET 1.5.x
 - Minimal APIs
 - Docker container
 - [Akka.NET v1.5 w/ Akka.Cluster](https://github.com/akkadotnet/akka.net)

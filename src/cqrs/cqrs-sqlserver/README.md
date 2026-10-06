@@ -2,7 +2,7 @@
 
 The goal of this sample is to demonstrate:
 
-1. How do to basic event-sourcing with Akka.Persistence;
+1. How to do basic event-sourcing with Akka.Persistence;
 2. How to use Akka.Persistence.Query to project events written to Akka.Persistence; and
 3. How to use Entity Framework Core to create CQRS-style read models that are used by the frontend application.
 
@@ -10,6 +10,7 @@ The goal of this sample is to demonstrate:
 
 This solution is built with:
 
+- .NET 10 SDK with Akka.NET 1.5.x;
 - Minimal APIs;
 - C# `record` types;
 - [Blazor](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) and [MudBlazor](https://www.mudblazor.com/);
