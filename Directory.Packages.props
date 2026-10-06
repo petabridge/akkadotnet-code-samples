@@ -65,8 +65,13 @@
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
   </ItemGroup>
 
-  <!-- Test framework (xunit v3, aligned with Akka.TestKit.Xunit's transitive family) -->
+  <!-- Test frameworks -->
   <ItemGroup>
+    <PackageVersion Include="Akka.Streams" Version="$(AkkaVersion)" />
+    <PackageVersion Include="Akka.Hosting.TestKit.Xunit2" Version="$(AkkaHostingVersion)" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.1" />
   </ItemGroup>
 </Project>
