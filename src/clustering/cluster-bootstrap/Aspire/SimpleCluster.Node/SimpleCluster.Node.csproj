@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,6 +12,10 @@
     <PackageReference Include="Akka.Discovery.Azure" Version="1.5.68" />
     <PackageReference Include="Akka.Management" Version="1.5.68" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageReference Include="Akka.Cluster.Hosting" />
+    <PackageReference Include="Akka.Discovery.Azure" />
+    <PackageReference Include="Akka.Management" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
   </ItemGroup>
 
 </Project>

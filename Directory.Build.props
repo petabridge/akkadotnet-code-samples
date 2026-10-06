@@ -10,14 +10,10 @@
     <NetRuntime>net10.0</NetRuntime>
     <XunitVersion>2.9.3</XunitVersion>
     <TestSdkVersion>18.4.0</TestSdkVersion>
-    <AkkaVersion>1.5.64</AkkaVersion>
-    <PbmVersion>1.5.0</PbmVersion>
-    <AkkaHostingVersion>1.5.64</AkkaHostingVersion>
-    <MicrosoftExtensionsVersion>[10.0.0,)</MicrosoftExtensionsVersion>
   </PropertyGroup>
-  <!-- SourceLink support for all Akka.NET projects -->
+  <!-- SourceLink support for all Akka.NET projects (version managed centrally in Directory.Packages.props) -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
   <PropertyGroup>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

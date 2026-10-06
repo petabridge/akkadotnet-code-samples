@@ -13,15 +13,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
-        <PackageReference Include="Akka.Persistence.Sql.Hosting" Version="1.5.62" />
-        <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
-        <PackageReference Include="Petabridge.Cmd.Cluster" Version="$(PbmVersion)" />
-        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" Version="$(PbmVersion)" />
-        <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)" />
+        <PackageReference Include="Akka.Cluster.Sharding" />
+        <PackageReference Include="Akka.Persistence.Sql.Hosting" />
+        <PackageReference Include="Microsoft.Data.SqlClient" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+        <PackageReference Include="Petabridge.Cmd.Cluster" />
+        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding" />
+        <PackageReference Include="Petabridge.Cmd.Host" />
     </ItemGroup>
 
     <ItemGroup>

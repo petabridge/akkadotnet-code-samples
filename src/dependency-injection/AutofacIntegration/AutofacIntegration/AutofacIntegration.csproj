@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -8,10 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka" Version="$(AkkaVersion)" />
-      <PackageReference Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
-      <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="11.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+      <PackageReference Include="Akka" />
+      <PackageReference Include="Akka.Hosting" />
+      <PackageReference Include="Autofac.Extensions.DependencyInjection" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
     </ItemGroup>
 
 </Project>

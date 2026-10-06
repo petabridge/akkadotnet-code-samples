@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>$(NetRuntime)</TargetFramework>
@@ -7,10 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)"/>
-        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)"/>
-        <PackageReference Include="Bogus" Version="35.6.5" />
-        <PackageReference Include="Grpc.Tools" Version="2.76.0">
+        <PackageReference Include="Akka.Cluster.Sharding"/>
+        <PackageReference Include="Akka.Cluster.Hosting"/>
+        <PackageReference Include="Bogus" />
+        <PackageReference Include="Grpc.Tools">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

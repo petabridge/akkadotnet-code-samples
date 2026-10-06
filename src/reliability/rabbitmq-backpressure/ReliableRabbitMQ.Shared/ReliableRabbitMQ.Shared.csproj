@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Akka.Streams.Amqp.RabbitMq" Version="1.5.59" />
-        <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
+        <PackageReference Include="Akka.Streams.Amqp.RabbitMq" />
+        <PackageReference Include="Akka.Cluster.Hosting" />
     </ItemGroup>
 
 </Project>

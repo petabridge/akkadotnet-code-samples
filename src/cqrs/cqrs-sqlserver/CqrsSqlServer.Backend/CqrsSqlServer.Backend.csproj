@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -19,6 +19,12 @@
         <PackageReference Include="Petabridge.Cmd.Host" Version="$(PbmVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Akka.Persistence.Sql.Hosting" />
+        <PackageReference Include="Petabridge.Cmd.Cluster"/>
+        <PackageReference Include="Petabridge.Cmd.Cluster.Sharding"/>
+        <PackageReference Include="Petabridge.Cmd.Host"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     </ItemGroup>
 
     <ItemGroup>
