@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="AutofacIntegration/AutofacIntegration.csproj" />
+  <Project Path="AutofacIntegration.Tests/AutofacIntegration.Tests.csproj" />
 </Solution>

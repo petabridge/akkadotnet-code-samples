@@ -2,4 +2,5 @@
   <Project Path="SqlSharding.Shared/SqlSharding.Shared.csproj" />
   <Project Path="SqlSharding.Sql.Host/SqlSharding.Sql.Host.csproj" />
   <Project Path="SqlSharding.WebApp/SqlSharding.WebApp.csproj" />
+  <Project Path="SqlSharding.Tests/SqlSharding.Tests.csproj" />
 </Solution>

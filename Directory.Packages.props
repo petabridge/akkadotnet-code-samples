@@ -19,6 +19,7 @@
     <PackageVersion Include="Akka.Discovery.Azure" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Management" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Persistence.Sql.Hosting" Version="1.5.70" />
+    <PackageVersion Include="Akka.Persistence.Hosting" Version="$(AkkaHostingVersion)" />
     <PackageVersion Include="Akka.Serialization.Hyperion" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Streams.Amqp.RabbitMq" Version="1.5.59" />
     <PackageVersion Include="Akka.Hosting.TestKit" Version="$(AkkaHostingVersion)" />

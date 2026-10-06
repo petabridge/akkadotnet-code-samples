@@ -2,4 +2,5 @@
   <Project Path="ReliableRabbitMQ.Consumer/ReliableRabbitMQ.Consumer.csproj" />
   <Project Path="ReliableRabbitMQ.Producer/ReliableRabbitMQ.Producer.csproj" />
   <Project Path="ReliableRabbitMQ.Shared/ReliableRabbitMQ.Shared.csproj" />
+  <Project Path="ReliableRabbitMQ.Tests/ReliableRabbitMQ.Tests.csproj" />
 </Solution>
