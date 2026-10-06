@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
-    <PackageReference Include="Akka.Discovery.Azure" Version="1.5.68" />
-    <PackageReference Include="Akka.Management" Version="1.5.68" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     <PackageReference Include="Akka.Cluster.Hosting" />
     <PackageReference Include="Akka.Discovery.Azure" />
     <PackageReference Include="Akka.Management" />

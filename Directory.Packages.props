@@ -15,6 +15,7 @@
     <PackageVersion Include="Akka.Hosting" Version="$(AkkaHostingVersion)" />
     <PackageVersion Include="Akka.Cluster.Hosting" Version="$(AkkaHostingVersion)" />
     <PackageVersion Include="Akka.Cluster.Sharding" Version="$(AkkaVersion)" />
+    <PackageVersion Include="Akka.Streams" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Cluster.Tools" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Discovery.Azure" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Management" Version="$(AkkaVersion)" />
@@ -22,6 +23,7 @@
     <PackageVersion Include="Akka.Serialization.Hyperion" Version="$(AkkaVersion)" />
     <PackageVersion Include="Akka.Streams.Amqp.RabbitMq" Version="1.5.59" />
     <PackageVersion Include="Akka.Hosting.TestKit" Version="$(AkkaHostingVersion)" />
+    <PackageVersion Include="Akka.Hosting.TestKit.Xunit2" Version="$(AkkaHostingVersion)" />
   </ItemGroup>
 
   <!-- Petabridge tooling -->
@@ -57,11 +59,19 @@
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Grpc.Tools" Version="2.84.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <PackageVersion Include="MudBlazor" Version="9.11.0" />
   </ItemGroup>
 
   <!-- SourceLink / tooling (bumped to clear NU1902 GHSA-23fw-v26w-5fgq) -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.401" />
+  </ItemGroup>
+
+  <!-- Test frameworks -->
+  <ItemGroup>
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
   </ItemGroup>
 </Project>
