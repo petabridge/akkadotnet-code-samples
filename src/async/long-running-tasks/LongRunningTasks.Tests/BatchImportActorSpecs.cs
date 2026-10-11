@@ -3,7 +3,6 @@ using Akka.Hosting;
 using Akka.Hosting.TestKit;
 using LongRunningTasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace LongRunningTasks.Tests;
 
