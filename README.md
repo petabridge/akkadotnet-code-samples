@@ -8,7 +8,7 @@ The goals of this repository are to provide users with shovel-ready Akka.NET sam
 * Integrating Akka.NET with other popular technologies: RabbitMQ, Apache Kafka, and more; and
 * Deploying Akka.NET into popular and common deployment environments: Kubernetes, Azure, AWS, and more.
 
-These samples aren't designed to teach how to model complex domains using actors - they are primarily designed to demonstrate copy-and-pasteable approaches to running AKka.NET infrastructure correctly and succinctly.
+These samples aren't designed to teach how to model complex domains using actors - they are primarily designed to demonstrate copy-and-pasteable approaches to running Akka.NET infrastructure correctly and succinctly.
 
 ## Current Samples:
 
@@ -16,7 +16,8 @@ These samples aren't designed to teach how to model complex domains using actors
 2. [Akka.Streams.Amqp.RabbitMQ with Akka.Cluster.Sharding - Reliable Delivery + Backpressure Support](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/reliability/rabbitmq-backpressure)
 3. [Event-Sourcing and CQRS with Akka.Persistence and Akka.Persistence.Query](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/cqrs/cqrs-sqlserver)
 4. [Autofac And Akka.Hosting Integration](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/dependency-injection/AutofacIntegration)
-5. [Akka.NET Cluster Setup Using Microsoft .NET Aspire](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/cluster-bootstrap/Aspire)
+5. [Akka.NET Cluster Client](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/cluster-client)
+6. [Akka.NET Cluster Setup Using Microsoft .NET Aspire](https://github.com/petabridge/akkadotnet-code-samples/tree/master/src/clustering/cluster-bootstrap/Aspire)
 
 ## Contributing
 
@@ -27,7 +28,7 @@ We accept pull requests for new samples or changes to existing ones, but we main
 3. Each sample needs a complete `README.md` that explains what the sample does, what a user needs to run it, and a what types of steps they need to execute it;
 4. If a sample requires Kubernetes or `docker compose` then a `.cmd` and `.sh` script must be provided to setup the infrastructure and another to tear it down;
 5. Samples should not ship with a full blown `nuke` build system - that's overkill;
-6. All samples should reference a single `Directory.Build.props` file (it's already in this repository, don't add a new one) which will determine the version of Akka.NET, Akka.Hosting, ASP.NET, .NET Runtime, and Microsoft.Extensions.* used;
+6. All samples should reference a single `Directory.Build.props` file (it's already in this repository, don't add a new one) which will determine the version of Akka.NET, Akka.Hosting, ASP.NET, .NET Runtime, and Microsoft.Extensions.* used. Package versions are centrally managed via the root `Directory.Packages.props` file - reference package versions there rather than hard-coding them inside individual projects;
 7. The samples should be contained in their own solution files, rather than one giant one; and
 8. Samples should be coherently organized by folder.
 
@@ -56,4 +57,4 @@ You are free to modify and use these diagrams in your own derivative works as lo
 Petabridge provides [Akka.NET support, consulting, and training](https://petabridge.com/services/support/).
 
 ---
-Copyright 2015 - 2024 Petabridge, LLC
+Copyright 2015 - 2026 Petabridge, LLC

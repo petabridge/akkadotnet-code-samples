@@ -6,6 +6,7 @@ The goal of this sample is to demonstrate how to host Akka.Cluster.Sharding with
 
 This solution is built with:
 
+- .NET 10 SDK with Akka.NET 1.5.x;
 - Minimal APIs;
 - C# `record` types;
 - ASP.NET Core;

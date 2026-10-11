@@ -4,6 +4,7 @@ The goal of this sample is to demonstrate how to integrate `Autofac.Extensions.D
 
 ## Technology
 
+* .NET 10 SDK with Akka.NET 1.5.x
 * Akka.NET v1.5
 * Microsoft.Extensions.Hosting
 * Autofac.Extensions.DependencyInjection
@@ -12,7 +13,7 @@ The goal of this sample is to demonstrate how to integrate `Autofac.Extensions.D
 
 ## Domain
 
-The sample shows how two actors that uses constructor argument injection in their constructor and at least one of the argument is set up through Autofac.
+The sample shows how two actors that use constructor argument injection in their constructor and at least one of the argument is set up through Autofac.
 The `EchoActor` constructor demonstrates 3 ways of injecting the `AutofacInjected` instance,
 
 * directly injecting it as an `AutoFacInjected` type,
