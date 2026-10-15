@@ -5,7 +5,7 @@
     <AkkaHostingVersion>1.5.73</AkkaHostingVersion>
     <PbmVersion>1.5.2</PbmVersion>
     <AspireVersion>13.6.0</AspireVersion>
-    <MicrosoftExtensionsVersion>10.0.12</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion>10.0.13</MicrosoftExtensionsVersion>
     <EfCoreVersion>10.0.12</EfCoreVersion>
   </PropertyGroup>
 
