@@ -63,7 +63,7 @@
 
   <!-- SourceLink / tooling (bumped to clear NU1902 GHSA-23fw-v26w-5fgq) -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
   </ItemGroup>
 
   <!-- Test frameworks -->
