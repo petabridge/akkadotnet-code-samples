@@ -58,7 +58,7 @@
     <PackageVersion Include="Autofac.Extensions.DependencyInjection" Version="11.0.2" />
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="Grpc.Tools" Version="2.84.0" />
-    <PackageVersion Include="MudBlazor" Version="9.11.0" />
+    <PackageVersion Include="MudBlazor" Version="9.12.0" />
   </ItemGroup>
 
   <!-- SourceLink / tooling (bumped to clear NU1902 GHSA-23fw-v26w-5fgq) -->
