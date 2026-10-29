@@ -6,7 +6,7 @@
     <PbmVersion>1.5.2</PbmVersion>
     <AspireVersion>13.6.1</AspireVersion>
     <MicrosoftExtensionsVersion>10.0.13</MicrosoftExtensionsVersion>
-    <EfCoreVersion>10.0.13</EfCoreVersion>
+    <EfCoreVersion>10.0.14</EfCoreVersion>
   </PropertyGroup>
 
   <!-- Akka.NET ecosystem -->
