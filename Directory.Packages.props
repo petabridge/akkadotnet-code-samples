@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <AkkaVersion>1.5.73</AkkaVersion>
-    <AkkaHostingVersion>1.5.73</AkkaHostingVersion>
+    <AkkaHostingVersion>1.5.74</AkkaHostingVersion>
     <PbmVersion>1.5.2</PbmVersion>
     <AspireVersion>13.6.1</AspireVersion>
     <MicrosoftExtensionsVersion>10.0.13</MicrosoftExtensionsVersion>
